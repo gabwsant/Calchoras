@@ -4,13 +4,22 @@
  */
 package calchoras.gui;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 /**
  *
  * @author gabri
  */
 public class CalchorasPrincipal extends javax.swing.JFrame {
+    
+    Date pdrEntrada;
+    SimpleDateFormat formatador = new SimpleDateFormat("HHmm");
     
     public CalchorasPrincipal() {
         initComponents();
@@ -25,6 +34,7 @@ public class CalchorasPrincipal extends javax.swing.JFrame {
         pnlDias.removeAll();
         for (int i = 1; i <= dias; i++){
             JLabel dia = new JLabel("Dia " + i);
+            dia.setFont(new java.awt.Font("Arial", 0, 15));
             pnlDias.add(dia);
         }
         pnlDias.revalidate();
@@ -36,11 +46,27 @@ public class CalchorasPrincipal extends javax.swing.JFrame {
     private void initComponents() {
 
         pnlDias = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        txtPdrEntrada = new javax.swing.JTextField();
+        jTextField1 = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new java.awt.Dimension(500, 600));
+        setLocation(new java.awt.Point(0, 0));
+        setMinimumSize(new java.awt.Dimension(600, 700));
+        setResizable(false);
 
         pnlDias.setLayout(new java.awt.GridLayout(0, 1));
+
+        jLabel1.setFont(new java.awt.Font("Arial", 0, 15)); // NOI18N
+        jLabel1.setText("Padrão:");
+
+        txtPdrEntrada.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtPdrEntradaActionPerformed(evt);
+            }
+        });
+
+        jTextField1.setText("jTextField1");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -48,19 +74,58 @@ public class CalchorasPrincipal extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(pnlDias, javax.swing.GroupLayout.DEFAULT_SIZE, 488, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(pnlDias, javax.swing.GroupLayout.DEFAULT_SIZE, 488, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtPdrEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 71, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(39, 39, 39)
-                .addComponent(pnlDias, javax.swing.GroupLayout.DEFAULT_SIZE, 555, Short.MAX_VALUE)
-                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(txtPdrEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 43, Short.MAX_VALUE)
+                .addComponent(pnlDias, javax.swing.GroupLayout.PREFERRED_SIZE, 476, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(53, 53, 53))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void txtPdrEntradaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPdrEntradaActionPerformed
+
+        try {
+            String entrada = txtPdrEntrada.getText();
+            txtPdrEntrada.setText(entrada.substring(0,2) + ":" + entrada.substring(2,4));
+            
+            String testeHora = entrada.substring(0,2);
+            String testeMin = entrada.substring(2,4);
+            int testeHoraInt = Integer.parseInt(testeHora);
+            int testeMinInt = Integer.parseInt(testeMin);
+            
+            if (testeHoraInt > 23 | testeMinInt >59){
+               JOptionPane.showMessageDialog(null, "Horário Inválido!", "Erro", JOptionPane.ERROR_MESSAGE);
+               txtPdrEntrada.setText("");
+            }else{
+                pdrEntrada = formatador.parse(entrada);
+            }
+        } catch (ParseException ex) {
+            JOptionPane.showMessageDialog(null, "Horário Inválido!", "Erro", JOptionPane.ERROR_MESSAGE);
+            txtPdrEntrada.setText("");
+            Logger.getLogger(CalchorasPrincipal.class.getName()).log(Level.SEVERE, null, ex);
+          //}
+        JOptionPane.showMessageDialog(null, pdrEntrada.toString());
+        
+    }//GEN-LAST:event_txtPdrEntradaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -96,6 +161,9 @@ public class CalchorasPrincipal extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JTextField jTextField1;
     private javax.swing.JPanel pnlDias;
+    private javax.swing.JTextField txtPdrEntrada;
     // End of variables declaration//GEN-END:variables
 }
