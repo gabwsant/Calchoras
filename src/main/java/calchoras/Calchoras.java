@@ -1,24 +1,20 @@
 package calchoras;
 import calchoras.view.MainFrame;
+import javax.swing.UIManager;
 
 public class Calchoras {
-
+    
     public static void main(String[] args) {
         //Seta Nimbus
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+        try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } 
+        catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(MainFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            System.out.print("Não foi possível definir o LAF");
         }
-
         // Executa o JFrame
         java.awt.EventQueue.invokeLater(() -> {
-            new MainFrame().setVisible(true);      
-        });
+            new MainFrame().setVisible(true);        
+        }); 
     }
 }
