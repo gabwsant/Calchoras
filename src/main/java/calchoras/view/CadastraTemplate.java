@@ -17,7 +17,7 @@ public class CadastraTemplate extends javax.swing.JFrame {
 
     public CadastraTemplate() {
         initComponents();
-        adicionarValidador(Grid);
+        adicionaValidador(Grid);
     }
     
     @SuppressWarnings("unchecked")
@@ -348,9 +348,10 @@ public class CadastraTemplate extends javax.swing.JFrame {
         setIconImage(new ImageIcon(imageUrl).getImage());
     }//GEN-LAST:event_formWindowOpened
 
-    private static void adicionarValidador(Container container){
+   private static void adicionaValidador(Container container){
         for (Component comp : container.getComponents()) {
-            if (comp instanceof JTextField campo) {
+            if (comp instanceof JTextField) {
+                JTextField campo = (JTextField) comp;
                 campo.addFocusListener(new FocusAdapter() {
                     @Override
                     public void focusLost(FocusEvent e) {

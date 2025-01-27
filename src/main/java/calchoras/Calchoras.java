@@ -1,6 +1,5 @@
 package calchoras;
 import calchoras.view.CadastraTemplate;
-import calchoras.view.MainFrame;
 import javax.swing.UIManager;
 
 public class Calchoras {
