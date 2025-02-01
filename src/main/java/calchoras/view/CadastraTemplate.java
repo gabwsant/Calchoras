@@ -1,24 +1,47 @@
 package calchoras.view;
 
 import calchoras.model.*;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.Component;
 import java.awt.Container;
+import java.util.List;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 public class CadastraTemplate extends javax.swing.JFrame {
-
+    
+    private static final Logger logger = Logger.getLogger(CadastraTemplate.class.getName());
+    
     public CadastraTemplate() {
         initComponents();
         adicionaValidador(Grid);
+        initLogger();
     }
+
+    private static void initLogger() {
+        try {
+            FileHandler fh = new FileHandler("logs.txt", true);
+            fh.setFormatter(new SimpleFormatter());
+            logger.addHandler(fh);
+            logger.setLevel(Level.ALL);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Erro ao configurar o Logger", e);
+        }
+    }
+
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -70,6 +93,7 @@ public class CadastraTemplate extends javax.swing.JFrame {
         tfSaida7 = new javax.swing.JTextField();
         tfModelo = new javax.swing.JTextField();
         btnCadastraModelo = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -258,6 +282,13 @@ public class CadastraTemplate extends javax.swing.JFrame {
             }
         });
 
+        jButton1.setText("jButton1");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -266,16 +297,19 @@ public class CadastraTemplate extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lblTitulo)
+                    .addComponent(Grid, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(12, 12, 12)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(spnModelo, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(tfModelo, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnCadastraModelo))
-                    .addComponent(Grid, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButton1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(spnModelo, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(tfModelo, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnCadastraModelo)))))
                 .addContainerGap(37, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -289,94 +323,117 @@ public class CadastraTemplate extends javax.swing.JFrame {
                     .addComponent(spnModelo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(tfModelo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnCadastraModelo))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(Grid, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-   
-    private void btnCadastraModeloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastraModeloActionPerformed
-        int modelo     = (int) spnModelo.getValue();
-        String empresa = tfModelo.getText();
-        
-        ObjectMapper mapper = new ObjectMapper();
-        TemplateDeHorario template;
-        
-        JTextField[][] textFields = {
-            {tfEntrada1, tfAlmoco1, tfVolta1, tfSaida1},
-            {tfEntrada2, tfAlmoco2, tfVolta2, tfSaida2},
-            {tfEntrada3, tfAlmoco3, tfVolta3, tfSaida3},
-            {tfEntrada4, tfAlmoco4, tfVolta4, tfSaida4},
-            {tfEntrada5, tfAlmoco5, tfVolta5, tfSaida5},
-            {tfEntrada6, tfAlmoco6, tfVolta6, tfSaida6},
-            {tfEntrada7, tfAlmoco7, tfVolta7, tfSaida7},
-        };
-        
-        String[][] horarios = new String[textFields.length][textFields[0].length];
-        
-        for(int i = 0; i < textFields.length; i++){
-            for(int j = 0; j < textFields[i].length; j++){
-                String valor = textFields[i][j].getText();
-                if(ValidacaoHorario.isHorarioValido(valor)){
-                    horarios[i][j] = valor;
-                    System.out.println("Horário cadastrado: " + valor + " na posição [" + i + "][" + j + "]" );
-                }
-                else{
-                    horarios[i][j] = "INVALIDO!";
-                    System.out.println("Horário inválido: " + valor + " na posição [" + i + "][" + j + "]");
-                }
-                
-            }
-        }
-        
-        template = new TemplateDeHorario(modelo, empresa, horarios);
-        
-        try{
-            mapper.writeValue(new File(empresa + ".json"), template);
-            System.out.println("Dados salvos no arquivo '" + empresa + ".json'");
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-        
-    }//GEN-LAST:event_btnCadastraModeloActionPerformed
-
-    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        //Define ícone da janela
-        URL imageUrl = CadastraTemplate.class.getClassLoader().getResource("calc_icon.png");
-        setIconImage(new ImageIcon(imageUrl).getImage());
-    }//GEN-LAST:event_formWindowOpened
 
    private static void adicionaValidador(Container container){
-        for (Component comp : container.getComponents()) {
-            if (comp instanceof JTextField) {
+        for(Component comp : container.getComponents()) {
+            if(comp instanceof JTextField) {
                 JTextField campo = (JTextField) comp;
                 campo.addFocusListener(new FocusAdapter() {
                     @Override
                     public void focusLost(FocusEvent e) {
                         String texto = campo.getText().trim();
-                         if (!texto.isEmpty() && !texto.matches(ValidacaoHorario.getRegex())) {
-                            JOptionPane.showMessageDialog(
+                        if(!texto.isEmpty()){
+                            if(texto.matches(ValidacaoHorario.getRegex())) {                              
+                                campo.setText(texto.substring(0, 2) + ":" + texto.substring(2, 4));
+                            }else if(texto.matches(ValidacaoHorario.getRegex1())) {
+                                campo.setText(texto);
+                            }else{
+                                JOptionPane.showMessageDialog(
                                 null, 
-                                "Horário '" + texto + "' é inválido! Use o formato HHmm.", 
+                                "Horário '" + texto + "' é inválido! Use o formato HH:mm.", 
                                 "Erro de Validação", 
                                 JOptionPane.ERROR_MESSAGE
-                            );
-                            campo.requestFocus();
-                        }else if(!texto.isEmpty() && texto.matches(ValidacaoHorario.getRegex())){
-                            campo.setText(texto.substring(0, 2) + ":" + texto.substring(2, 4));
+                                );
+                                campo.requestFocus();
+                            }
                         }
                     }
                 });
             }
         }
     }
+
+    private void btnCadastraModeloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastraModeloActionPerformed
+        //variáveis
+        int modelo     = (int) spnModelo.getValue();
+        String empresa = tfModelo.getText();
+        String[][] horarios = obterHorariosValidados();
+        
+        if (horarios == null) {
+            JOptionPane.showMessageDialog(this, "Erro: Existem horários inválidos!", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        TemplateDeHorario template = new TemplateDeHorario(modelo, empresa, horarios);
+       
+        try {
+            TemplateDeHorario.salvarTemplate(template);
+            JOptionPane.showMessageDialog(this, "Modelo cadastrado com sucesso", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        }catch(IllegalArgumentException e){ 
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao salvar o modelo no arquivo!", "Erro", JOptionPane.ERROR_MESSAGE);
+            logger.log(Level.SEVERE, "Erro ao salvar o template", ex);
+        }
+    }//GEN-LAST:event_btnCadastraModeloActionPerformed
+    
+    private String[][] obterHorariosValidados() {
+    JTextField[][] textFields = {
+        {tfEntrada1, tfAlmoco1, tfVolta1, tfSaida1},
+        {tfEntrada2, tfAlmoco2, tfVolta2, tfSaida2},
+        {tfEntrada3, tfAlmoco3, tfVolta3, tfSaida3},
+        {tfEntrada4, tfAlmoco4, tfVolta4, tfSaida4},
+        {tfEntrada5, tfAlmoco5, tfVolta5, tfSaida5},
+        {tfEntrada6, tfAlmoco6, tfVolta6, tfSaida6},
+        {tfEntrada7, tfAlmoco7, tfVolta7, tfSaida7},
+    };
+
+    String[][] horarios = new String[textFields.length][textFields[0].length];
+
+    boolean erro = false;
+
+    for (int i = 0; i < textFields.length; i++) {
+        for (int j = 0; j < textFields[i].length; j++) {
+            String valor = textFields[i][j].getText().trim();
+            
+            if (ValidacaoHorario.isHorarioValido(valor)) {
+                horarios[i][j] = valor;
+                System.out.println("Horário cadastrado: " + valor + " na posição [" + i + "][" + j + "]");
+            } else {
+                System.out.println("Horário inválido: " + valor + " na posição [" + i + "][" + j + "]");
+                erro = true;
+            }
+        }
+    }
+
+    return erro ? null : horarios;
+}
     
     
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        //Define ícone da janela
+        URL imageUrl = CadastraTemplate.class.getClassLoader().getResource("calc_icon.png");
+        setIconImage(new ImageIcon(imageUrl).getImage());
+    }//GEN-LAST:event_formWindowOpened
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        TemplateDeHorario template = TemplateDeHorario.buscarTemplatePorModelo(1);
+        System.out.print(template.getEmpresa());
+    }//GEN-LAST:event_jButton1ActionPerformed
+ 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Grid;
     private javax.swing.JButton btnCadastraModelo;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
