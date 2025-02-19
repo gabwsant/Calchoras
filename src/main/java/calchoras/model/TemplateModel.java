@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TemplateDeHorario {
+public class TemplateModel {
     @JsonProperty("modelo")
     private int modelo;
 
@@ -22,17 +22,17 @@ public class TemplateDeHorario {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     //construtores
-    public TemplateDeHorario(){}
+    public TemplateModel(){}
     
-    public TemplateDeHorario(int modelo, String empresa, String[][] horarios) {
+    public TemplateModel(int modelo, String empresa, String[][] horarios) {
         this.modelo = modelo;
         this.empresa = empresa;
         this.horarios = horarios;
     }
 
     //métodos
-    public static void salvarTemplate(TemplateDeHorario template) throws IOException {
-        List<TemplateDeHorario> templates = carregarTemplates();  //carregar os templates existentes
+    public static void salvarTemplate(TemplateModel template) throws IOException {
+        List<TemplateModel> templates = carregarTemplates();  //carregar os templates existentes
         
         boolean existe = templates.stream().anyMatch(t -> t.getModelo() == template.getModelo());
         
@@ -44,27 +44,27 @@ public class TemplateDeHorario {
         mapper.writeValue(new File(FILE_PATH), templates);        //salvar no arquivo
     }
     
-    public static List<TemplateDeHorario> carregarTemplates() {
+    public static List<TemplateModel> carregarTemplates() {
         try {
             File file = new File(FILE_PATH);
             if (!file.exists()) {
                 return new ArrayList<>();                         //se o arquivo não existe, retorna uma lista vazia
             }
-            return mapper.readValue(file, new TypeReference<List<TemplateDeHorario>>() {});
+            return mapper.readValue(file, new TypeReference<List<TemplateModel>>() {});
         } catch (IOException e) {
             e.printStackTrace();
             return new ArrayList<>();                             //se der erro, retorna uma lista vazia
         }
     }
     
-    public static TemplateDeHorario buscarTemplatePorNome(String empresa){
+    public static TemplateModel buscarTemplatePorNome(String empresa){
         return carregarTemplates().stream()
                 .filter(t -> t.getEmpresa().equalsIgnoreCase(empresa))
                 .findFirst()
                 .orElse(null);
     }
     
-    public static TemplateDeHorario buscarTemplatePorModelo(int modelo){
+    public static TemplateModel buscarTemplatePorModelo(int modelo){
         return carregarTemplates().stream()
                 .filter(t -> t.getModelo() == modelo)
                 .findFirst()

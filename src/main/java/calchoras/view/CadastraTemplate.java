@@ -1,25 +1,22 @@
 package calchoras.view;
 
 import calchoras.model.*;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import calchoras.controller.TemplateController;
 import java.awt.Component;
 import java.awt.Container;
-import java.util.List;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CadastraTemplate extends javax.swing.JFrame {
     
@@ -42,7 +39,6 @@ public class CadastraTemplate extends javax.swing.JFrame {
         }
     }
 
-    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -109,6 +105,11 @@ public class CadastraTemplate extends javax.swing.JFrame {
         jLabel1.setText("Modelo");
 
         spnModelo.setModel(new javax.swing.SpinnerNumberModel(1, 1, null, 1));
+        spnModelo.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                spnModeloStateChanged(evt);
+            }
+        });
 
         Grid.setLayout(new java.awt.GridLayout(8, 5, 15, 14));
         Grid.add(jLabel19);
@@ -303,13 +304,13 @@ public class CadastraTemplate extends javax.swing.JFrame {
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(spnModelo, javax.swing.GroupLayout.PREFERRED_SIZE, 56, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(tfModelo, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnCadastraModelo)))))
+                                .addComponent(btnCadastraModelo))
+                            .addComponent(jButton1))))
                 .addContainerGap(37, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -363,61 +364,34 @@ public class CadastraTemplate extends javax.swing.JFrame {
     }
 
     private void btnCadastraModeloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCadastraModeloActionPerformed
-        //variáveis
+
         int modelo     = (int) spnModelo.getValue();
         String empresa = tfModelo.getText();
-        String[][] horarios = obterHorariosValidados();
+        String[][] horarios = getHorariosDigitados();
         
-        if (horarios == null) {
-            JOptionPane.showMessageDialog(this, "Erro: Existem horários inválidos!", "Erro", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        TemplateController controller = new TemplateController();
+        controller.salvarTemplate(modelo, empresa, horarios);
         
-        TemplateDeHorario template = new TemplateDeHorario(modelo, empresa, horarios);
-       
-        try {
-            TemplateDeHorario.salvarTemplate(template);
-            JOptionPane.showMessageDialog(this, "Modelo cadastrado com sucesso", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-        }catch(IllegalArgumentException e){ 
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-        }catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "Erro ao salvar o modelo no arquivo!", "Erro", JOptionPane.ERROR_MESSAGE);
-            logger.log(Level.SEVERE, "Erro ao salvar o template", ex);
-        }
     }//GEN-LAST:event_btnCadastraModeloActionPerformed
     
-    private String[][] obterHorariosValidados() {
-    JTextField[][] textFields = {
-        {tfEntrada1, tfAlmoco1, tfVolta1, tfSaida1},
-        {tfEntrada2, tfAlmoco2, tfVolta2, tfSaida2},
-        {tfEntrada3, tfAlmoco3, tfVolta3, tfSaida3},
-        {tfEntrada4, tfAlmoco4, tfVolta4, tfSaida4},
-        {tfEntrada5, tfAlmoco5, tfVolta5, tfSaida5},
-        {tfEntrada6, tfAlmoco6, tfVolta6, tfSaida6},
-        {tfEntrada7, tfAlmoco7, tfVolta7, tfSaida7},
-    };
+    private String[][] getHorariosDigitados(){
 
-    String[][] horarios = new String[textFields.length][textFields[0].length];
-
-    boolean erro = false;
-
-    for (int i = 0; i < textFields.length; i++) {
-        for (int j = 0; j < textFields[i].length; j++) {
-            String valor = textFields[i][j].getText().trim();
-            
-            if (ValidacaoHorario.isHorarioValido(valor)) {
-                horarios[i][j] = valor;
-                System.out.println("Horário cadastrado: " + valor + " na posição [" + i + "][" + j + "]");
-            } else {
-                System.out.println("Horário inválido: " + valor + " na posição [" + i + "][" + j + "]");
-                erro = true;
-            }
-        }
-    }
-
-    return erro ? null : horarios;
-}
+        List<String[]> horariosList = new ArrayList<>();
+        List<String> linhaAtual = new ArrayList<>();
     
+        for(Component c : Grid.getComponents()){
+            if(c instanceof JTextField){
+                JTextField campo = (JTextField) c;
+                linhaAtual.add(campo.getText().trim());
+
+                if(linhaAtual.size() == 4){
+                    horariosList.add(linhaAtual.toArray(new String[0]));
+                    linhaAtual.clear();
+                }
+            }   
+        }
+        return horariosList.toArray(new String[0][0]);
+}
     
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         //Define ícone da janela
@@ -426,10 +400,44 @@ public class CadastraTemplate extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowOpened
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        TemplateDeHorario template = TemplateDeHorario.buscarTemplatePorModelo(1);
+        TemplateModel template = TemplateModel.buscarTemplatePorModelo(1);
         System.out.print(template.getEmpresa());
     }//GEN-LAST:event_jButton1ActionPerformed
- 
+
+    private void spnModeloStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spnModeloStateChanged
+        
+        try{
+            int modeloSelecionado = (int) spnModelo.getValue();
+            TemplateModel templateAtual = TemplateController.buscarTemplate(modeloSelecionado);
+        
+            if (templateAtual == null) {
+                System.out.println("Não existe modelo salvo com o número " + modeloSelecionado);
+                return;
+            }
+        
+            tfModelo.setText(templateAtual.getEmpresa());
+            String[][] horarios = TemplateController.getHorarios(templateAtual);
+        
+            Component[] componentes = Grid.getComponents();
+            int index = 0;
+        
+            for (Component c : componentes) {
+                if (c instanceof JTextField) {
+                    int linha = index / 4;  // Cada linha tem 4 campos (entrada, almoço, volta, saída)
+                    int coluna = index % 4; // Define qual tipo de horário está sendo preenchido
+                
+                    if (linha < horarios.length && coluna < horarios[linha].length) {
+                        ((JTextField) c).setText(horarios[linha][coluna]);
+                    }
+                    index++; 
+                }
+            }
+        
+        } catch (Exception e) {
+            System.out.println("Erro ao buscar modelo: " + e.getMessage());
+        }
+    }//GEN-LAST:event_spnModeloStateChanged
+           
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Grid;
     private javax.swing.JButton btnCadastraModelo;
