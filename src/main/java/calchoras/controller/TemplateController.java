@@ -7,7 +7,7 @@ public class TemplateController {
      public boolean salvarTemplate(int modelo, String empresa, String[][] horarios) {
         for (String[] linha : horarios) {
             for (String horario : linha) {
-                if (!ValidacaoHorario.isHorarioValido(horario)) {
+                if (!ValidacaoHorarioModel.isHorarioValido(horario)) {
                     JOptionPane.showMessageDialog(null, "Horário inválido: " + horario, "Erro", JOptionPane.ERROR_MESSAGE);
                     return false;
                 }

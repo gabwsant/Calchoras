@@ -1,13 +1,12 @@
 package calchoras.view;
 
 import calchoras.model.*;
-import calchoras.controller.TemplateController;
+import calchoras.controller.*;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -23,8 +22,10 @@ public class CadastraTemplate extends javax.swing.JFrame {
     private static final Logger logger = Logger.getLogger(CadastraTemplate.class.getName());
     
     public CadastraTemplate() {
+        controller = new ValidaHorarioController();
+        
         initComponents();
-        adicionaValidador(Grid);
+        adicionaValidador(Grid, controller);
         initLogger();
     }
 
@@ -334,29 +335,14 @@ public class CadastraTemplate extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-   private static void adicionaValidador(Container container){
+   private static void adicionaValidador(Container container, ValidaHorarioController controller){
         for(Component comp : container.getComponents()) {
             if(comp instanceof JTextField) {
                 JTextField campo = (JTextField) comp;
                 campo.addFocusListener(new FocusAdapter() {
                     @Override
                     public void focusLost(FocusEvent e) {
-                        String texto = campo.getText().trim();
-                        if(!texto.isEmpty()){
-                            if(texto.matches(ValidacaoHorario.getRegex())) {                              
-                                campo.setText(texto.substring(0, 2) + ":" + texto.substring(2, 4));
-                            }else if(texto.matches(ValidacaoHorario.getRegex1())) {
-                                campo.setText(texto);
-                            }else{
-                                JOptionPane.showMessageDialog(
-                                null, 
-                                "Horário '" + texto + "' é inválido! Use o formato HH:mm.", 
-                                "Erro de Validação", 
-                                JOptionPane.ERROR_MESSAGE
-                                );
-                                campo.requestFocus();
-                            }
-                        }
+                        controller.validarCampo(campo);
                     }
                 });
             }
@@ -487,4 +473,5 @@ public class CadastraTemplate extends javax.swing.JFrame {
     private javax.swing.JTextField tfVolta6;
     private javax.swing.JTextField tfVolta7;
     // End of variables declaration//GEN-END:variables
+    private ValidaHorarioController controller;
 }
