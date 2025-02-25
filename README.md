@@ -1,19 +1,27 @@
-# Calchoras - Cálculo de Horas
+# Calchoras - Cálculo de Horas Extras
+O Calchoras é um software desenvolvido em Java para facilitar o cálculo de horas extras de funcionários ao longo do mês. Seu objetivo é automatizar esse processo, tornando-o mais rápido, preciso e eficiente.
 
-O **Calchoras** é um programa desenvolvido em Java para calcular as horas extras realizadas por um funcionário de uma determinada empresa em um mês. O objetivo é simplificar e agilizar o processo de cálculo manual.
+## Funcionalidades
+***Cadastro de Horários Padrão***
+Permite cadastrar os horários padrão de entrada, saída, intervalo e retorno do funcionário.
+Os horários podem ser salvos como templates, facilitando a reutilização.
+As informações são armazenadas em um arquivo JSON, garantindo persistência dos dados.
+***Inserção de Horários Reais***
+O usuário seleciona um template previamente cadastrado.
+Insere os horários reais registrados no ponto do funcionário.
+***Cálculo Automático de Horas Extras***
+O sistema calcula automaticamente horas extras e déficits com base na comparação entre horários reais e padrão.
+O resultado é exibido de forma clara e objetiva.
+***Motivação do Projeto***
+No trabalho de um familiar, a apuração de horas extras precisa ser feita manualmente, tornando-se um processo cansativo e propenso a erros. O Calchoras surgiu para automatizar essa tarefa, trazendo mais precisão e praticidade.
 
-##  Como o programa funciona?
+## Objetivos
+***Aprendizado na prática***
 
-1. **Cadastro de horários padrão**  
-   O usuário deverá inserir o horário padrão de ponto do funcionário. Para facilitar, haverá uma tela de cadastro onde será possível salvar templates com esses horários padrão.  
-   - Esses dados só precisam ser inseridos uma vez e serão armazenados em um arquivo JSON.
+Aprofundar meus conhecimentos em Java e arquitetura de software.
+Explorar soluções eficientes para problemas reais.
 
-2. **Inserção dos horários reais**  
-   Após selecionar o template desejado, o usuário poderá inserir os horários reais de ponto do funcionário.
+***Ganho de experiência***
 
-3. **Cálculo de horas extras**  
-   O programa calculará a quantidade de horas extras realizadas pelo funcionário. Se houver déficit de horas, o programa também indicará.
-
-##  Motivação do projeto
-
-No emprego da minha mãe, é necessário saber quantas horas extras um funcionário realizou no mês. Porém, os horários de ponto são fornecidos sem o cálculo pronto, e ela precisa realizar tudo manualmente. Esse processo torna-se cansativo e repetitivo. Com o **Calchoras**, busco automatizar essa tarefa e tornar o trabalho mais eficiente.
+Desenvolver habilidades na construção de aplicações desktop.
+Aprimorar boas práticas de programação.
