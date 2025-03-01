@@ -1,5 +1,5 @@
 package calchoras;
-import calchoras.view.CadastraTemplate;
+import calchoras.view.*;
 import javax.swing.UIManager;
 
 public class Calchoras {
@@ -16,5 +16,9 @@ public class Calchoras {
         java.awt.EventQueue.invokeLater(() -> {
             new CadastraTemplate().setVisible(true);        
         });
+        java.awt.EventQueue.invokeLater(() -> {
+            new CalculaHoraExtra().setVisible(true);        
+        });
+        
     }
 }

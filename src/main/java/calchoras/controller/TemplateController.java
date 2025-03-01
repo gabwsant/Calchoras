@@ -2,12 +2,13 @@ package calchoras.controller;
 
 import calchoras.model.*;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 public class TemplateController {
      public boolean salvarTemplate(int modelo, String empresa, String[][] horarios) {
         for (String[] linha : horarios) {
             for (String horario : linha) {
-                if (!ValidacaoHorarioModel.isHorarioValido(horario)) {
+                if (!ValidaHorarioModel.isHorarioValido(horario)) {
                     JOptionPane.showMessageDialog(null, "Horário inválido: " + horario, "Erro", JOptionPane.ERROR_MESSAGE);
                     return false;
                 }
@@ -24,7 +25,7 @@ public class TemplateController {
             return false;
         }
     }
-     
+    
      public static TemplateModel buscarTemplate(int modelo){
          return TemplateModel.buscarTemplatePorModelo(modelo);
      }
@@ -35,4 +36,21 @@ public class TemplateController {
          }
          return new String[0][0];
      }
+     
+     public void validarCampo(JTextField campo) {
+        String texto = campo.getText().trim();
+        if (!texto.isEmpty()) {
+            if (ValidaHorarioModel.isHorarioValido(texto)) {
+                campo.setText(ValidaHorarioModel.formatarHorario(texto));
+            } else {
+                JOptionPane.showMessageDialog(
+                    null, 
+                    "Horário '" + texto + "' é inválido! Use o formato HH:mm.", 
+                    "Erro de Validação", 
+                    JOptionPane.ERROR_MESSAGE
+                );
+                campo.requestFocus();
+            }
+        }
+    }
 }

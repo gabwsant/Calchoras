@@ -1,5 +1,6 @@
 package calchoras.view;
 
+import calchoras.Calchoras;
 import calchoras.model.*;
 import calchoras.controller.*;
 import java.awt.Component;
@@ -22,7 +23,7 @@ public class CadastraTemplate extends javax.swing.JFrame {
     private static final Logger logger = Logger.getLogger(CadastraTemplate.class.getName());
     
     public CadastraTemplate() {
-        controller = new ValidaHorarioController();
+        controller = new TemplateController();
         
         initComponents();
         adicionaValidador(Grid, controller);
@@ -91,10 +92,12 @@ public class CadastraTemplate extends javax.swing.JFrame {
         tfModelo = new javax.swing.JTextField();
         btnCadastraModelo = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Calchoras - Cadastro de Modelos");
         setMinimumSize(new java.awt.Dimension(550, 550));
         setPreferredSize(new java.awt.Dimension(550, 550));
         setSize(new java.awt.Dimension(550, 550));
+        setType(java.awt.Window.Type.POPUP);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent evt) {
                 formWindowOpened(evt);
@@ -102,7 +105,7 @@ public class CadastraTemplate extends javax.swing.JFrame {
         });
 
         lblTitulo.setFont(new java.awt.Font("Arial", 0, 36)); // NOI18N
-        lblTitulo.setText("Cálculo de Horas Extras");
+        lblTitulo.setText("Cadastro de Modelos");
 
         jLabel1.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         jLabel1.setText("Modelo");
@@ -335,7 +338,7 @@ public class CadastraTemplate extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-   private static void adicionaValidador(Container container, ValidaHorarioController controller){
+   private static void adicionaValidador(Container container, TemplateController controller){
         for(Component comp : container.getComponents()) {
             if(comp instanceof JTextField) {
                 JTextField campo = (JTextField) comp;
@@ -380,8 +383,9 @@ public class CadastraTemplate extends javax.swing.JFrame {
 }
     
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
-        URL imageUrl = CadastraTemplate.class.getClassLoader().getResource("calc_icon.png");
-        setIconImage(new ImageIcon(imageUrl).getImage());
+        ImageModel icon = new ImageModel();
+        URL iconUrl = icon.getIconUrl();
+        setIconImage(new ImageIcon(iconUrl).getImage());
         atualizaHorariosMostrados();
     }//GEN-LAST:event_formWindowOpened
 
@@ -477,5 +481,5 @@ public class CadastraTemplate extends javax.swing.JFrame {
     private javax.swing.JTextField tfVolta6;
     private javax.swing.JTextField tfVolta7;
     // End of variables declaration//GEN-END:variables
-    private ValidaHorarioController controller;
+    private final TemplateController controller;
 }
