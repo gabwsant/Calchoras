@@ -14,9 +14,6 @@ public class Calchoras {
         }
         
         java.awt.EventQueue.invokeLater(() -> {
-            new CadastraTemplate().setVisible(true);        
-        });
-        java.awt.EventQueue.invokeLater(() -> {
             new CalculaHoraExtra().setVisible(true);        
         });
         

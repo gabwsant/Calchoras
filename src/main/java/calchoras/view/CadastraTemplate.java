@@ -1,6 +1,5 @@
 package calchoras.view;
 
-import calchoras.Calchoras;
 import calchoras.model.*;
 import calchoras.controller.*;
 import java.awt.Component;
