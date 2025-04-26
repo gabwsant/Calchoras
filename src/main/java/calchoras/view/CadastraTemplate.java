@@ -31,7 +31,7 @@ public class CadastraTemplate extends javax.swing.JFrame {
 
     private static void initLogger() {
         try {
-            FileHandler fh = new FileHandler("logs.txt", true);
+            FileHandler fh = new FileHandler("app.log", true);
             fh.setFormatter(new SimpleFormatter());
             logger.addHandler(fh);
             logger.setLevel(Level.ALL);
@@ -430,6 +430,8 @@ public class CadastraTemplate extends javax.swing.JFrame {
         
         } catch (Exception e) {
             System.out.println("Erro ao buscar modelo: " + e.getMessage());
+            logger.log(Level.SEVERE, "Erro ao buscar o modelo/template.", e);
+            
         }
     }   
     // Variables declaration - do not modify//GEN-BEGIN:variables

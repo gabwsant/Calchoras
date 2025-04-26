@@ -21,14 +21,27 @@ public class CalculaHoraExtra extends javax.swing.JFrame {
         
         carregarEmpresasDoJson(cbEmpresa, mapaModelos, "src/main/resources/templates.json");
         
+        //Criação de Listeners para cbEmpresa e spnModelo para visualização dos modelos
         cbEmpresa.addActionListener(e -> {
-             empresaSelecionada = (String) cbEmpresa.getSelectedItem();
-             if (empresaSelecionada != null && mapaModelos.containsKey(empresaSelecionada)) {
-                int modelo = mapaModelos.get(empresaSelecionada);
+             strEmpresaSelecionada = (String) cbEmpresa.getSelectedItem();
+             if (strEmpresaSelecionada != null && mapaModelos.containsKey(strEmpresaSelecionada)) {
+                int modelo = mapaModelos.get(strEmpresaSelecionada);
                 spnModelo.setValue(modelo); //Atualiza o spinner com o modelo da empresa selecionada
             }
-        });       
+        });
+        spnModelo.addChangeListener(e -> {
+            int valorSelecionado = (int) spnModelo.getValue();
+
+            for (Map.Entry<String, Integer> entry : mapaModelos.entrySet()) {
+                if (entry.getValue() == valorSelecionado) {
+                String empresa = entry.getKey();
+                cbEmpresa.setSelectedItem(empresa);
+                break;
+                }
+            }
+        });     
     }
+    
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -144,7 +157,7 @@ public class CalculaHoraExtra extends javax.swing.JFrame {
     private javax.swing.JLabel lblModelo;
     private javax.swing.JSpinner spnModelo;
     // End of variables declaration//GEN-END:variables
-    String empresaSelecionada;
+    String strEmpresaSelecionada;
 }
 
 
