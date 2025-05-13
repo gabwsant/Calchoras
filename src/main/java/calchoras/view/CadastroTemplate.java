@@ -17,11 +17,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CadastraTemplate extends javax.swing.JFrame {
+public class CadastroTemplate extends javax.swing.JFrame {
     
-    private static final Logger logger = Logger.getLogger(CadastraTemplate.class.getName());
+    private static final Logger logger = Logger.getLogger(CadastroTemplate.class.getName());
     
-    public CadastraTemplate() {
+    public CadastroTemplate() {
         controller = new TemplateController();
         
         initComponents();

@@ -9,12 +9,12 @@ public class Calchoras {
         try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } 
         catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(CadastraTemplate.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(CadastroTemplate.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             System.out.print("Não foi possível definir o LAF");
         }
         
         java.awt.EventQueue.invokeLater(() -> {
-            new CalculaHoraExtra().setVisible(true);        
+            new CalculoHoraExtra().setVisible(true);        
         });
         
     }
