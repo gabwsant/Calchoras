@@ -1,7 +1,13 @@
 package view;
 
+import controller.ControllerBatidas;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.WindowEvent;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -75,6 +81,35 @@ public class JanelaPrincipal extends JFrame {
 
         pack();
         setLocationRelativeTo(null);
+        setIcon("/resources/calc_icon.png");
         setVisible(true);
+    }
+
+    public void limpaCampos(){
+        campoEntrada.setText("");
+        campoSaidaAlmoco.setText("");
+        campoVoltaAlmoco.setText("");
+        campoSaida.setText("");
+    }
+
+    public void setIcon(String url){
+        URL iconURL = JanelaPrincipal.class.getResource(url);
+        if(iconURL != null) {
+            ImageIcon icon = new ImageIcon(iconURL);
+            setIconImage(icon.getImage());
+        }else{
+            System.err.println("Ícone não encontrado!");
+        }
+    }
+
+    //********** Criar controller de validação ******************//
+
+    public void addValidacao(JTextField campo){
+        campo.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                //controller.validaBatida(campo.getText());
+            }
+        });
     }
 }

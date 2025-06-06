@@ -14,12 +14,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ControleBatidas {
+public class ControllerBatidas {
     private JanelaPrincipal view;
     private List<BatidaPonto> batidas = new ArrayList<>();
     private final DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    public ControleBatidas(JanelaPrincipal view) {
+    public ControllerBatidas(JanelaPrincipal view) {
         this.view = view;
 
         view.botaoAdicionar.addActionListener(new ActionListener() {
@@ -51,6 +51,7 @@ public class ControleBatidas {
 
             LocalDate proximaData = data.plusDays(1);
             view.campoData.setText(proximaData.format(formatadorData));
+            view.limpaCampos();
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view, "Erro ao adicionar batida. Verifique os campos.");
@@ -67,4 +68,6 @@ public class ControleBatidas {
         view.areaResultado.append("\nTotal de horas extras: " + (minutos / 60) + "h " + (minutos % 60) + "min\n");
     }
 
+    public void validaBatida(String text) {
+    }
 }

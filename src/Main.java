@@ -1,9 +1,9 @@
-import controller.ControleBatidas;
+import controller.ControllerBatidas;
 import view.JanelaPrincipal;
 
 public class Main {
     public static void main(String[] args) {
         JanelaPrincipal view = new JanelaPrincipal();
-        new ControleBatidas(view);
+        new ControllerBatidas(view);
     }
 }

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Calchoras.iml" filepath="$PROJECT_DIR$/Calchoras.iml" />
+      <module fileurl="file://$PROJECT_DIR$/calchoras.iml" filepath="$PROJECT_DIR$/calchoras.iml" />
     </modules>
   </component>
 </project>
