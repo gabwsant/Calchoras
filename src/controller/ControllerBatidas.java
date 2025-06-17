@@ -75,7 +75,7 @@ public class ControllerBatidas {
             long extras = resultado.getHorasExtras();
             long negativas = resultado.getHorasNegativas();
             view.areaResultado.append("\nTotal de horas extras: " + (extras / 60) + "h " + (extras % 60) + "min\n" +
-                                      "Total de horas negativas:   " + (negativas / 60) + "h " + (negativas % 60));
+                                      "Total de horas negativas:   " + (negativas / 60) + "h " + (negativas % 60) + "min\n");
             view.resetaData();
         }
     }
