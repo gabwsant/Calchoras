@@ -5,14 +5,18 @@ import java.util.List;
 public class CalculadoraHorasExtras {
     //private static final int JORNADA_PADRAO_MINUTOS = 8 * 60;
 
-    public long calcularHorasExtras(List<BatidaPonto> batidas, long jornada) {
-        long total = 0;
+    public ResultadoHoras calcularHorasExtras(List<BatidaPonto> batidas, long jornada) {
+        long horasExtras = 0;
+        long horasNegativas = 0;
+
         for (BatidaPonto b : batidas) {
             long trabalhado = b.getMinutosTrabalhados();
             if (trabalhado > jornada) {
-                total += trabalhado - jornada;
+                horasExtras += trabalhado - jornada;
+            }else if(trabalhado < jornada){
+                horasNegativas += trabalhado - jornada;
             }
         }
-        return total;
+        return new ResultadoHoras(horasExtras, horasNegativas);
     }
 }

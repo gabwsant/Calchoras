@@ -3,6 +3,7 @@ package controller;
 import model.BatidaPonto;
 import model.CalculadoraHorasExtras;
 import model.JornadaPadrao;
+import model.ResultadoHoras;
 import view.JanelaPrincipal;
 
 import javax.swing.*;
@@ -53,6 +54,7 @@ public class ControllerBatidas {
             LocalDate proximaData = data.plusDays(1);
             view.campoData.setText(proximaData.format(formatadorData));
             view.limpaCampos();
+            view.campoEntrada.requestFocus();
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view, "Erro ao adicionar batida. Verifique os campos.");
@@ -69,8 +71,12 @@ public class ControllerBatidas {
                     LocalTime.parse(jornadaEntrada),
                     LocalTime.parse(jornadaSaida)
             );
-            long minutos = calc.calcularHorasExtras(batidas, jornada.getJornadaPadrao());
-            view.areaResultado.append("\nTotal de horas extras: " + (minutos / 60) + "h " + (minutos % 60) + "min\n");
+            ResultadoHoras resultado = calc.calcularHorasExtras(batidas, jornada.getJornadaPadrao());
+            long extras = resultado.getHorasExtras();
+            long negativas = resultado.getHorasNegativas();
+            view.areaResultado.append("\nTotal de horas extras: " + (extras / 60) + "h " + (extras % 60) + "min\n" +
+                                      "Total de horas negativas:   " + (negativas / 60) + "h " + (negativas % 60));
+            view.resetaData();
         }
     }
 }

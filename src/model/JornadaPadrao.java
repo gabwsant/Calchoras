@@ -14,5 +14,5 @@ public class JornadaPadrao {
 
     public long getJornadaPadrao() {
         return Duration.between(entrada, saida).toMinutes() - 60;
-    }
+    } //retiro 1 hora do horario de almoço
 }
