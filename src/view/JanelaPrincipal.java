@@ -6,17 +6,21 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.net.URL;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class JanelaPrincipal extends JFrame {
-    public JTextField campoData = new JTextField(10);
+    //public JTextField campoData = new JTextField(10);
+    public JFormattedTextField campoData;
     public JTextField campoJornadaEntrada = new JTextField(10);
     public JTextField campoJornadaSaida = new JTextField(10);
     public JTextField campoEntrada = new JTextField(5);
@@ -47,8 +51,21 @@ public class JanelaPrincipal extends JFrame {
         painelPrincipal.setLayout(new BoxLayout(painelPrincipal, BoxLayout.Y_AXIS));
 
         // Data
-        painelPrincipal.add(criaLinha("Data (dd/mm/aaaa):", campoData));
-        campoData.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("01/MM/yyyy")));
+        MaskFormatter mask = null;
+        try {
+            mask = new MaskFormatter("##/##/####");
+            mask.setPlaceholderCharacter('_');
+        } catch (ParseException e) {
+            System.err.println("Erro criar formatador: " + e.getMessage());
+        }
+        campoData = new JFormattedTextField(mask);
+        painelPrincipal.add(criaLinha("Data:", campoData));
+        adicionaValidacaoData(campoData);
+        campoData.setText(
+                LocalDate.now()
+                         .minusMonths(1)
+                         .withDayOfMonth(1)
+                         .format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
         // Jornada
         JPanel jornadaPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -112,7 +129,11 @@ public class JanelaPrincipal extends JFrame {
     }
 
     public void resetaData() {
-        campoData.setText(LocalDate.now().format(DateTimeFormatter.ofPattern("01/MM/yyyy")));
+        campoData.setText(
+                LocalDate.now()
+                         .minusMonths(1)
+                         .withDayOfMonth(1)
+                         .format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
     }
 
     public void setIcon(String url) {
@@ -133,6 +154,27 @@ public class JanelaPrincipal extends JFrame {
             }
         });
     }
+
+    private void adicionaValidacaoData(JTextField campo) {
+        campo.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                String texto = campo.getText();
+                try {
+                    LocalDate.parse(texto, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                } catch (DateTimeParseException ex) {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Data inválida! Use o formato dd/mm/aaaa (ex: 03/07/1985).",
+                            "Erro de Validação",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    campo.requestFocus();
+                }
+            }
+        });
+    }
+
 
     private void adicionaAvancoAutomatico(JTextField campo){
         campo.getDocument().addDocumentListener(new DocumentListener() {
