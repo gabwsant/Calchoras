@@ -4,9 +4,13 @@ import controller.ControllerValidacao;
 
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -54,6 +58,8 @@ public class JanelaPrincipal extends JFrame {
         jornadaPanel.add(campoJornadaSaida);
         adicionaValidacaoBatida(campoJornadaEntrada);
         adicionaValidacaoBatida(campoJornadaSaida);
+        adicionaAvancoAutomatico(campoJornadaEntrada);
+        adicionaAvancoAutomatico(campoJornadaSaida);
         painelPrincipal.add(jornadaPanel);
 
         // Batidas
@@ -62,9 +68,13 @@ public class JanelaPrincipal extends JFrame {
         painelPrincipal.add(criaLinha("Volta Almoço:", campoVoltaAlmoco));
         painelPrincipal.add(criaLinha("Saída:", campoSaida));
         adicionaValidacaoBatida(campoEntrada);
+        adicionaAvancoAutomatico(campoEntrada);
         adicionaValidacaoBatida(campoSaidaAlmoco);
+        adicionaAvancoAutomatico(campoSaidaAlmoco);
         adicionaValidacaoBatida(campoVoltaAlmoco);
+        adicionaAvancoAutomatico(campoVoltaAlmoco);
         adicionaValidacaoBatida(campoSaida);
+        adicionaAvancoAutomatico(campoSaida);
 
         // Botões
         JPanel botoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -120,6 +130,32 @@ public class JanelaPrincipal extends JFrame {
             @Override
             public void focusLost(FocusEvent e) {
                 controllerValidacao.validaBatida(campo);
+            }
+        });
+    }
+
+    private void adicionaAvancoAutomatico(JTextField campo){
+        campo.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e){
+                avancar();
+            }
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                avancar();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                //usado para campos com estilo (não JTextField)
+            }
+
+            private void avancar() {
+                if (campo.getText().length() == 4 && !campo.getText().contains(":")) {
+                    campo.transferFocus(); // Pula para o próximo campo
+                }else if(campo.getText().length() == 5 && campo.getText().contains(":")){
+                    campo.transferFocus();
+                }
             }
         });
     }
