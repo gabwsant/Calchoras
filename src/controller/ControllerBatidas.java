@@ -18,6 +18,7 @@ public class ControllerBatidas {
     private JanelaPrincipal view;
     private List<BatidaPonto> batidas = new ArrayList<>();
     private final DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private ControllerValidacao controllerValidacao = new ControllerValidacao();
 
     public ControllerBatidas(JanelaPrincipal view) {
         this.view = view;
@@ -60,14 +61,16 @@ public class ControllerBatidas {
 
     private void calcularHorasExtras() {
         CalculadoraHorasExtras calc = new CalculadoraHorasExtras();
-        JornadaPadrao jornada = new JornadaPadrao(
-                LocalTime.parse(view.campoJornadaEntrada.getText()),
-                LocalTime.parse(view.campoJornadaSaida.getText())
-        );
-        long minutos = calc.calcularHorasExtras(batidas, jornada.getJornadaPadrao());
-        view.areaResultado.append("\nTotal de horas extras: " + (minutos / 60) + "h " + (minutos % 60) + "min\n");
-    }
+        String jornadaEntrada = view.campoJornadaEntrada.getText();
+        String jornadaSaida = view.campoJornadaSaida.getText();
 
-    public void validaBatida(String text) {
+        if(controllerValidacao.validaJornada(jornadaEntrada, jornadaSaida)) {
+            JornadaPadrao jornada = new JornadaPadrao(
+                    LocalTime.parse(jornadaEntrada),
+                    LocalTime.parse(jornadaSaida)
+            );
+            long minutos = calc.calcularHorasExtras(batidas, jornada.getJornadaPadrao());
+            view.areaResultado.append("\nTotal de horas extras: " + (minutos / 60) + "h " + (minutos % 60) + "min\n");
+        }
     }
 }
