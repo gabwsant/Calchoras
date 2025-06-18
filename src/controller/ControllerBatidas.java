@@ -5,6 +5,7 @@ import model.CalculadoraHorasExtras;
 import model.JornadaPadrao;
 import model.ResultadoHoras;
 import view.JanelaPrincipal;
+import util.*;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -19,7 +20,6 @@ public class ControllerBatidas {
     private JanelaPrincipal view;
     private List<BatidaPonto> batidas = new ArrayList<>();
     private final DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private ControllerValidacao controllerValidacao = new ControllerValidacao();
 
     public ControllerBatidas(JanelaPrincipal view) {
         this.view = view;
@@ -66,7 +66,7 @@ public class ControllerBatidas {
         String jornadaEntrada = view.campoJornadaEntrada.getText();
         String jornadaSaida = view.campoJornadaSaida.getText();
 
-        if(controllerValidacao.validaJornada(jornadaEntrada, jornadaSaida)) {
+        if(ValidacaoHorario.isJornadaValida(jornadaEntrada, jornadaSaida)) {
             JornadaPadrao jornada = new JornadaPadrao(
                     LocalTime.parse(jornadaEntrada),
                     LocalTime.parse(jornadaSaida)
@@ -77,6 +77,13 @@ public class ControllerBatidas {
             view.areaResultado.append("\nTotal de horas extras: " + (extras / 60) + "h " + (extras % 60) + "min\n" +
                                       "Total de horas negativas:   " + (negativas / 60) + "h " + (negativas % 60) + "min\n");
             view.resetaData();
+            batidas.clear();
+        }else{
+            JOptionPane.showMessageDialog(
+                    null,
+                    "Jornada inválida! Confira o preenchimento.",
+                    "Erro de Validação",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 }

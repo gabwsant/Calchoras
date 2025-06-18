@@ -1,6 +1,6 @@
 package view;
 
-import controller.ControllerValidacao;
+import util.*;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -19,7 +19,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 public class JanelaPrincipal extends JFrame {
-    //public JTextField campoData = new JTextField(10);
     public JFormattedTextField campoData;
     public JTextField campoJornadaEntrada = new JTextField(10);
     public JTextField campoJornadaSaida = new JTextField(10);
@@ -30,8 +29,6 @@ public class JanelaPrincipal extends JFrame {
     public JButton botaoAdicionar = new JButton("➕ Adicionar");
     public JButton botaoCalcular = new JButton("🧮 Calcular");
     public JTextArea areaResultado = new JTextArea(6, 30);
-
-    private ControllerValidacao controllerValidacao = new ControllerValidacao();
 
     public JanelaPrincipal() {
         setTitle("Calchoras - Cálculo de Horas Extras");
@@ -150,7 +147,19 @@ public class JanelaPrincipal extends JFrame {
         campo.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                controllerValidacao.validaBatida(campo);
+                //controllerValidacao.validaBatida(campo);
+                String batida = campo.getText().trim();
+                if (!batida.isEmpty()){
+                    if (!ValidacaoHorario.isHorarioValido(batida)) {
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Horário inválido! Use o formato HH24:MI (ex: 17:45).",
+                                "Erro de Validação",
+                                JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        campo.setText(ValidacaoHorario.formatarHorario(batida));
+                    }
+                }
             }
         });
     }
