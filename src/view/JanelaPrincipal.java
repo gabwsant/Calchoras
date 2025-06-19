@@ -8,10 +8,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.net.URL;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -143,6 +140,14 @@ public class JanelaPrincipal extends JFrame {
         }
     }
 
+    public void addAcaoAdicionar(ActionListener listener) {
+        botaoAdicionar.addActionListener(listener);
+    }
+
+    public void addAcaoCalcular(ActionListener listener) {
+        botaoCalcular.addActionListener(listener);
+    }
+
     private void adicionaValidacaoBatida(JTextField campo) {
         campo.addFocusListener(new FocusAdapter() {
             @Override
@@ -184,7 +189,6 @@ public class JanelaPrincipal extends JFrame {
         });
     }
 
-
     private void adicionaAvancoAutomatico(JTextField campo){
         campo.getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -195,7 +199,6 @@ public class JanelaPrincipal extends JFrame {
             public void removeUpdate(DocumentEvent e) {
                 avancar();
             }
-
             @Override
             public void changedUpdate(DocumentEvent e) {
                 //usado para campos com estilo (não JTextField)

@@ -24,19 +24,8 @@ public class ControllerBatidas {
     public ControllerBatidas(JanelaPrincipal view) {
         this.view = view;
 
-        view.botaoAdicionar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                adicionarBatida();
-            }
-        });
-
-        view.botaoCalcular.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                calcularHorasExtras();
-            }
-        });
+        this.view.addAcaoAdicionar(e -> adicionarBatida());
+        this.view.addAcaoCalcular(e -> calcularHorasExtras());
     }
 
     private void adicionarBatida() {
@@ -79,11 +68,7 @@ public class ControllerBatidas {
             view.resetaData();
             batidas.clear();
         }else{
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Jornada inválida! Confira o preenchimento.",
-                    "Erro de Validação",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(view, "Jornada inválida! Confira o preenchimento.");;
         }
     }
 }
