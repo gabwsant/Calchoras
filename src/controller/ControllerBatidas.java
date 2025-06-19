@@ -30,11 +30,11 @@ public class ControllerBatidas {
 
     private void adicionarBatida() {
         try {
-            LocalDate data = LocalDate.parse(view.campoData.getText(), formatadorData);
-            LocalTime entrada = LocalTime.parse(view.campoEntrada.getText());
-            LocalTime saidaAlmoco = LocalTime.parse(view.campoSaidaAlmoco.getText());
-            LocalTime voltaAlmoco = LocalTime.parse(view.campoVoltaAlmoco.getText());
-            LocalTime saida = LocalTime.parse(view.campoSaida.getText());
+            LocalDate data = view.getData();
+            LocalTime entrada = view.getEntrada();
+            LocalTime saidaAlmoco = view.getSaidaAlmoco();
+            LocalTime voltaAlmoco = view.getVoltaAlmoco();
+            LocalTime saida = view.getSaida();
 
             BatidaPonto b = new BatidaPonto(data, entrada, saidaAlmoco, voltaAlmoco, saida);
             batidas.add(b);

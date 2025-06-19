@@ -12,6 +12,7 @@ import java.awt.event.*;
 import java.net.URL;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
@@ -26,6 +27,8 @@ public class JanelaPrincipal extends JFrame {
     public JButton botaoAdicionar = new JButton("➕ Adicionar");
     public JButton botaoCalcular = new JButton("🧮 Calcular");
     public JTextArea areaResultado = new JTextArea(6, 30);
+
+    private final DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public JanelaPrincipal() {
         setTitle("Calchoras - Cálculo de Horas Extras");
@@ -213,4 +216,30 @@ public class JanelaPrincipal extends JFrame {
             }
         });
     }
+
+    public LocalDate getData() {
+        String texto = campoData.getText();
+        return LocalDate.parse(texto, formatadorData);
+    }
+
+    public LocalTime getEntrada(){
+        String texto = campoEntrada.getText();
+        return LocalTime.parse(texto);
+    }
+
+    public LocalTime getSaidaAlmoco(){
+        String texto = campoSaidaAlmoco.getText();
+        return LocalTime.parse(texto);
+    }
+
+    public LocalTime getVoltaAlmoco(){
+        String texto = campoVoltaAlmoco.getText();
+        return LocalTime.parse(texto);
+    }
+
+    public LocalTime getSaida(){
+        String texto = campoSaida.getText();
+        return LocalTime.parse(texto);
+    }
+
 }
