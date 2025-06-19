@@ -38,22 +38,23 @@ public class ControllerBatidas {
 
             BatidaPonto b = new BatidaPonto(data, entrada, saidaAlmoco, voltaAlmoco, saida);
             batidas.add(b);
-            view.areaResultado.append("Batida adicionada: " + data.format(formatadorData) + "\n");
+            view.exibirMensagemResultado("Batida adicionada: " + data.format(formatadorData) + "\n");
 
             LocalDate proximaData = data.plusDays(1);
-            view.campoData.setText(proximaData.format(formatadorData));
+            view.setData(proximaData);
+
             view.limpaCampos();
-            view.campoEntrada.requestFocus();
+            view.focaCampoEntrada();
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(view, "Erro ao adicionar batida. Verifique os campos.");
+            view.exibirErro("Erro ao adicionar batida. Verifique os campos.");
         }
     }
 
     private void calcularHorasExtras() {
         CalculadoraHorasExtras calc = new CalculadoraHorasExtras();
-        String jornadaEntrada = view.campoJornadaEntrada.getText();
-        String jornadaSaida = view.campoJornadaSaida.getText();
+        String jornadaEntrada = view.getJornadaEntrada();
+        String jornadaSaida = view.getJornadaSaida();
 
         if(ValidacaoHorario.isJornadaValida(jornadaEntrada, jornadaSaida)) {
             JornadaPadrao jornada = new JornadaPadrao(
@@ -63,12 +64,12 @@ public class ControllerBatidas {
             ResultadoHoras resultado = calc.calcularHorasExtras(batidas, jornada.getJornadaPadrao());
             long extras = resultado.getHorasExtras();
             long negativas = resultado.getHorasNegativas();
-            view.areaResultado.append("\nTotal de horas extras: " + (extras / 60) + "h " + (extras % 60) + "min\n" +
-                                      "Total de horas negativas:   " + (negativas / 60) + "h " + (negativas % 60) + "min\n");
+            view.exibirMensagemResultado("\nTotal de horas positivas: " + (extras / 60) + "h " + (extras % 60) + "min\n" +
+                                      "Total de horas negativas: " + (negativas / 60) + "h " + (negativas % 60) + "min\n");
             view.resetaData();
             batidas.clear();
         }else{
-            JOptionPane.showMessageDialog(view, "Jornada inválida! Confira o preenchimento.");;
+            view.exibirErro("Jornada inválida! Confira o preenchimento.");
         }
     }
 }

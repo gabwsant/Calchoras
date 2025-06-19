@@ -217,9 +217,34 @@ public class JanelaPrincipal extends JFrame {
         });
     }
 
+    public void focaCampoEntrada() {
+        campoEntrada.requestFocus();
+    }
+
+    public void exibirMensagemResultado(String mensagem){
+        areaResultado.append(mensagem);
+    }
+
+    public void exibirErro(String mensagem){
+        JOptionPane.showMessageDialog(
+                this,
+                mensagem,
+                "Erro",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+
     public LocalDate getData() {
         String texto = campoData.getText();
         return LocalDate.parse(texto, formatadorData);
+    }
+
+    //O parse da jornada é feito no ControllerBatidas pois possuí validação específica
+    public String getJornadaEntrada() {
+        return campoJornadaEntrada.getText();
+    }
+    public String getJornadaSaida() {
+        return campoJornadaSaida.getText();
     }
 
     public LocalTime getEntrada(){
@@ -240,6 +265,10 @@ public class JanelaPrincipal extends JFrame {
     public LocalTime getSaida(){
         String texto = campoSaida.getText();
         return LocalTime.parse(texto);
+    }
+
+    public void setData(LocalDate data) {
+        campoData.setText(data.format(formatadorData));
     }
 
 }
