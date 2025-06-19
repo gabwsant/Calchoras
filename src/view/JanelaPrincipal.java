@@ -1,11 +1,9 @@
 package view;
 
 import util.*;
-
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.awt.event.*;
@@ -25,7 +23,7 @@ public class JanelaPrincipal extends JFrame {
     public JTextField campoVoltaAlmoco = new JTextField(5);
     public JTextField campoSaida = new JTextField(5);
     public JButton botaoAdicionar = new JButton("➕ Adicionar");
-    public JButton botaoCalcular = new JButton("🧮 Calcular");
+    public JButton botaoCalcular = new JButton("\uD83D\uDD0E Calcular");
     public JTextArea areaResultado = new JTextArea(6, 30);
 
     private final DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -71,8 +69,8 @@ public class JanelaPrincipal extends JFrame {
         jornadaPanel.add(new JLabel("às"));
         jornadaPanel.add(campoJornadaSaida);
         adicionaValidacaoBatida(campoJornadaEntrada);
-        adicionaValidacaoBatida(campoJornadaSaida);
         adicionaAvancoAutomatico(campoJornadaEntrada);
+        adicionaValidacaoBatida(campoJornadaSaida);
         adicionaAvancoAutomatico(campoJornadaSaida);
         painelPrincipal.add(jornadaPanel);
 
@@ -155,7 +153,6 @@ public class JanelaPrincipal extends JFrame {
         campo.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                //controllerValidacao.validaBatida(campo);
                 String batida = campo.getText().trim();
                 if (!batida.isEmpty()){
                     if (!ValidacaoHorario.isHorarioValido(batida)) {
@@ -164,6 +161,7 @@ public class JanelaPrincipal extends JFrame {
                                 "Horário inválido! Use o formato HH24:MI (ex: 17:45).",
                                 "Erro de Validação",
                                 JOptionPane.ERROR_MESSAGE);
+                        campo.requestFocus();
                     } else {
                         campo.setText(ValidacaoHorario.formatarHorario(batida));
                     }
@@ -193,25 +191,19 @@ public class JanelaPrincipal extends JFrame {
     }
 
     private void adicionaAvancoAutomatico(JTextField campo){
-        campo.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e){
-                avancar();
-            }
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                avancar();
-            }
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                //usado para campos com estilo (não JTextField)
-            }
+        campo.getDocument().addDocumentListener(new DocumentAdapter() {
+            @Override public void insertUpdate(DocumentEvent e){ avancar(); }
+            @Override public void removeUpdate(DocumentEvent e) { avancar(); }
 
             private void avancar() {
-                if (campo.getText().length() == 4 && !campo.getText().contains(":")) {
-                    campo.transferFocus(); // Pula para o próximo campo
-                }else if(campo.getText().length() == 5 && campo.getText().contains(":")){
-                    campo.transferFocus();
+                String texto = campo.getText();
+                if ((texto.length() == 4 && !texto.contains(":")) ||
+                        (texto.length() == 5 && texto.contains(":"))) {
+                    SwingUtilities.invokeLater(() -> { //aguarda o sistema concluir o evento shift+tab
+                        if (campo.hasFocus()) { //só avança se o campo ainda tem foco (evita conflito com shift+tab)
+                            campo.transferFocus();
+                        }
+                    });
                 }
             }
         });
@@ -270,5 +262,4 @@ public class JanelaPrincipal extends JFrame {
     public void setData(LocalDate data) {
         campoData.setText(data.format(formatadorData));
     }
-
 }
