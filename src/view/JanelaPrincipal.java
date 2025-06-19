@@ -1,20 +1,16 @@
 package view;
 
 import util.*;
-
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.net.URL;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
@@ -27,8 +23,10 @@ public class JanelaPrincipal extends JFrame {
     public JTextField campoVoltaAlmoco = new JTextField(5);
     public JTextField campoSaida = new JTextField(5);
     public JButton botaoAdicionar = new JButton("➕ Adicionar");
-    public JButton botaoCalcular = new JButton("🧮 Calcular");
+    public JButton botaoCalcular = new JButton("\uD83D\uDD0E Calcular");
     public JTextArea areaResultado = new JTextArea(6, 30);
+
+    private final DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public JanelaPrincipal() {
         setTitle("Calchoras - Cálculo de Horas Extras");
@@ -71,8 +69,8 @@ public class JanelaPrincipal extends JFrame {
         jornadaPanel.add(new JLabel("às"));
         jornadaPanel.add(campoJornadaSaida);
         adicionaValidacaoBatida(campoJornadaEntrada);
-        adicionaValidacaoBatida(campoJornadaSaida);
         adicionaAvancoAutomatico(campoJornadaEntrada);
+        adicionaValidacaoBatida(campoJornadaSaida);
         adicionaAvancoAutomatico(campoJornadaSaida);
         painelPrincipal.add(jornadaPanel);
 
@@ -143,11 +141,18 @@ public class JanelaPrincipal extends JFrame {
         }
     }
 
+    public void addAcaoAdicionar(ActionListener listener) {
+        botaoAdicionar.addActionListener(listener);
+    }
+
+    public void addAcaoCalcular(ActionListener listener) {
+        botaoCalcular.addActionListener(listener);
+    }
+
     private void adicionaValidacaoBatida(JTextField campo) {
         campo.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                //controllerValidacao.validaBatida(campo);
                 String batida = campo.getText().trim();
                 if (!batida.isEmpty()){
                     if (!ValidacaoHorario.isHorarioValido(batida)) {
@@ -156,6 +161,7 @@ public class JanelaPrincipal extends JFrame {
                                 "Horário inválido! Use o formato HH24:MI (ex: 17:45).",
                                 "Erro de Validação",
                                 JOptionPane.ERROR_MESSAGE);
+                        campo.requestFocus();
                     } else {
                         campo.setText(ValidacaoHorario.formatarHorario(batida));
                     }
@@ -184,30 +190,76 @@ public class JanelaPrincipal extends JFrame {
         });
     }
 
-
     private void adicionaAvancoAutomatico(JTextField campo){
-        campo.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e){
-                avancar();
-            }
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                avancar();
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                //usado para campos com estilo (não JTextField)
-            }
+        campo.getDocument().addDocumentListener(new DocumentAdapter() {
+            @Override public void insertUpdate(DocumentEvent e){ avancar(); }
+            @Override public void removeUpdate(DocumentEvent e) { avancar(); }
 
             private void avancar() {
-                if (campo.getText().length() == 4 && !campo.getText().contains(":")) {
-                    campo.transferFocus(); // Pula para o próximo campo
-                }else if(campo.getText().length() == 5 && campo.getText().contains(":")){
-                    campo.transferFocus();
+                String texto = campo.getText();
+                if ((texto.length() == 4 && !texto.contains(":")) ||
+                        (texto.length() == 5 && texto.contains(":"))) {
+                    SwingUtilities.invokeLater(() -> { //aguarda o sistema concluir o evento shift+tab
+                        if (campo.hasFocus()) { //só avança se o campo ainda tem foco (evita conflito com shift+tab)
+                            campo.transferFocus();
+                        }
+                    });
                 }
             }
         });
+    }
+
+    public void focaCampoEntrada() {
+        campoEntrada.requestFocus();
+    }
+
+    public void exibirMensagemResultado(String mensagem){
+        areaResultado.append(mensagem);
+    }
+
+    public void exibirErro(String mensagem){
+        JOptionPane.showMessageDialog(
+                this,
+                mensagem,
+                "Erro",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+
+    public LocalDate getData() {
+        String texto = campoData.getText();
+        return LocalDate.parse(texto, formatadorData);
+    }
+
+    //O parse da jornada é feito no ControllerBatidas pois possuí validação específica
+    public String getJornadaEntrada() {
+        return campoJornadaEntrada.getText();
+    }
+    public String getJornadaSaida() {
+        return campoJornadaSaida.getText();
+    }
+
+    public LocalTime getEntrada(){
+        String texto = campoEntrada.getText();
+        return LocalTime.parse(texto);
+    }
+
+    public LocalTime getSaidaAlmoco(){
+        String texto = campoSaidaAlmoco.getText();
+        return LocalTime.parse(texto);
+    }
+
+    public LocalTime getVoltaAlmoco(){
+        String texto = campoVoltaAlmoco.getText();
+        return LocalTime.parse(texto);
+    }
+
+    public LocalTime getSaida(){
+        String texto = campoSaida.getText();
+        return LocalTime.parse(texto);
+    }
+
+    public void setData(LocalDate data) {
+        campoData.setText(data.format(formatadorData));
     }
 }

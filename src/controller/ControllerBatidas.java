@@ -24,47 +24,37 @@ public class ControllerBatidas {
     public ControllerBatidas(JanelaPrincipal view) {
         this.view = view;
 
-        view.botaoAdicionar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                adicionarBatida();
-            }
-        });
-
-        view.botaoCalcular.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                calcularHorasExtras();
-            }
-        });
+        this.view.addAcaoAdicionar(e -> adicionarBatida());
+        this.view.addAcaoCalcular(e -> calcularHorasExtras());
     }
 
     private void adicionarBatida() {
         try {
-            LocalDate data = LocalDate.parse(view.campoData.getText(), formatadorData);
-            LocalTime entrada = LocalTime.parse(view.campoEntrada.getText());
-            LocalTime saidaAlmoco = LocalTime.parse(view.campoSaidaAlmoco.getText());
-            LocalTime voltaAlmoco = LocalTime.parse(view.campoVoltaAlmoco.getText());
-            LocalTime saida = LocalTime.parse(view.campoSaida.getText());
+            LocalDate data = view.getData();
+            LocalTime entrada = view.getEntrada();
+            LocalTime saidaAlmoco = view.getSaidaAlmoco();
+            LocalTime voltaAlmoco = view.getVoltaAlmoco();
+            LocalTime saida = view.getSaida();
 
             BatidaPonto b = new BatidaPonto(data, entrada, saidaAlmoco, voltaAlmoco, saida);
             batidas.add(b);
-            view.areaResultado.append("Batida adicionada: " + data.format(formatadorData) + "\n");
+            view.exibirMensagemResultado("Batida adicionada: " + data.format(formatadorData) + "\n");
 
             LocalDate proximaData = data.plusDays(1);
-            view.campoData.setText(proximaData.format(formatadorData));
+            view.setData(proximaData);
+
             view.limpaCampos();
-            view.campoEntrada.requestFocus();
+            view.focaCampoEntrada();
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(view, "Erro ao adicionar batida. Verifique os campos.");
+            view.exibirErro("Erro ao adicionar batida. Verifique os campos.");
         }
     }
 
     private void calcularHorasExtras() {
         CalculadoraHorasExtras calc = new CalculadoraHorasExtras();
-        String jornadaEntrada = view.campoJornadaEntrada.getText();
-        String jornadaSaida = view.campoJornadaSaida.getText();
+        String jornadaEntrada = view.getJornadaEntrada();
+        String jornadaSaida = view.getJornadaSaida();
 
         if(ValidacaoHorario.isJornadaValida(jornadaEntrada, jornadaSaida)) {
             JornadaPadrao jornada = new JornadaPadrao(
@@ -74,16 +64,12 @@ public class ControllerBatidas {
             ResultadoHoras resultado = calc.calcularHorasExtras(batidas, jornada.getJornadaPadrao());
             long extras = resultado.getHorasExtras();
             long negativas = resultado.getHorasNegativas();
-            view.areaResultado.append("\nTotal de horas extras: " + (extras / 60) + "h " + (extras % 60) + "min\n" +
-                                      "Total de horas negativas:   " + (negativas / 60) + "h " + (negativas % 60) + "min\n");
+            view.exibirMensagemResultado("\nTotal de horas positivas: " + (extras / 60) + "h " + (extras % 60) + "min\n" +
+                                      "Total de horas negativas: " + (negativas / 60) + "h " + (negativas % 60) + "min\n");
             view.resetaData();
             batidas.clear();
         }else{
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Jornada inválida! Confira o preenchimento.",
-                    "Erro de Validação",
-                    JOptionPane.ERROR_MESSAGE);
+            view.exibirErro("Jornada inválida! Confira o preenchimento.");
         }
     }
 }

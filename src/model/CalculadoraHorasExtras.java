@@ -3,7 +3,6 @@ package model;
 import java.util.List;
 
 public class CalculadoraHorasExtras {
-    //private static final int JORNADA_PADRAO_MINUTOS = 8 * 60;
 
     public ResultadoHoras calcularHorasExtras(List<BatidaPonto> batidas, long jornada) {
         long horasExtras = 0;
