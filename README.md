@@ -4,4 +4,4 @@ O **Calchoras** é um programa desenvolvido em Java para calcular as horas extra
 
 ##  Motivação do projeto
 
-No emprego da minha mãe, é necessário saber quantas horas extras um funcionário realizou no mês. Porém, os horários de ponto são fornecidos sem o cálculo pronto, e ela precisa realizar tudo manualmente. Esse processo torna-se cansativo e repetitivo. Com o **Calchoras**, busco automatizar essa tarefa e tornar o trabalho mais eficiente.
+No emprego de um familiar, é necessário saber quantas horas extras um funcionário realizou no mês. Porém, os horários de ponto são fornecidos sem o cálculo pronto, e ele precisa realizar tudo manualmente. Esse processo torna-se cansativo e repetitivo. Com o **Calchoras**, busco automatizar essa tarefa e tornar o trabalho mais eficiente.
