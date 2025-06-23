@@ -26,6 +26,7 @@ public class ControllerBatidas {
 
         this.view.addAcaoAdicionar(e -> adicionarBatida());
         this.view.addAcaoCalcular(e -> calcularHorasExtras());
+        this.view.addAcaoRetroceder(e -> removerBatida());
     }
 
     private void adicionarBatida() {
@@ -70,6 +71,17 @@ public class ControllerBatidas {
             batidas.clear();
         }else{
             view.exibirErro("Jornada inválida! Confira o preenchimento.");
+        }
+    }
+
+    public void removerBatida() {
+        if(batidas.size() > 0) {
+            LocalDate data = view.getData();
+
+            batidas.remove(batidas.size() - 1);
+
+            view.setData(data.plusDays(-1));
+            view.exibirMensagemResultado("Batida em " + data.format(formatadorData) + " removida!\n");
         }
     }
 }

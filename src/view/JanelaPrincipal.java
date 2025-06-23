@@ -24,6 +24,7 @@ public class JanelaPrincipal extends JFrame {
     public JTextField campoSaida = new JTextField(5);
     public JButton botaoAdicionar = new JButton("➕ Adicionar");
     public JButton botaoCalcular = new JButton("\uD83D\uDD0E Calcular");
+    public JButton botaoRetroceder = new JButton("⬅ Retroceder");
     public JTextArea areaResultado = new JTextArea(6, 30);
 
     private final DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -92,8 +93,10 @@ public class JanelaPrincipal extends JFrame {
         JPanel botoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
         botaoAdicionar.setBackground(new Color(200, 230, 200));
         botaoCalcular.setBackground(new Color(200, 200, 250));
+        botaoRetroceder.setBackground(new Color(255, 200, 200));
         botoes.add(botaoAdicionar);
         botoes.add(botaoCalcular);
+        botoes.add(botaoRetroceder);
         painelPrincipal.add(botoes);
 
         // Resultado
@@ -147,6 +150,10 @@ public class JanelaPrincipal extends JFrame {
 
     public void addAcaoCalcular(ActionListener listener) {
         botaoCalcular.addActionListener(listener);
+    }
+
+    public void addAcaoRetroceder(ActionListener listener) {
+        botaoRetroceder.addActionListener(listener);
     }
 
     private void adicionaValidacaoBatida(JTextField campo) {
