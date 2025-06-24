@@ -27,6 +27,8 @@ public class ControllerBatidas {
         this.view.addAcaoAdicionar(e -> adicionarBatida());
         this.view.addAcaoCalcular(e -> calcularHorasExtras());
         this.view.addAcaoRetroceder(e -> removerBatida());
+        this.view.addAcaoReiniciar(e -> reiniciarCalculos());
+        this.view.addAcaoLimpar(e -> limparResultado());
     }
 
     private void adicionarBatida() {
@@ -83,5 +85,15 @@ public class ControllerBatidas {
             view.setData(data.plusDays(-1));
             view.exibirMensagemResultado("Batida em " + data.format(formatadorData) + " removida!\n");
         }
+    }
+
+    public void reiniciarCalculos() {
+        view.resetaData();
+        batidas.clear();
+        view.exibirMensagemResultado("\nCálculo reiniciado.\n");
+    }
+
+    public void limparResultado() {
+        view.limpaMensagemResultado();
     }
 }

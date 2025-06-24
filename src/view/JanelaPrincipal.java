@@ -25,6 +25,8 @@ public class JanelaPrincipal extends JFrame {
     public JButton botaoAdicionar = new JButton("➕ Adicionar");
     public JButton botaoCalcular = new JButton("\uD83D\uDD0E Calcular");
     public JButton botaoRetroceder = new JButton("⬅ Retroceder");
+    public JButton botaoReiniciar = new JButton("\uD83D\uDD01 Reiniciar");
+    public JButton botaoLimparResultado = new JButton("✖ Limpar Área Resultado");
     public JTextArea areaResultado = new JTextArea(6, 30);
 
     private final DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -91,12 +93,14 @@ public class JanelaPrincipal extends JFrame {
 
         // Botões
         JPanel botoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        botaoAdicionar.setBackground(new Color(200, 230, 200));
-        botaoCalcular.setBackground(new Color(200, 200, 250));
-        botaoRetroceder.setBackground(new Color(255, 200, 200));
+        botaoAdicionar.setBackground(new Color(46, 204, 113));
+        botaoCalcular.setBackground(new Color(52, 152, 219));
+        botaoRetroceder.setBackground(new Color(231, 76, 60));
+        botaoReiniciar.setBackground(new Color(241, 196, 15));
         botoes.add(botaoAdicionar);
         botoes.add(botaoCalcular);
         botoes.add(botaoRetroceder);
+        botoes.add(botaoReiniciar);
         painelPrincipal.add(botoes);
 
         // Resultado
@@ -105,6 +109,12 @@ public class JanelaPrincipal extends JFrame {
         areaResultado.setLineWrap(true);
         areaResultado.setWrapStyleWord(true);
         painelPrincipal.add(new JScrollPane(areaResultado));
+
+        // Botão Limpar
+        JPanel painelLimpar = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        botaoLimparResultado.setBackground(new Color(200, 200, 200));
+        painelLimpar.add(botaoLimparResultado);
+        painelPrincipal.add(painelLimpar);
 
         add(painelPrincipal, BorderLayout.CENTER);
         setVisible(true);
@@ -154,6 +164,14 @@ public class JanelaPrincipal extends JFrame {
 
     public void addAcaoRetroceder(ActionListener listener) {
         botaoRetroceder.addActionListener(listener);
+    }
+
+    public void addAcaoReiniciar(ActionListener listener) {
+        botaoReiniciar.addActionListener(listener);
+    }
+
+    public void addAcaoLimpar(ActionListener listener) {
+        botaoLimparResultado.addActionListener(listener);
     }
 
     private void adicionaValidacaoBatida(JTextField campo) {
@@ -222,6 +240,10 @@ public class JanelaPrincipal extends JFrame {
 
     public void exibirMensagemResultado(String mensagem){
         areaResultado.append(mensagem);
+    }
+
+    public void limpaMensagemResultado(){
+        areaResultado.setText("");
     }
 
     public void exibirErro(String mensagem){
