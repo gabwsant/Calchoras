@@ -13,7 +13,7 @@ public class CalculadoraHorasExtras {
             if (trabalhado > jornada) {
                 horasExtras += trabalhado - jornada;
             }else if(trabalhado < jornada){
-                horasNegativas += trabalhado - jornada;
+                horasNegativas += jornada - trabalhado;
             }
         }
         return new ResultadoHoras(horasExtras, horasNegativas);
