@@ -8,9 +8,14 @@ import java.time.Duration;
 public class BatidaPonto {
     private LocalDateTime entrada, saidaAlmoco, voltaAlmoco, saida;
 
-    public BatidaPonto(LocalDate data, LocalTime entrada, LocalTime saidaAlmoco,
-                       LocalTime voltaAlmoco, LocalTime saida) {
+    public BatidaPonto(LocalDateTime entrada, LocalDateTime saidaAlmoco,
+                       LocalDateTime voltaAlmoco, LocalDateTime saida) {
+        this.entrada = entrada;
+        this.saidaAlmoco = saidaAlmoco;
+        this.voltaAlmoco = voltaAlmoco;
+        this.saida = saida;
 
+        /*
         LocalDate dataFim = data.plusDays(1);
         this.entrada = LocalDateTime.of(data, entrada);
         this.saidaAlmoco = LocalDateTime.of(data, saidaAlmoco);
@@ -31,7 +36,7 @@ public class BatidaPonto {
         if (saida.isBefore(voltaAlmoco)) {
             this.saida = LocalDateTime.of(dataFim, saida);
         }
-
+        */
     }
 
     public long getMinutosTrabalhados() {

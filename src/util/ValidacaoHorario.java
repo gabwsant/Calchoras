@@ -1,8 +1,6 @@
 package util;
 
-import javax.swing.*;
-import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
+import java.time.LocalDateTime;
 
 public class ValidacaoHorario {
 
@@ -27,12 +25,11 @@ public class ValidacaoHorario {
                 jornadaSaida != null && !jornadaSaida.trim().isEmpty();
     }
 
-    //não estou usando esta classe pois há funcionários que começam a jornada em um dia e teminam no outro
-    public static boolean horariosEmOrdem(String h1, String h2) {
-        try {
-            return LocalTime.parse(h1).isBefore(LocalTime.parse(h2));
-        } catch (DateTimeParseException e) {
-            return false;
-        }
+    public static boolean horariosEmOrdem(LocalDateTime h1,
+                                          LocalDateTime h2,
+                                          LocalDateTime h3,
+                                          LocalDateTime h4) {
+        return h1.isBefore(h2) && h2.isBefore(h3) && h3.isBefore(h4);
+
     }
 }

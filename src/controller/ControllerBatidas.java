@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -34,17 +35,38 @@ public class ControllerBatidas {
     private void adicionarBatida() {
         try {
             LocalDate data = view.getData();
-            LocalTime entrada = view.getEntrada();
-            LocalTime saidaAlmoco = view.getSaidaAlmoco();
-            LocalTime voltaAlmoco = view.getVoltaAlmoco();
-            LocalTime saida = view.getSaida();
+            LocalDate dataFim = data.plusDays(1);
+            LocalDateTime entrada = LocalDateTime.of(data, view.getEntrada());
+            LocalDateTime saidaAlmoco = LocalDateTime.of(data,view.getSaidaAlmoco());
+            LocalDateTime voltaAlmoco = LocalDateTime.of(data,view.getVoltaAlmoco());
+            LocalDateTime saida = LocalDateTime.of(data,view.getSaida());
 
-            BatidaPonto b = new BatidaPonto(data, entrada, saidaAlmoco, voltaAlmoco, saida);
+            //tratando fim da jornada no dia seguinte
+            if (saidaAlmoco.isBefore(entrada)) {
+                saidaAlmoco = saidaAlmoco.plusDays(1);
+                voltaAlmoco = voltaAlmoco.plusDays(1);
+                saida = saida.plusDays(1);
+            }
+            else if (voltaAlmoco.isBefore(saidaAlmoco)) {
+                voltaAlmoco = voltaAlmoco.plusDays(1);
+                saida = saida.plusDays(1);
+            }
+
+            if (saida.isBefore(voltaAlmoco)) {
+                saida = saida.plusDays(1);
+            }
+
+            if(!ValidacaoHorario.horariosEmOrdem(entrada, saidaAlmoco, voltaAlmoco, saida)){
+                view.exibirErro("Os horários não seguem uma ordem cronológica válida! Revise.");
+                return;
+            }
+
+
+            BatidaPonto b = new BatidaPonto(entrada, saidaAlmoco, voltaAlmoco, saida);
             batidas.add(b);
             view.exibirMensagemResultado("Batida adicionada: " + data.format(formatadorData) + "\n");
 
-            LocalDate proximaData = data.plusDays(1);
-            view.setData(proximaData);
+            view.setData(data.plusDays(1));
 
             view.limpaCampos();
             view.focaCampoEntrada();
