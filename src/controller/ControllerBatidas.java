@@ -1,11 +1,13 @@
 package controller;
 
+import model.ArquivoCalculo;
 import model.BatidaPonto;
 import model.CalculadoraHorasExtras;
 import model.JornadaPadrao;
 import view.JanelaPrincipal;
 import util.*;
 
+import java.io.File;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,6 +20,7 @@ public class ControllerBatidas {
     private JanelaPrincipal view;
     private List<BatidaPonto> batidas = new ArrayList<>();
     private final DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private final DateTimeFormatter formatadorHora = DateTimeFormatter.ofPattern("HH:mm");
 
     public ControllerBatidas(JanelaPrincipal view) {
         this.view = view;
@@ -65,7 +68,6 @@ public class ControllerBatidas {
             view.exibirMensagemResultado("Batida adicionada: " + data.format(formatadorData) + "\n");
 
             view.setData(data.plusDays(1));
-
             view.limpaCampos();
             view.focaCampoEntrada();
 
@@ -77,6 +79,8 @@ public class ControllerBatidas {
     private void calcularHorasExtras(){
         long horasExtras = 0;
         long horasNegativas = 0;
+        String documentos = System.getProperty("user.home") + "\\Documents";
+        String caminhoArquivo = documentos + "\\calculos.txt";
 
         LocalTime jornadaEntrada = LocalTime.parse(view.getJornadaEntrada());
         LocalTime jornadaSaida = LocalTime.parse(view.getJornadaSaida());
@@ -84,6 +88,7 @@ public class ControllerBatidas {
         JornadaPadrao jornada = new JornadaPadrao(jornadaEntrada, jornadaSaida);
         CalculadoraHorasExtras calc = new CalculadoraHorasExtras();
 
+        int i = 1;
         for(BatidaPonto b : batidas) {
             LocalDate data = b.getData();
 
@@ -100,6 +105,27 @@ public class ControllerBatidas {
             calc.calcularHorasExtras(trabalhado, jornadaEsperada);
             horasExtras += calc.getHorasExtras();
             horasNegativas += calc.getHorasNegativas();
+
+            String mensagem = String.format(
+                    "Batida %02d (%s)\n" +
+                            "Entrada : %s\n" +
+                            "Almoço  : %s\n" +
+                            "          %s\n" +
+                            "Saída   : %s\n" +
+                            "Extras     -> %2dh %02dmin\n" +
+                            "Negativas  -> %2dh %02dmin\n" +
+                            "Esperada   -> %2dh %02dmin\n",
+                    i++,
+                    data.toString(),                                    // data da batida
+                    b.getEntrada().format(formatadorHora),              // entrada
+                    b.getSaidaAlmoco().format(formatadorHora),          // almoço
+                    b.getVoltaAlmoco().format(formatadorHora),          // volta
+                    b.getSaida().format(formatadorHora),                // saída
+                    horasExtras / 60, horasExtras % 60,
+                    horasNegativas / 60, horasNegativas % 60,
+                    jornadaEsperada / 60, jornadaEsperada % 60
+            );
+            ArquivoCalculo.escreverNoArquivo(caminhoArquivo, mensagem);
         }
         view.exibirMensagemResultado("\nTotal de horas positivas: " + (horasExtras / 60) + "h " + (horasExtras % 60) + "min\n" +
                     "Total de horas negativas: " + (horasNegativas / 60) + "h " + (horasNegativas % 60) + "min\n");
