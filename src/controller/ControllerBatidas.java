@@ -3,13 +3,10 @@ package controller;
 import model.BatidaPonto;
 import model.CalculadoraHorasExtras;
 import model.JornadaPadrao;
-import model.ResultadoHoras;
 import view.JanelaPrincipal;
 import util.*;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -77,30 +74,42 @@ public class ControllerBatidas {
         }
     }
 
-    private void calcularHorasExtras() {
-        ControllerCalculadora calc = new ControllerCalculadora();
-        LocalDate data = view.getData().minusDays(1);
+    private void calcularHorasExtras(){
+        long horasExtras = 0;
+        long horasNegativas = 0;
 
         LocalTime jornadaEntrada = LocalTime.parse(view.getJornadaEntrada());
         LocalTime jornadaSaida = LocalTime.parse(view.getJornadaSaida());
 
-        if(ValidacaoHorario.isJornadaValida(jornadaEntrada, jornadaSaida)) {
-            JornadaPadrao jornada = new JornadaPadrao(jornadaEntrada, jornadaSaida);
-            ResultadoHoras resultado = calc.calcular(batidas, jornada);
+        JornadaPadrao jornada = new JornadaPadrao(jornadaEntrada, jornadaSaida);
+        CalculadoraHorasExtras calc = new CalculadoraHorasExtras();
 
-            long extras = resultado.getHorasExtras();
-            long negativas = resultado.getHorasNegativas();
-            view.exibirMensagemResultado("\nTotal de horas positivas: " + (extras / 60) + "h " + (extras % 60) + "min\n" +
-                                      "Total de horas negativas: " + (negativas / 60) + "h " + (negativas % 60) + "min\n");
-            view.resetaData();
-            batidas.clear();
-        }else{
-            view.exibirErro("Jornada inválida! Confira o preenchimento.");
+        for(BatidaPonto b : batidas) {
+            LocalDate data = b.getData();
+
+            LocalDateTime entradaEsperada = LocalDateTime.of(data, jornada.getEntrada());
+            LocalDateTime saidaEsperada = LocalDateTime.of(data, jornada.getSaida());
+
+            if (jornada.isAtravessaMeiaNoite()) {
+                saidaEsperada = saidaEsperada.plusDays(1);
+            }
+
+            long trabalhado = b.getMinutosTrabalhados();
+            long jornadaEsperada = Duration.between(entradaEsperada, saidaEsperada).toMinutes() - 60;
+
+            calc.calcularHorasExtras(trabalhado, jornadaEsperada);
+            horasExtras += calc.getHorasExtras();
+            horasNegativas += calc.getHorasNegativas();
         }
+        view.exibirMensagemResultado("\nTotal de horas positivas: " + (horasExtras / 60) + "h " + (horasExtras % 60) + "min\n" +
+                    "Total de horas negativas: " + (horasNegativas / 60) + "h " + (horasNegativas % 60) + "min\n");
+        view.resetaData();
+        batidas.clear();
     }
 
+
     public void removerBatida() {
-        if(batidas.size() > 0) {
+        if(!batidas.isEmpty()) {
             LocalDate data = view.getData();
 
             batidas.remove(batidas.size() - 1);

@@ -101,6 +101,10 @@ public class JanelaPrincipal extends JFrame {
         gbc.anchor = GridBagConstraints.EAST;
         jornadaPanel.add(new JLabel("minutos"), gbc);
         painelPrincipal.add(jornadaPanel);
+        adicionaAvancoAutomatico(campoJornadaEntrada);
+        adicionaAvancoAutomatico(campoJornadaSaida);
+        adicionaValidacaoBatida(campoJornadaEntrada);
+        adicionaValidacaoBatida( campoJornadaSaida);
 
         // Batidas
         painelPrincipal.add(criaLinha("Entrada:", campoEntrada));
