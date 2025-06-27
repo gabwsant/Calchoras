@@ -78,7 +78,7 @@ public class ControllerBatidas {
     }
 
     private void calcularHorasExtras() {
-        CalculadoraHorasExtras calc = new CalculadoraHorasExtras();
+        ControllerCalculadora calc = new ControllerCalculadora();
         LocalDate data = view.getData().minusDays(1);
 
         LocalTime jornadaEntrada = LocalTime.parse(view.getJornadaEntrada());
@@ -86,7 +86,7 @@ public class ControllerBatidas {
 
         if(ValidacaoHorario.isJornadaValida(jornadaEntrada, jornadaSaida)) {
             JornadaPadrao jornada = new JornadaPadrao(jornadaEntrada, jornadaSaida);
-            ResultadoHoras resultado = calc.calcularHorasExtras(batidas, jornada);
+            ResultadoHoras resultado = calc.calcular(batidas, jornada);
 
             long extras = resultado.getHorasExtras();
             long negativas = resultado.getHorasNegativas();
