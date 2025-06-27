@@ -16,8 +16,9 @@ import java.time.format.DateTimeParseException;
 
 public class JanelaPrincipal extends JFrame {
     public JFormattedTextField campoData;
-    public JTextField campoJornadaEntrada = new JTextField(10);
-    public JTextField campoJornadaSaida = new JTextField(10);
+    public JTextField campoJornadaEntrada = new JTextField(5);
+    public JTextField campoJornadaSaida = new JTextField(5);
+    public JTextField campoTempoAlmoco = new JTextField(2);
     public JTextField campoEntrada = new JTextField(5);
     public JTextField campoSaidaAlmoco = new JTextField(5);
     public JTextField campoVoltaAlmoco = new JTextField(5);
@@ -65,16 +66,40 @@ public class JanelaPrincipal extends JFrame {
                          .withDayOfMonth(1)
                          .format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
-        // Jornada
-        JPanel jornadaPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        //Jornada
+        JPanel jornadaPanel = new JPanel(new GridBagLayout());
         jornadaPanel.setBorder(new TitledBorder("Jornada"));
-        jornadaPanel.add(campoJornadaEntrada);
-        jornadaPanel.add(new JLabel("às"));
-        jornadaPanel.add(campoJornadaSaida);
-        adicionaValidacaoBatida(campoJornadaEntrada);
-        adicionaAvancoAutomatico(campoJornadaEntrada);
-        adicionaValidacaoBatida(campoJornadaSaida);
-        adicionaAvancoAutomatico(campoJornadaSaida);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5); // Espaçamento interno
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        // Campo jornadaEntrada
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 0.3;
+        jornadaPanel.add(campoJornadaEntrada, gbc);
+        // Label "às"
+        gbc.gridx = 1;
+        gbc.weightx = 0;
+        jornadaPanel.add(new JLabel("às"), gbc);
+        // Campo jornadaSaida
+        gbc.gridx = 2;
+        gbc.weightx = 0.3;
+        jornadaPanel.add(campoJornadaSaida, gbc);
+        // Label Tempo de Almoço
+        gbc.gridx = 3;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        jornadaPanel.add(new JLabel("Tempo de Almoço:"), gbc);
+        // Campo Tempo de Almoço
+        gbc.gridx = 4;
+        gbc.weightx = 0.2;
+        gbc.anchor = GridBagConstraints.WEST;
+        jornadaPanel.add(campoTempoAlmoco, gbc);
+        // Label minutos
+        gbc.gridx = 5;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        jornadaPanel.add(new JLabel("minutos"), gbc);
         painelPrincipal.add(jornadaPanel);
 
         // Batidas

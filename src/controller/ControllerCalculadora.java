@@ -32,13 +32,10 @@ public class ControllerCalculadora {
             long jornadaEsperada =
                     Duration.between(entradaEsperada, saidaEsperada).toMinutes() - 60;
 
-            System.out.println(entradaEsperada + " " + saidaEsperada);
-
             calculadoraHorasExtras.calcularHorasExtras(trabalhado, jornadaEsperada);
             horasExtras += calculadoraHorasExtras.getHorasExtras();
             horasNegativas += calculadoraHorasExtras.getHorasNegativas();
         }
-
         return new ResultadoHoras(horasExtras, horasNegativas);
     }
 }
