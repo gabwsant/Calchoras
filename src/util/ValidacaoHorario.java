@@ -1,6 +1,7 @@
 package util;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class ValidacaoHorario {
 
@@ -20,9 +21,8 @@ public class ValidacaoHorario {
         return horario;
     }
 
-    public static boolean isJornadaValida(String jornadaEntrada, String jornadaSaida) {
-        return jornadaEntrada != null && !jornadaEntrada.trim().isEmpty() &&
-                jornadaSaida != null && !jornadaSaida.trim().isEmpty();
+    public static boolean isJornadaValida(LocalTime jornadaEntrada, LocalTime jornadaSaida) {
+        return jornadaEntrada != null && jornadaSaida != null;
     }
 
     public static boolean horariosEmOrdem(LocalDateTime h1,

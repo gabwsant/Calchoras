@@ -35,7 +35,6 @@ public class ControllerBatidas {
     private void adicionarBatida() {
         try {
             LocalDate data = view.getData();
-            LocalDate dataFim = data.plusDays(1);
             LocalDateTime entrada = LocalDateTime.of(data, view.getEntrada());
             LocalDateTime saidaAlmoco = LocalDateTime.of(data,view.getSaidaAlmoco());
             LocalDateTime voltaAlmoco = LocalDateTime.of(data,view.getVoltaAlmoco());
@@ -50,9 +49,7 @@ public class ControllerBatidas {
             else if (voltaAlmoco.isBefore(saidaAlmoco)) {
                 voltaAlmoco = voltaAlmoco.plusDays(1);
                 saida = saida.plusDays(1);
-            }
-
-            if (saida.isBefore(voltaAlmoco)) {
+            }else if (saida.isBefore(voltaAlmoco)) {
                 saida = saida.plusDays(1);
             }
 
@@ -61,6 +58,10 @@ public class ControllerBatidas {
                 return;
             }
 
+            System.out.println(entrada);
+            System.out.println(saidaAlmoco);
+            System.out.println(voltaAlmoco);
+            System.out.println(saida);
 
             BatidaPonto b = new BatidaPonto(entrada, saidaAlmoco, voltaAlmoco, saida);
             batidas.add(b);
@@ -78,17 +79,15 @@ public class ControllerBatidas {
 
     private void calcularHorasExtras() {
         CalculadoraHorasExtras calc = new CalculadoraHorasExtras();
-        String jornadaEntrada = view.getJornadaEntrada();
-        String jornadaSaida = view.getJornadaSaida();
-        LocalDate data = view.getData();
+        LocalDate data = view.getData().minusDays(1);
+
+        LocalTime jornadaEntrada = LocalTime.parse(view.getJornadaEntrada());
+        LocalTime jornadaSaida = LocalTime.parse(view.getJornadaSaida());
 
         if(ValidacaoHorario.isJornadaValida(jornadaEntrada, jornadaSaida)) {
-            JornadaPadrao jornada = new JornadaPadrao(
-                data,
-                LocalTime.parse(jornadaEntrada),
-                LocalTime.parse(jornadaSaida)
-            );
-            ResultadoHoras resultado = calc.calcularHorasExtras(batidas, jornada.getJornadaPadrao());
+            JornadaPadrao jornada = new JornadaPadrao(jornadaEntrada, jornadaSaida);
+            ResultadoHoras resultado = calc.calcularHorasExtras(batidas, jornada);
+
             long extras = resultado.getHorasExtras();
             long negativas = resultado.getHorasNegativas();
             view.exibirMensagemResultado("\nTotal de horas positivas: " + (extras / 60) + "h " + (extras % 60) + "min\n" +

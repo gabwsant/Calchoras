@@ -6,10 +6,13 @@ import java.time.LocalTime;
 import java.time.Duration;
 
 public class BatidaPonto {
+    private LocalDate data;
     private LocalDateTime entrada, saidaAlmoco, voltaAlmoco, saida;
-
-    public BatidaPonto(LocalDateTime entrada, LocalDateTime saidaAlmoco,
-                       LocalDateTime voltaAlmoco, LocalDateTime saida) {
+    public BatidaPonto(LocalDateTime entrada,
+                       LocalDateTime saidaAlmoco,
+                       LocalDateTime voltaAlmoco,
+                       LocalDateTime saida) {
+        this.data = entrada.toLocalDate();
         this.entrada = entrada;
         this.saidaAlmoco = saidaAlmoco;
         this.voltaAlmoco = voltaAlmoco;
@@ -43,4 +46,9 @@ public class BatidaPonto {
         return Duration.between(entrada, saidaAlmoco).toMinutes()
                 + Duration.between(voltaAlmoco, saida).toMinutes();
     }
+
+    public LocalDate getData() {
+        return data;
+    }
+
 }
