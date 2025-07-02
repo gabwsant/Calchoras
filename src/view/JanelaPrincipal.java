@@ -29,13 +29,15 @@ public class JanelaPrincipal extends JFrame {
     public JButton botaoReiniciar = new JButton("\uD83D\uDD01 Reiniciar");
     public JButton botaoLimparResultado = new JButton("✖ Limpar Área Resultado");
     public JTextArea areaResultado = new JTextArea(6, 30);
+    public JButton botaoFolgar = new JButton("Folga");
 
     private final DateTimeFormatter formatadorData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public JanelaPrincipal() {
         setTitle("Calchoras - Cálculo de Horas Extras");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(500, 550);
+        setSize(475, 550);
+        setMinimumSize(new Dimension(475, 400));
         setLayout(new BorderLayout());
         setLocationRelativeTo(null);
         setIcon("/resources/calc_icon.png");
@@ -58,7 +60,7 @@ public class JanelaPrincipal extends JFrame {
             System.err.println("Erro criar formatador: " + e.getMessage());
         }
         campoData = new JFormattedTextField(mask);
-        painelPrincipal.add(criaLinha("Data:", campoData));
+        painelPrincipal.add(criaLinha("Data:", campoData, botaoFolgar));
         adicionaValidacaoData(campoData);
         campoData.setText(
                 LocalDate.now()
@@ -67,44 +69,25 @@ public class JanelaPrincipal extends JFrame {
                          .format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
         //Jornada
-        JPanel jornadaPanel = new JPanel(new GridBagLayout());
-        jornadaPanel.setBorder(new TitledBorder("Jornada"));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5); // Espaçamento interno
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        // Campo jornadaEntrada
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 0.3;
-        jornadaPanel.add(campoJornadaEntrada, gbc);
-        // Label "às"
-        gbc.gridx = 1;
-        gbc.weightx = 0;
-        jornadaPanel.add(new JLabel("às"), gbc);
-        // Campo jornadaSaida
-        gbc.gridx = 2;
-        gbc.weightx = 0.3;
-        jornadaPanel.add(campoJornadaSaida, gbc);
-        // Label Tempo de Almoço
-        gbc.gridx = 3;
-        gbc.weightx = 0;
-        gbc.anchor = GridBagConstraints.EAST;
-        jornadaPanel.add(new JLabel("Tempo de Almoço:"), gbc);
-        // Campo Tempo de Almoço
-        gbc.gridx = 4;
-        gbc.weightx = 0.2;
-        gbc.anchor = GridBagConstraints.WEST;
-        jornadaPanel.add(campoTempoAlmoco, gbc);
-        // Label minutos
-        gbc.gridx = 5;
-        gbc.weightx = 0;
-        gbc.anchor = GridBagConstraints.EAST;
-        jornadaPanel.add(new JLabel("minutos"), gbc);
+        campoJornadaEntrada.setColumns(3);
+        campoJornadaSaida.setColumns(3);
+        JPanel jornadaPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        jornadaPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+        jornadaPanel.add(new JLabel("Jornada:"));
+        jornadaPanel.add(campoJornadaEntrada);
+        jornadaPanel.add(new JLabel("às"));
+        jornadaPanel.add(campoJornadaSaida);
+        jornadaPanel.add(new JLabel("Tempo de Almoço(min):"));
+        jornadaPanel.add(campoTempoAlmoco);
+        campoTempoAlmoco.setText("60");
         painelPrincipal.add(jornadaPanel);
         adicionaAvancoAutomatico(campoJornadaEntrada);
         adicionaAvancoAutomatico(campoJornadaSaida);
         adicionaValidacaoBatida(campoJornadaEntrada);
-        adicionaValidacaoBatida( campoJornadaSaida);
+        adicionaValidacaoBatida(campoJornadaSaida);
 
         // Batidas
         painelPrincipal.add(criaLinha("Entrada:", campoEntrada));
@@ -122,10 +105,11 @@ public class JanelaPrincipal extends JFrame {
 
         // Botões
         JPanel botoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        botaoAdicionar.setBackground(new Color(46, 204, 113));
-        botaoCalcular.setBackground(new Color(52, 152, 219));
-        botaoRetroceder.setBackground(new Color(231, 76, 60));
-        botaoReiniciar.setBackground(new Color(241, 196, 15));
+        estilizarBotao(botaoAdicionar, new Color(46, 204, 113));
+        estilizarBotao(botaoCalcular, new Color(52, 152, 219));
+        estilizarBotao(botaoRetroceder, new Color(231, 76, 60));
+        estilizarBotao(botaoReiniciar, new Color(241, 196, 15));
+        estilizarBotao(botaoFolgar, new Color(200, 200, 200));
         botoes.add(botaoAdicionar);
         botoes.add(botaoCalcular);
         botoes.add(botaoRetroceder);
@@ -155,6 +139,15 @@ public class JanelaPrincipal extends JFrame {
         label.setPreferredSize(new Dimension(150, 30));
         painel.add(label);
         painel.add(campo);
+        return painel;
+    }
+    private JPanel criaLinha(String rotulo, JTextField campo, JButton botao) {
+        JPanel painel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel label = new JLabel(rotulo);
+        label.setPreferredSize(new Dimension(150, 30));
+        painel.add(label);
+        painel.add(campo);
+        painel.add(botao);
         return painel;
     }
 
@@ -263,6 +256,25 @@ public class JanelaPrincipal extends JFrame {
         });
     }
 
+    private void estilizarBotao(JButton botao, Color corFundo) {
+        botao.setBackground(corFundo);
+        botao.setForeground(Color.WHITE);
+        botao.setFocusPainted(false);
+        botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        botao.setOpaque(true);
+        botao.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                botao.setBackground(new Color(100, 100, 100));
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                botao.setBackground(corFundo);
+            }
+        });
+    }
+
     public void focaCampoEntrada() {
         campoEntrada.requestFocus();
     }
@@ -319,5 +331,12 @@ public class JanelaPrincipal extends JFrame {
 
     public void setData(LocalDate data) {
         campoData.setText(data.format(formatadorData));
+    }
+
+    public void setCampoTempoAlmoco(long tempoAlmoco) {
+        campoTempoAlmoco.setText(String.valueOf(tempoAlmoco));
+    }
+    public long getTempoAlmoco() {
+        return Long.parseLong(campoTempoAlmoco.getText());
     }
 }

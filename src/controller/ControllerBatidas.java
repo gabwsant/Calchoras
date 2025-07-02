@@ -1,13 +1,12 @@
 package controller;
 
-import model.ArquivoCalculo;
+import util.Writter;
 import model.BatidaPonto;
 import model.CalculadoraHorasExtras;
 import model.JornadaPadrao;
 import view.JanelaPrincipal;
 import util.*;
 
-import java.io.File;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -79,6 +78,7 @@ public class ControllerBatidas {
     private void calcularHorasExtras(){
         long horasExtras = 0;
         long horasNegativas = 0;
+        long almoco = view.getTempoAlmoco();
         String documentos = System.getProperty("user.home") + "\\Documents";
         String caminhoArquivo = documentos + "\\calculos.txt";
 
@@ -100,7 +100,7 @@ public class ControllerBatidas {
             }
 
             long trabalhado = b.getMinutosTrabalhados();
-            long jornadaEsperada = Duration.between(entradaEsperada, saidaEsperada).toMinutes() - 60;
+            long jornadaEsperada = Duration.between(entradaEsperada, saidaEsperada).toMinutes() - almoco;
 
             calc.calcularHorasExtras(trabalhado, jornadaEsperada);
             horasExtras += calc.getHorasExtras();
@@ -125,7 +125,7 @@ public class ControllerBatidas {
                     horasNegativas / 60, horasNegativas % 60,
                     jornadaEsperada / 60, jornadaEsperada % 60
             );
-            ArquivoCalculo.escreverNoArquivo(caminhoArquivo, mensagem);
+            Writter.escreverNoArquivo(caminhoArquivo, mensagem);
         }
         view.exibirMensagemResultado("\nTotal de horas positivas: " + (horasExtras / 60) + "h " + (horasExtras % 60) + "min\n" +
                     "Total de horas negativas: " + (horasNegativas / 60) + "h " + (horasNegativas % 60) + "min\n");
@@ -147,7 +147,6 @@ public class ControllerBatidas {
 
     public void reiniciarCalculos() {
         view.resetaData();
-        batidas.clear();
         view.exibirMensagemResultado("\nCálculo reiniciado.\n");
     }
 

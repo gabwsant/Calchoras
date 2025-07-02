@@ -1,10 +1,9 @@
-package model;
+package util;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class ArquivoCalculo {
+public class Writter {
 
     public static void escreverNoArquivo(String caminho, String texto) {
         try (FileWriter writer = new FileWriter(caminho, true)) {
