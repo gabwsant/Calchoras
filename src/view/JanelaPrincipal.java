@@ -196,6 +196,8 @@ public class JanelaPrincipal extends JFrame {
         botaoLimparResultado.addActionListener(listener);
     }
 
+    public void addAcaoFolgar(ActionListener listener) { botaoFolgar.addActionListener(listener); }
+
     private void adicionaValidacaoBatida(JTextField campo) {
         campo.addFocusListener(new FocusAdapter() {
             @Override

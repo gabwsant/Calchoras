@@ -2,6 +2,7 @@ package util;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 
 public class ValidacaoHorario {
 
@@ -21,8 +22,17 @@ public class ValidacaoHorario {
         return horario;
     }
 
-    public static boolean isJornadaValida(LocalTime jornadaEntrada, LocalTime jornadaSaida) {
-        return jornadaEntrada != null && jornadaSaida != null;
+    public static boolean isJornadaValida(String jornadaEntrada, String jornadaSaida) {
+        if (jornadaEntrada == null || jornadaSaida == null ) {
+            return false;
+        }
+        try {
+            LocalTime.parse(jornadaEntrada);
+            LocalTime.parse(jornadaSaida);
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
     }
 
     public static boolean horariosEmOrdem(LocalDateTime h1,

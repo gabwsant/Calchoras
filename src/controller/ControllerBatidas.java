@@ -29,6 +29,7 @@ public class ControllerBatidas {
         this.view.addAcaoRetroceder(e -> removerBatida());
         this.view.addAcaoReiniciar(e -> reiniciarCalculos());
         this.view.addAcaoLimpar(e -> limparResultado());
+        this.view.addAcaoFolgar(e -> adicionarFolga());
     }
 
     private void adicionarBatida() {
@@ -57,11 +58,6 @@ public class ControllerBatidas {
                 return;
             }
 
-            System.out.println(entrada);
-            System.out.println(saidaAlmoco);
-            System.out.println(voltaAlmoco);
-            System.out.println(saida);
-
             BatidaPonto b = new BatidaPonto(entrada, saidaAlmoco, voltaAlmoco, saida);
             batidas.add(b);
             view.exibirMensagemResultado("Batida adicionada: " + data.format(formatadorData) + "\n");
@@ -75,64 +71,109 @@ public class ControllerBatidas {
         }
     }
 
-    private void calcularHorasExtras(){
-        long horasExtras = 0;
-        long horasNegativas = 0;
-        long almoco = view.getTempoAlmoco();
-        String documentos = System.getProperty("user.home") + "\\Documents";
-        String caminhoArquivo = documentos + "\\calculos.txt";
+    private void adicionarFolga() {
+        LocalDate data = view.getData();
+        LocalDateTime folga = LocalDateTime.of(data, LocalTime.of(0, 0));
+        BatidaPonto b = new BatidaPonto(folga, folga, folga, folga);
+        batidas.add(b);
+
+        view.exibirMensagemResultado("Folga adicionada: " + data.format(formatadorData) + "\n");
+
+        view.setData(data.plusDays(1));
+        view.limpaCampos();
+        view.focaCampoEntrada();
+    }
+
+    private void calcularHorasExtras() {
+        long totalHorasExtras = 0;
+        long totalHorasNegativas = 0;
+        long tempoAlmoco = view.getTempoAlmoco(); // em minutos
+
+        String caminhoArquivo = System.getProperty("user.home") + "\\Documents\\calculos.txt";
+
+        if(!ValidacaoHorario.isJornadaValida(view.getJornadaEntrada(), view.getJornadaSaida())){
+            view.exibirErro("Por favor, preencha a jornada.");
+            return;
+        }
 
         LocalTime jornadaEntrada = LocalTime.parse(view.getJornadaEntrada());
         LocalTime jornadaSaida = LocalTime.parse(view.getJornadaSaida());
-
         JornadaPadrao jornada = new JornadaPadrao(jornadaEntrada, jornadaSaida);
+
         CalculadoraHorasExtras calc = new CalculadoraHorasExtras();
+        int contador = 1;
 
-        int i = 1;
-        for(BatidaPonto b : batidas) {
-            LocalDate data = b.getData();
+        try {
+            for (BatidaPonto b : batidas) {
+                LocalDate data = b.getData();
 
-            LocalDateTime entradaEsperada = LocalDateTime.of(data, jornada.getEntrada());
-            LocalDateTime saidaEsperada = LocalDateTime.of(data, jornada.getSaida());
+                if (b.isFolga()) {
+                    String mensagemFolga = String.format("Batida %02d\nFolga (%s)\n\n", contador++, data);
+                    Writter.escreverNoArquivo(caminhoArquivo, mensagemFolga);
+                    continue;
+                }
 
-            if (jornada.isAtravessaMeiaNoite()) {
-                saidaEsperada = saidaEsperada.plusDays(1);
+                LocalDateTime entradaEsperada = LocalDateTime.of(data, jornada.getEntrada());
+                LocalDateTime saidaEsperada = LocalDateTime.of(data, jornada.getSaida());
+
+                if (jornada.isAtravessaMeiaNoite()) {
+                    saidaEsperada = saidaEsperada.plusDays(1);
+                }
+
+                long minutosTrabalhados = b.getMinutosTrabalhados();
+                long jornadaEsperadaMinutos = Duration.between(entradaEsperada, saidaEsperada).toMinutes() - tempoAlmoco;
+
+                calc.calcularHorasExtras(minutosTrabalhados, jornadaEsperadaMinutos);
+
+                long horasExtras = calc.getHorasExtras();
+                long horasNegativas = calc.getHorasNegativas();
+
+                totalHorasExtras += horasExtras;
+                totalHorasNegativas += horasNegativas;
+
+                String mensagem = String.format(
+                        "Batida %02d (%s)\n" +
+                                "Entrada      : %s\n" +
+                                "Almoço ida   : %s\n" +
+                                "Almoço volta : %s\n" +
+                                "Saída        : %s\n" +
+                                "Trabalhado   : %2dh %02dmin\n" +
+                                "Esperado     : %2dh %02dmin\n" +
+                                "Extras       : %2dh %02dmin\n" +
+                                "Negativas    : %2dh %02dmin\n\n",
+                        contador++,
+                        data,
+                        b.getEntrada().format(formatadorHora),
+                        b.getSaidaAlmoco().format(formatadorHora),
+                        b.getVoltaAlmoco().format(formatadorHora),
+                        b.getSaida().format(formatadorHora),
+                        minutosTrabalhados / 60, minutosTrabalhados % 60,
+                        jornadaEsperadaMinutos / 60, jornadaEsperadaMinutos % 60,
+                        horasExtras / 60, horasExtras % 60,
+                        horasNegativas / 60, horasNegativas % 60
+                );
+
+                Writter.escreverNoArquivo(caminhoArquivo, mensagem);
             }
 
-            long trabalhado = b.getMinutosTrabalhados();
-            long jornadaEsperada = Duration.between(entradaEsperada, saidaEsperada).toMinutes() - almoco;
-
-            calc.calcularHorasExtras(trabalhado, jornadaEsperada);
-            horasExtras += calc.getHorasExtras();
-            horasNegativas += calc.getHorasNegativas();
-
-            String mensagem = String.format(
-                    "Batida %02d (%s)\n" +
-                            "Entrada : %s\n" +
-                            "Almoço  : %s\n" +
-                            "          %s\n" +
-                            "Saída   : %s\n" +
-                            "Extras     -> %2dh %02dmin\n" +
-                            "Negativas  -> %2dh %02dmin\n" +
-                            "Esperada   -> %2dh %02dmin\n",
-                    i++,
-                    data.toString(),                                    // data da batida
-                    b.getEntrada().format(formatadorHora),              // entrada
-                    b.getSaidaAlmoco().format(formatadorHora),          // almoço
-                    b.getVoltaAlmoco().format(formatadorHora),          // volta
-                    b.getSaida().format(formatadorHora),                // saída
-                    horasExtras / 60, horasExtras % 60,
-                    horasNegativas / 60, horasNegativas % 60,
-                    jornadaEsperada / 60, jornadaEsperada % 60
+            String resumoFinal = String.format(
+                    "\nTotal de horas positivas: %dh %02dmin\n" +
+                            "Total de horas negativas: %dh %02dmin\n",
+                    totalHorasExtras / 60, totalHorasExtras % 60,
+                    totalHorasNegativas / 60, totalHorasNegativas % 60
             );
-            Writter.escreverNoArquivo(caminhoArquivo, mensagem);
-        }
-        view.exibirMensagemResultado("\nTotal de horas positivas: " + (horasExtras / 60) + "h " + (horasExtras % 60) + "min\n" +
-                    "Total de horas negativas: " + (horasNegativas / 60) + "h " + (horasNegativas % 60) + "min\n");
-        view.resetaData();
-        batidas.clear();
-    }
 
+            Writter.escreverNoArquivo(caminhoArquivo, resumoFinal);
+            view.exibirMensagemResultado(resumoFinal);
+
+        } catch (Exception e) {
+            view.exibirErro("Erro ao calcular horas extras ou gravar arquivo:\n" + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            view.resetaData();
+            batidas.clear();
+        }
+    }
 
     public void removerBatida() {
         if(!batidas.isEmpty()) {
@@ -147,6 +188,7 @@ public class ControllerBatidas {
 
     public void reiniciarCalculos() {
         view.resetaData();
+        batidas.clear();
         view.exibirMensagemResultado("\nCálculo reiniciado.\n");
     }
 

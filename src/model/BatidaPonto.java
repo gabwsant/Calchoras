@@ -24,6 +24,11 @@ public class BatidaPonto {
                 + Duration.between(voltaAlmoco, saida).toMinutes();
     }
 
+    public boolean isFolga() {
+        return entrada != null && entrada.equals(saidaAlmoco) &&
+                entrada.equals(voltaAlmoco) && entrada.equals(saida);
+    }
+
     public LocalDate getData() {
         return data;
     }
