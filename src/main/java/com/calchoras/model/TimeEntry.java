@@ -1,12 +1,13 @@
 package com.calchoras.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
-@NoArgsConstructor
+@AllArgsConstructor
 public class TimeEntry {
     private int id;
     private int employeeId;

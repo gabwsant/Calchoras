@@ -65,11 +65,9 @@ public class TimeEntryService implements ITimeEntryService {
         // Remove da lista todas as batidas que pertencem ao funcionário especificado
         boolean removed = this.timeEntryList.removeIf(entry -> entry.getEmployeeId() == employeeId);
         if (removed) {
-            saveTimeEntriesToFile(); // Salva apenas se algo foi realmente removido
+            saveTimeEntriesToFile();
         }
     }
-
-    // --- Métodos Privados de Persistência ---
 
     private void loadTimeEntriesFromFile() {
         try (Reader reader = new FileReader(filePath)) {

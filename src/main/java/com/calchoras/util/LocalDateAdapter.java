@@ -1,4 +1,4 @@
-package com.calchoras.util; // ou outro pacote
+package com.calchoras.util;
 
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;

@@ -2,7 +2,7 @@ package com.calchoras.service;
 
 import com.calchoras.model.DailyCalculationResult;
 import com.calchoras.model.Employee;
-import com.calchoras.model.MonthCalculationResult;
+import com.calchoras.model.PeriodCalculationResult;
 import com.calchoras.model.TimeEntry;
 import com.calchoras.service.interfaces.IDailyCalculationService;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,7 +67,7 @@ class ReportServiceTest {
         );
 
         // Act (Ação)
-        MonthCalculationResult result = reportService.calculateMonthlyBalance(sampleEmployee, entries);
+        PeriodCalculationResult result = reportService.calculatePeriodBalance(sampleEmployee, entries);
 
         // Assert (Verificação)
         // O mock retorna 10min de extra e 15min negativas para CADA UMA das 3 batidas.
@@ -89,7 +89,7 @@ class ReportServiceTest {
         List<TimeEntry> emptyList = Collections.emptyList();
 
         // Act
-        MonthCalculationResult result = reportService.calculateMonthlyBalance(sampleEmployee, emptyList);
+        PeriodCalculationResult result = reportService.calculatePeriodBalance(sampleEmployee, emptyList);
 
         // Assert
         assertNotNull(result);

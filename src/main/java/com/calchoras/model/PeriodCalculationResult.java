@@ -9,7 +9,7 @@ import java.util.List;
  * @param totalOvertime O total de horas extras no período.
  * @param totalNegativeHours O total de horas negativas no período.
  */
-public record MonthCalculationResult(
+public record PeriodCalculationResult(
         List<DailyCalculationResult> dailyResults,
         Duration totalOvertime,
         Duration totalNegativeHours

@@ -2,7 +2,7 @@ package com.calchoras.service;
 
 import com.calchoras.model.DailyCalculationResult;
 import com.calchoras.model.Employee;
-import com.calchoras.model.MonthCalculationResult;
+import com.calchoras.model.PeriodCalculationResult;
 import com.calchoras.model.TimeEntry;
 import com.calchoras.service.interfaces.IDailyCalculationService;
 import com.calchoras.service.interfaces.IReportService;
@@ -20,7 +20,7 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public MonthCalculationResult calculateMonthlyBalance(Employee employee, List<TimeEntry> entries){
+    public PeriodCalculationResult calculatePeriodBalance(Employee employee, List<TimeEntry> entries){
         List<DailyCalculationResult> dailyResults = new ArrayList<>();
         Duration totalOvertime = Duration.ZERO;
         Duration totalNegativeHours = Duration.ZERO;
@@ -31,6 +31,6 @@ public class ReportService implements IReportService {
             totalOvertime = totalOvertime.plus(dailyResult.overtimeHours());
             totalNegativeHours = totalNegativeHours.plus(dailyResult.negativeHours());
         }
-        return new MonthCalculationResult(dailyResults, totalOvertime, totalNegativeHours);
+        return new PeriodCalculationResult(dailyResults, totalOvertime, totalNegativeHours);
     }
 }

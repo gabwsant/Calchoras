@@ -6,10 +6,7 @@ import com.calchoras.service.interfaces.IReportService;
 import com.calchoras.service.interfaces.ITimeEntryService;
 import com.calchoras.view.MainFrame;
 
-import java.util.ArrayList;
-
 public class PontoController {
-    private final MainFrame view;
     private final IDailyCalculationService dailyCalculationService;
     private final IEmployeeService employeeService;
     private final IReportService reportService;
@@ -22,7 +19,6 @@ public class PontoController {
             IReportService reportService,
             ITimeEntryService timeEntryService
     ) {
-        this.view = view;
         this.dailyCalculationService = dailyCalculationService;
         this.employeeService = employeeService;
         this.reportService = reportService;

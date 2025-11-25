@@ -8,15 +8,8 @@ import com.calchoras.service.interfaces.IDailyCalculationService;
 import java.time.Duration;
 import java.time.LocalTime;
 
-/**
- * Um serviço stateless para calcular os resultados de um único dia de trabalho.
- * "Stateless" significa que a classe não armazena nenhuma informação em seus campos.
- * Todos os dados necessários são passados como parâmetros para os métodos.
- */
 public class DailyCalculationService implements IDailyCalculationService {
 
-    // Como esta classe "assinou o contrato", ela é OBRIGADA a ter este método.
-    // O @Override indica que estamos cumprindo uma promessa da interface.
     @Override
     public DailyCalculationResult calculate(TimeEntry timeEntry, Employee employee) {
 

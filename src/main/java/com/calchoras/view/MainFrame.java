@@ -80,9 +80,7 @@ public class MainFrame extends JFrame {
     }
 
     private void layoutComponents() {
-        // Define o layout principal da janela como BorderLayout, com 10 pixels de espaço entre as áreas.
         this.setLayout(new BorderLayout(10, 10));
-        // Adiciona uma borda interna para dar um respiro aos componentes.
         ((JPanel) this.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // --- PAINEL DA ESQUERDA (GERENCIAMENTO DE FUNCIONÁRIOS) ---
@@ -90,7 +88,7 @@ public class MainFrame extends JFrame {
         employeePanel.setBorder(BorderFactory.createTitledBorder("Funcionários"));
 
         // Painel para os botões de adicionar/remover funcionários
-        JPanel employeeButtonsPanel = new JPanel(new GridLayout(1, 2, 5, 5)); // 1 linha, 2 colunas
+        JPanel employeeButtonsPanel = new JPanel(new GridLayout(1, 2, 5, 5));
         employeeButtonsPanel.add(addEmployeeButton);
         employeeButtonsPanel.add(removeEmployeeButton);
 
@@ -98,9 +96,9 @@ public class MainFrame extends JFrame {
         employeePanel.add(new JScrollPane(employeeList), BorderLayout.CENTER);
         employeePanel.add(employeeButtonsPanel, BorderLayout.SOUTH);
 
-
         // --- PAINEL CENTRAL (DADOS E AÇÕES) ---
         JPanel centerPanel = new JPanel();
+
         // BoxLayout empilha os componentes verticalmente.
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
@@ -155,7 +153,7 @@ public class MainFrame extends JFrame {
         // Área de resultado com barra de rolagem
         JScrollPane resultScrollPane = new JScrollPane(resultArea);
         resultScrollPane.setBorder(BorderFactory.createTitledBorder("Resultados / Relatório"));
-        resultScrollPane.setPreferredSize(new Dimension(100, 120)); // Define uma altura preferida
+        resultScrollPane.setPreferredSize(new Dimension(100, 120));
 
         southPanel.add(mainActionsPanel, BorderLayout.NORTH);
         southPanel.add(resultScrollPane, BorderLayout.CENTER);
@@ -180,10 +178,9 @@ public class MainFrame extends JFrame {
     }
 
     public void displayEmployeeInfo(Employee employee) {
-        // Usamos o padrão do Java.time para formatar LocalTime para String "HH:mm"
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-        companyField.setText(employee.getCompany());
+        companyField.setText(Integer.toString(employee.getCompanyId()));
         shiftInField.setText(employee.getShiftIn().format(timeFormatter));
         shiftOutField.setText(employee.getShiftOut().format(timeFormatter));
         lunchBreakMinutesField.setText(String.valueOf(employee.getLunchBreakMinutes()));
@@ -201,7 +198,6 @@ public class MainFrame extends JFrame {
     }
 
     public void clearTimeEntryFields() {
-        // Deixa o campo de data com a data atual, pronto para um novo registro
         dateField.setValue(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         clockInField.setText("");
         lunchOutField.setText("");

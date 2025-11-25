@@ -1,25 +1,28 @@
 package com.calchoras.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalTime;
 
 @Data
-@NoArgsConstructor
+@AllArgsConstructor
 public class Employee {
     private int id;
-    private String company;
+    private int companyId;
     private String name;
     private LocalTime shiftIn;
     private LocalTime shiftOut;
     private long lunchBreakMinutes;
 
     public Employee(
-            String company,
+            int companyId,
             String name,
             LocalTime shiftIn,
             LocalTime shiftOut,
             long lunchBreakMinutes) {
-        this.company = company;
+        this.companyId = companyId;
         this.name = name;
         this.shiftIn = shiftIn;
         this.shiftOut = shiftOut;
