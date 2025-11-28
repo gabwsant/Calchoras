@@ -13,14 +13,15 @@ public class Main {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				IEmployeeService employeeService = new EmployeeService();
+				ICompanyService companyService = new CompanyService();
+				IEmployeeService employeeService = new EmployeeService(companyService);
 				ITimeEntryService timeEntryService = new TimeEntryService();
 				IDailyCalculationService dailyCalculationService = new DailyCalculationService();
 				IReportService reportService = new ReportService(dailyCalculationService);
 
 				MainFrame view = new MainFrame();
 
-				new PontoController(view, dailyCalculationService, employeeService, reportService, timeEntryService);
+				new PontoController(view, companyService, dailyCalculationService, employeeService, reportService, timeEntryService);
 			}
 		});
 	}

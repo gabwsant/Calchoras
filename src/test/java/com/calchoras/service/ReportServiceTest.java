@@ -52,7 +52,7 @@ class ReportServiceTest {
         reportService = new ReportService(mockDailyCalculator);
 
         // 3. Criamos um funcionário de exemplo para usar nos testes.
-        sampleEmployee = new Employee("Empresa Teste", "Funcionário Mock", LocalTime.of(8,0), LocalTime.of(17,0), 60);
+        sampleEmployee = new Employee(1, "Funcionário Mock", LocalTime.of(8,0), LocalTime.of(17,0), 60);
     }
 
     @Test

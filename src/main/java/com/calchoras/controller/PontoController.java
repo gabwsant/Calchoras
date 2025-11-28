@@ -1,25 +1,25 @@
 package com.calchoras.controller;
 
-import com.calchoras.service.interfaces.IDailyCalculationService;
-import com.calchoras.service.interfaces.IEmployeeService;
-import com.calchoras.service.interfaces.IReportService;
-import com.calchoras.service.interfaces.ITimeEntryService;
+import com.calchoras.service.interfaces.*;
 import com.calchoras.view.MainFrame;
 
 public class PontoController {
     private final IDailyCalculationService dailyCalculationService;
     private final IEmployeeService employeeService;
+    private final ICompanyService companyService;
     private final IReportService reportService;
     private final ITimeEntryService timeEntryService;
 
     public PontoController(
             MainFrame view,
+            ICompanyService companyService,
             IDailyCalculationService dailyCalculationService,
             IEmployeeService employeeService,
             IReportService reportService,
             ITimeEntryService timeEntryService
     ) {
         this.dailyCalculationService = dailyCalculationService;
+        this.companyService = companyService;
         this.employeeService = employeeService;
         this.reportService = reportService;
         this.timeEntryService = timeEntryService;

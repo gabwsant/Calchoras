@@ -1,6 +1,7 @@
 package com.calchoras.service;
 
 import com.calchoras.model.Employee;
+import com.calchoras.service.interfaces.ICompanyService;
 import com.calchoras.service.interfaces.IEmployeeService;
 import com.calchoras.util.LocalDateAdapter;
 import com.calchoras.util.LocalTimeAdapter;
@@ -8,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+
 import java.io.*;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
@@ -21,23 +23,26 @@ public class EmployeeService implements IEmployeeService {
     private final String filePath;
     private List<Employee> employeeList;
     private final Gson gson;
+    private final ICompanyService companyService;
 
-    public EmployeeService() {
-        this("funcionarios.json"); // Chama o outro construtor com o nome padrão
+    // Construtor padrão, usado na aplicação
+    public EmployeeService(ICompanyService companyService) {
+        this("funcionarios.json", companyService);
     }
 
     /**
      * Construtor para testes, permitindo especificar um arquivo diferente.
-     * @param filePath O caminho para o arquivo JSON a ser usado.
+     * Este é o construtor REAL usado pela classe.
      */
-    public EmployeeService(String filePath) {
+    public EmployeeService(String filePath, ICompanyService companyService) {
         this.filePath = filePath;
-        GsonBuilder gsonBuilder = new GsonBuilder();
+        this.companyService = companyService;
 
+        GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(LocalDate.class, new LocalDateAdapter());
         gsonBuilder.registerTypeAdapter(LocalTime.class, new LocalTimeAdapter());
-
         this.gson = gsonBuilder.setPrettyPrinting().create();
+
         loadEmployeesFromFile();
     }
 
@@ -54,7 +59,22 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Override
+    public List<Employee> getEmployeesByCompany(int companyId) {
+        return employeeList.stream()
+                .filter(e -> e.getCompanyId() == companyId)
+                .toList();
+    }
+
+    @Override
     public Employee addEmployee(Employee employee) {
+
+        // 🔍 VALIDAÇÃO IMPORTANTE: empresa deve existir
+        if (!companyService.exists(employee.getCompanyId())) {
+            throw new IllegalArgumentException(
+                    "A empresa com ID " + employee.getCompanyId() + " não existe."
+            );
+        }
+
         int nextId = employeeList.stream()
                 .mapToInt(Employee::getId)
                 .max()
@@ -69,13 +89,21 @@ public class EmployeeService implements IEmployeeService {
 
     @Override
     public void updateEmployee(Employee updatedEmployee) {
+
+        // 🔍 VALIDAÇÃO ANTES DE ATUALIZAR
+        if (!companyService.exists(updatedEmployee.getCompanyId())) {
+            throw new IllegalArgumentException(
+                    "A empresa com ID " + updatedEmployee.getCompanyId() + " não existe."
+            );
+        }
+
         for (int i = 0; i < employeeList.size(); i++) {
             if (employeeList.get(i).getId() == updatedEmployee.getId()) {
                 employeeList.set(i, updatedEmployee);
-                break;
+                saveEmployeesToFile();
+                return;
             }
         }
-        saveEmployeesToFile();
     }
 
     @Override

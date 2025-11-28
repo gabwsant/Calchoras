@@ -21,7 +21,7 @@ class DailyCalculationServiceTest {
         // --- 1. Arrange (Preparação) ---
         // Preparamos todos os dados de entrada para o nosso teste.
         Employee employee = new Employee(
-                "Empresa de Teste",
+                1,
                 "Funcionario Teste",
                 LocalTime.of(8, 0),
                 LocalTime.of(17, 0),
