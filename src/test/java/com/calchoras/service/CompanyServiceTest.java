@@ -71,7 +71,8 @@ class CompanyServiceTest {
 
         companyService.addCompany(company);
 
-        CompanyService newInstanceService = new  CompanyService(companyRepository);
+        CompanyService newInstanceService =
+                new CompanyService(new CompanyRepository(TEST_FILE_PATH));
         List<Company> loadedCompanies = newInstanceService.getAllCompanies();
 
         assertEquals(1, loadedCompanies.size(), "Deveria ter carregado 1 empresa do arquivo.");

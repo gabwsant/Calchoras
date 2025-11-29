@@ -1,6 +1,7 @@
 package com.calchoras.service;
 
 import com.calchoras.model.Employee;
+import com.calchoras.repository.EmployeeRepository;
 import com.calchoras.service.interfaces.ICompanyService;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
@@ -20,19 +21,18 @@ class EmployeeServiceTest {
 
     private final String TEST_FILE_PATH = "funcionarios_teste.json";
     private EmployeeService employeeService;
+    private EmployeeRepository employeeRepository;
     private ICompanyService companyServiceMock;
 
     @BeforeEach
     void setUp() {
         deleteTestFile();
+        employeeRepository = new EmployeeRepository(TEST_FILE_PATH);
 
-        // MOCK do serviço de empresas
         companyServiceMock = Mockito.mock(ICompanyService.class);
-
-        // Toda empresa passada nos testes EXISTE (para não dar erro no addEmployee)
         when(companyServiceMock.exists(anyInt())).thenReturn(true);
 
-        employeeService = new EmployeeService(TEST_FILE_PATH, companyServiceMock);
+        employeeService = new EmployeeService(employeeRepository, companyServiceMock);
     }
 
     @AfterEach
@@ -83,7 +83,9 @@ class EmployeeServiceTest {
         employeeService.addEmployee(newEmployee);
 
         // cria nova instância para forçar leitura do arquivo
-        EmployeeService newInstance = new EmployeeService(TEST_FILE_PATH, companyServiceMock);
+        EmployeeService newInstance =
+                new EmployeeService(new EmployeeRepository(TEST_FILE_PATH), companyServiceMock);
+
 
         // getAllEmployees
         List<Employee> loadedEmployees = newInstance.getAllEmployees();
@@ -142,7 +144,8 @@ class EmployeeServiceTest {
         assertTrue(employeeService.getEmployeeById(emp2.getId()).isPresent());
 
         // verifica persistência
-        EmployeeService newInstance = new EmployeeService(TEST_FILE_PATH, companyServiceMock);
+        EmployeeService newInstance =
+                new EmployeeService(new EmployeeRepository(TEST_FILE_PATH), companyServiceMock);
         assertEquals(1, newInstance.getAllEmployees().size());
     }
 }

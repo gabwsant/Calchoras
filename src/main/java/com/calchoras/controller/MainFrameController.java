@@ -3,14 +3,14 @@ package com.calchoras.controller;
 import com.calchoras.service.interfaces.*;
 import com.calchoras.view.MainFrame;
 
-public class PontoController {
+public class MainFrameController {
     private final IDailyCalculationService dailyCalculationService;
     private final IEmployeeService employeeService;
     private final ICompanyService companyService;
     private final IReportService reportService;
     private final ITimeEntryService timeEntryService;
 
-    public PontoController(
+    public MainFrameController(
             MainFrame view,
             ICompanyService companyService,
             IDailyCalculationService dailyCalculationService,

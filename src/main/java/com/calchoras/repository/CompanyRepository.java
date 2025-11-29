@@ -10,6 +10,7 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CompanyRepository {
     private final String filePath;
@@ -59,6 +60,13 @@ public class CompanyRepository {
     public List<Company> getAll() {
         return new ArrayList<>(companiesList);
     }
+
+    public Optional<Company> getCompany(int id) {
+        return companiesList.stream()
+                .filter(c -> c.getId() == id)
+                .findFirst();
+    }
+
 
     public void add(Company company) {
         companiesList.add(company);
