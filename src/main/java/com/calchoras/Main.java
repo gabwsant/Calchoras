@@ -1,6 +1,7 @@
 package com.calchoras;
 
 import com.calchoras.controller.PontoController;
+import com.calchoras.repository.CompanyRepository;
 import com.calchoras.service.*;
 import com.calchoras.service.interfaces.*;
 import com.calchoras.view.MainFrame;
@@ -13,7 +14,8 @@ public class Main {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				ICompanyService companyService = new CompanyService();
+				CompanyRepository companyRepository = new CompanyRepository();
+				ICompanyService companyService = new CompanyService(companyRepository);
 				IEmployeeService employeeService = new EmployeeService(companyService);
 				ITimeEntryService timeEntryService = new TimeEntryService();
 				IDailyCalculationService dailyCalculationService = new DailyCalculationService();

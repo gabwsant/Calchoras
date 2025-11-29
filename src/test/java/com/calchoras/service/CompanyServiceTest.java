@@ -1,6 +1,7 @@
 package com.calchoras.service;
 
 import com.calchoras.model.Company;
+import com.calchoras.repository.CompanyRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,11 +20,13 @@ class CompanyServiceTest {
 
     private final String TEST_FILE_PATH = "empresas_teste.json";
     private CompanyService companyService;
+    private CompanyRepository companyRepository;
 
     @BeforeEach
     void setUp() {
         deleteTestFile();
-        companyService = new CompanyService(TEST_FILE_PATH);
+        companyRepository = new CompanyRepository(TEST_FILE_PATH);
+        companyService = new CompanyService(companyRepository);
     }
 
     @AfterEach
@@ -68,7 +71,7 @@ class CompanyServiceTest {
 
         companyService.addCompany(company);
 
-        CompanyService newInstanceService = new  CompanyService(TEST_FILE_PATH);
+        CompanyService newInstanceService = new  CompanyService(companyRepository);
         List<Company> loadedCompanies = newInstanceService.getAllCompanies();
 
         assertEquals(1, loadedCompanies.size(), "Deveria ter carregado 1 empresa do arquivo.");
@@ -127,7 +130,7 @@ class CompanyServiceTest {
         assertTrue(companyService.getCompanyById(company2.getId()).isPresent(), "A empresa 2 deveria continuar existindo.");
 
         // Assert (verificando a persistência)
-        CompanyService newInstanceService = new CompanyService(TEST_FILE_PATH);
+        CompanyService newInstanceService = new CompanyService(companyRepository);
         assertEquals(1, newInstanceService.getAllCompanies().size(), "A lista carregada do arquivo também deveria ter apenas 1 empresa.");
     }
 }
