@@ -1,17 +1,17 @@
-package com.calchoras.service.interfaces;
+package com.calchoras.repository.interfaces;
 
 import com.calchoras.model.Employee;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface IEmployeeService {
+public interface IEmployeeRepository {
 
     // Retorna todos os funcionários
     List<Employee> findAll();
 
     // Retorna um funcionário pelo ID
-    Optional<Employee> findById(int employeeId);
+    Optional<Employee> findById(int id);
 
     // Retorna todos os funcionários de uma empresa
     List<Employee> findByCompanyId(int companyId);
@@ -23,11 +23,14 @@ public interface IEmployeeService {
     Employee update(Employee employee);
 
     // Remove um funcionário pelo ID e retorna boolean indicando sucesso
-    boolean deleteById(int employeeId);
+    boolean deleteById(int id);
 
     // Verifica existência por ID
-    boolean existsById(int employeeId);
+    boolean existsById(int id);
 
     // Verifica existência por nome
     boolean existsByName(String name);
+
+    // Verifica existência por empresa
+    boolean existsByCompanyId(int companyId);
 }

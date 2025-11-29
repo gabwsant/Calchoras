@@ -1,33 +1,42 @@
 package com.calchoras.service;
 
 import com.calchoras.model.TimeEntry;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.calchoras.repository.TimeEntryRepository;
+import com.calchoras.service.interfaces.ITimeEntryService;
+import com.calchoras.service.interfaces.IEmployeeService;
+import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@DisplayName("Testes para o TimeEntryService")
+@DisplayName("Testes para TimeEntryService")
 class TimeEntryServiceTest {
 
-    // Usaremos um arquivo separado para não interferir com os dados de produção.
-    private static final String TEST_FILE_PATH = "batidas_teste.json";
+    private final String TEST_FILE_PATH = "batidas_teste.json";
     private TimeEntryService timeEntryService;
+    private TimeEntryRepository timeEntryRepository;
+    private IEmployeeService employeeServiceMock;
 
     @BeforeEach
     void setUp() {
         deleteTestFile();
-        // Passamos o caminho do arquivo de teste para o construtor.
-        timeEntryService = new TimeEntryService(TEST_FILE_PATH);
-    }
+        timeEntryRepository = new TimeEntryRepository(TEST_FILE_PATH);
 
+        employeeServiceMock = Mockito.mock(IEmployeeService.class);
+        when(employeeServiceMock.existsById(anyInt())).thenReturn(true);
+
+        // Criar TimeEntryService passando o mock e o arquivo de teste
+        timeEntryService = new TimeEntryService(timeEntryRepository, employeeServiceMock);
+    }
 
     @AfterEach
     void tearDown() {
@@ -43,71 +52,101 @@ class TimeEntryServiceTest {
     }
 
     @Test
-    @DisplayName("Deve adicionar uma batida de ponto, atribuir ID e persistir no arquivo")
-    void addTimeEntry_shouldAssignIdAndPersist() {
-        // Arrange (Preparação)
-        // O serviço deve começar com zero batidas.
-        assertTrue(timeEntryService.getTimeEntriesForEmployee(1).isEmpty(), "A lista de batidas deveria começar vazia.");
+    @DisplayName("Deve adicionar uma batida de ponto e atribuir ID")
+    void save_ShouldAssignIdAndPersist() {
+        // Arrange
+        when(employeeServiceMock.existsById(1)).thenReturn(true);
 
-        TimeEntry newEntry = new TimeEntry(1, LocalDate.now(), LocalTime.of(8, 0), LocalTime.of(12, 0), LocalTime.of(13, 0), LocalTime.of(17, 0));
+        TimeEntry entry = new TimeEntry();
+        entry.setEmployeeId(1);
+        entry.setEntryDate(LocalDate.of(2025, 11, 29));
+        entry.setClockIn(LocalTime.of(9, 0));
 
-        // Act (Ação)
-        timeEntryService.addTimeEntry(newEntry);
+        // Act
+        TimeEntry saved = timeEntryService.save(entry);
 
-        // Assert (Verificação)
-        // 1. Verifica se a batida foi adicionada na instância atual do serviço.
-        List<TimeEntry> entries = timeEntryService.getTimeEntriesForEmployee(1);
-        assertEquals(1, entries.size());
-        assertEquals(1, entries.get(0).getId(), "O ID da primeira batida deveria ser 1.");
-        assertEquals(1, entries.get(0).getEmployeeId());
+        // Assert
+        assertNotNull(saved, "O objeto salvo não deveria ser nulo");
+        assertEquals(1, saved.getId(), "O ID da primeira batida deveria ser 1");
 
-        // 2. Verifica se a batida foi salva no arquivo, criando uma nova instância do serviço para forçar a leitura.
-        TimeEntryService newInstanceService = new TimeEntryService(TEST_FILE_PATH);
-        List<TimeEntry> loadedEntries = newInstanceService.getTimeEntriesForEmployee(1);
-        assertEquals(1, loadedEntries.size(), "Deveria carregar 1 batida do arquivo.");
-        assertEquals(1, loadedEntries.get(0).getId());
+        List<TimeEntry> entries = timeEntryService.findByEmployeeId(1);
+        assertEquals(1, entries.size(), "Deveria ter uma batida de ponto registrada");
     }
 
     @Test
-    @DisplayName("Deve retornar apenas as batidas do funcionário solicitado")
-    void getTimeEntriesForEmployee_shouldReturnOnlyMatchingEntries() {
-        // Arrange
-        // Adiciona batidas para dois funcionários diferentes.
-        timeEntryService.addTimeEntry(new TimeEntry(1, LocalDate.now(), LocalTime.of(8, 0), null, null, null));
-        timeEntryService.addTimeEntry(new TimeEntry(2, LocalDate.now(), LocalTime.of(9, 0), null, null, null));
-        timeEntryService.addTimeEntry(new TimeEntry(1, LocalDate.now().plusDays(1), LocalTime.of(8, 5), null, null, null));
+    @DisplayName("Deve lançar exceção ao tentar salvar batida duplicada")
+    void save_ShouldThrowExceptionOnDuplicate() {
+        when(employeeServiceMock.existsById(1)).thenReturn(true);
 
-        // Act
-        List<TimeEntry> employee1Entries = timeEntryService.getTimeEntriesForEmployee(1);
-        List<TimeEntry> employee2Entries = timeEntryService.getTimeEntriesForEmployee(2);
-        List<TimeEntry> employee3Entries = timeEntryService.getTimeEntriesForEmployee(3); // Um funcionário sem batidas
+        TimeEntry entry = new TimeEntry();
+        entry.setEmployeeId(1);
+        entry.setEntryDate(LocalDate.of(2025, 11, 29));
+        entry.setClockIn(LocalTime.of(9, 0));
 
-        // Assert
-        assertEquals(2, employee1Entries.size(), "Funcionário 1 deveria ter 2 batidas.");
-        assertEquals(1, employee2Entries.size(), "Funcionário 2 deveria ter 1 batida.");
-        assertTrue(employee3Entries.isEmpty(), "Funcionário 3 não deveria ter batidas.");
+        timeEntryService.save(entry);
+
+        TimeEntry duplicate = new TimeEntry();
+        duplicate.setEmployeeId(1);
+        duplicate.setEntryDate(LocalDate.of(2025, 11, 29));
+        duplicate.setClockIn(LocalTime.of(10, 0));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> timeEntryService.save(duplicate),
+                "Deveria lançar exceção ao tentar adicionar batida duplicada");
     }
 
     @Test
-    @DisplayName("Deve remover todas as batidas de um funcionário específico")
-    void deleteEntriesForEmployee_shouldRemoveEntriesAndPersist() {
+    @DisplayName("Deve lançar exceção ao tentar adicionar batida para funcionário inexistente")
+    void save_ShouldThrowExceptionForNonExistentEmployee() {
         // Arrange
-        timeEntryService.addTimeEntry(new TimeEntry(1, LocalDate.now(), LocalTime.of(8, 0), null, null, null));
-        timeEntryService.addTimeEntry(new TimeEntry(2, LocalDate.now(), LocalTime.of(9, 0), null, null, null));
-        timeEntryService.addTimeEntry(new TimeEntry(1, LocalDate.now().plusDays(1), LocalTime.of(8, 5), null, null, null));
+        when(employeeServiceMock.existsById(999)).thenReturn(false);
 
-        // Act
-        timeEntryService.deleteEntriesForEmployee(1);
+        TimeEntry entry = new TimeEntry();
+        entry.setEmployeeId(999);
+        entry.setEntryDate(LocalDate.of(2025, 11, 29));
+        entry.setClockIn(LocalTime.of(9, 0));
 
-        // Assert
-        // 1. Verifica na instância atual.
-        assertTrue(timeEntryService.getTimeEntriesForEmployee(1).isEmpty(), "As batidas do funcionário 1 deveriam ter sido removidas.");
-        assertFalse(timeEntryService.getTimeEntriesForEmployee(2).isEmpty(), "As batidas do funcionário 2 deveriam permanecer.");
-        assertEquals(1, timeEntryService.getTimeEntriesForEmployee(2).size());
+        // Act & Assert
+        assertThrows(IllegalArgumentException.class,
+                () -> timeEntryService.save(entry),
+                "Deveria lançar exceção para funcionário inexistente");
+    }
 
-        // 2. Verifica a persistência criando uma nova instância.
-        TimeEntryService newInstanceService = new TimeEntryService(TEST_FILE_PATH);
-        assertTrue(newInstanceService.getTimeEntriesForEmployee(1).isEmpty(), "As batidas do funcionário 1 também deveriam ter sumido do arquivo.");
-        assertEquals(1, newInstanceService.getTimeEntriesForEmployee(2).size(), "As batidas do funcionário 2 deveriam ter sido carregadas do arquivo.");
+    @Test
+    @DisplayName("Deve atualizar uma batida existente")
+    void update_ShouldModifyExistingEntry() {
+        when(employeeServiceMock.existsById(1)).thenReturn(true);
+
+        TimeEntry entry = new TimeEntry();
+        entry.setEmployeeId(1);
+        entry.setEntryDate(LocalDate.of(2025, 11, 29));
+        entry.setClockIn(LocalTime.of(9, 0));
+
+        TimeEntry saved = timeEntryService.save(entry);
+
+        saved.setClockIn(LocalTime.of(10, 0));
+        timeEntryService.update(saved);
+
+        Optional<TimeEntry> loaded = timeEntryService.findById(saved.getId());
+        assertTrue(loaded.isPresent(), "A batida atualizada deveria existir");
+        assertEquals(LocalTime.of(10, 0), loaded.get().getClockIn(), "O horário deveria ser atualizado");
+    }
+
+    @Test
+    @DisplayName("Deve deletar uma batida pelo employeeId e data")
+    void deleteByEmployeeIdAndDate_ShouldRemoveEntry() {
+        when(employeeServiceMock.existsById(1)).thenReturn(true);
+
+        TimeEntry entry = new TimeEntry();
+        entry.setEmployeeId(1);
+        entry.setEntryDate(LocalDate.of(2025, 11, 29));
+        entry.setClockIn(LocalTime.of(9, 0));
+
+        timeEntryService.save(entry);
+
+        timeEntryService.deleteByEmployeeIdAndDate(1, LocalDate.of(2025, 11, 29));
+
+        List<TimeEntry> entries = timeEntryService.findByEmployeeId(1);
+        assertEquals(0, entries.size(), "A lista de batidas deveria estar vazia");
     }
 }

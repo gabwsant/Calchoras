@@ -1,7 +1,7 @@
 package com.calchoras.repository;
 
-import com.calchoras.model.Company;
 import com.calchoras.model.Employee;
+import com.calchoras.repository.interfaces.IEmployeeRepository;
 import com.calchoras.util.LocalDateAdapter;
 import com.calchoras.util.LocalTimeAdapter;
 import com.google.gson.Gson;
@@ -13,93 +13,114 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class EmployeeRepository {
-    private String filePath;
-    private Gson gson;
+public class EmployeeRepository implements IEmployeeRepository {
+
+    private final String filePath;
+    private final Gson gson;
     private List<Employee> employeesList;
 
-    public EmployeeRepository(){
+    public EmployeeRepository() {
         this("funcionarios.json");
     }
 
-    public EmployeeRepository(String filePath){
+    public EmployeeRepository(String filePath) {
         this.filePath = filePath;
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
                 .registerTypeAdapter(LocalTime.class, new LocalTimeAdapter())
                 .setPrettyPrinting()
                 .create();
-        this.employeesList = new ArrayList<>();
-        loadEmployees();
+        load();
     }
 
-    private void loadEmployees() {
+    private void load() {
         File file = new File(filePath);
-
         if (!file.exists() || file.length() == 0) {
-            this.employeesList = new ArrayList<>();
+            employeesList = new ArrayList<>();
             return;
         }
 
         try (Reader reader = new FileReader(file)) {
-            Type listType = new TypeToken<ArrayList<Employee>>() {}.getType();
-            List<Employee> loaded = gson.fromJson(reader, listType);
+            Type type = new TypeToken<ArrayList<Employee>>() {}.getType();
+            List<Employee> loaded = gson.fromJson(reader, type);
             employeesList = (loaded != null) ? loaded : new ArrayList<>();
-
         } catch (IOException | JsonSyntaxException e) {
             employeesList = new ArrayList<>();
             e.printStackTrace();
         }
     }
 
-    public void save() {
+    private void saveToFile() {
         try (Writer writer = new FileWriter(filePath)) {
             gson.toJson(employeesList, writer);
         } catch (IOException e) {
-            System.err.println("Erro ao salvar funcionarios.json");
             e.printStackTrace();
         }
     }
 
-    public List<Employee> getAll() {
+    @Override
+    public List<Employee> findAll() {
         return new ArrayList<>(employeesList);
     }
 
-    public Optional<Employee> getEmployee(int id) {
+    @Override
+    public Optional<Employee> findById(int id) {
         return employeesList.stream().filter(e -> e.getId() == id).findFirst();
     }
 
-    public List<Employee> getEmployeesByCompany(int companyId) {
-        return employeesList.stream().filter(e -> e.getCompanyId() == companyId).collect(Collectors.toList());
+    @Override
+    public List<Employee> findByCompanyId(int companyId) {
+        return employeesList.stream()
+                .filter(e -> e.getCompanyId() == companyId)
+                .collect(Collectors.toList());
     }
 
-    public void add(Employee employee) {
+    @Override
+    public Employee save(Employee employee) {
+        int nextId = employeesList.stream()
+                .mapToInt(Employee::getId)
+                .max()
+                .orElse(0) + 1;
+        employee.setId(nextId);
         employeesList.add(employee);
-        save();
+        saveToFile();
+        return employee;
     }
 
-    public void update(Employee employee) {
+    @Override
+    public Employee update(Employee employee) {
         for (int i = 0; i < employeesList.size(); i++) {
             if (employeesList.get(i).getId() == employee.getId()) {
                 employeesList.set(i, employee);
-                save();
-                return;
+                saveToFile();
+                return employee;
             }
         }
+        throw new NoSuchElementException("Funcionário não encontrado para atualizar.");
     }
 
-    public void remove(int id) {
-        employeesList.removeIf(c -> c.getId() == id);
-        save();
+    @Override
+    public boolean deleteById(int id) {
+        boolean removed = employeesList.removeIf(e -> e.getId() == id);
+        if (removed) saveToFile();
+        return removed;
     }
 
-    public boolean exists(String name) {
-        return employeesList.stream()
-                .anyMatch(c -> c.getName().equalsIgnoreCase(name));
+    @Override
+    public boolean existsById(int id) {
+        return employeesList.stream().anyMatch(e -> e.getId() == id);
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return employeesList.stream().anyMatch(e -> e.getName().equalsIgnoreCase(name));
+    }
+
+    @Override
+    public boolean existsByCompanyId(int companyId) {
+        return employeesList.stream().anyMatch(e -> e.getCompanyId() == companyId);
     }
 }

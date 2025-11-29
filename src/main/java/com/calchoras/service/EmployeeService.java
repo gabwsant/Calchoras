@@ -1,86 +1,82 @@
 package com.calchoras.service;
 
 import com.calchoras.model.Employee;
-import com.calchoras.repository.EmployeeRepository;
+import com.calchoras.repository.interfaces.IEmployeeRepository;
 import com.calchoras.service.interfaces.ICompanyService;
 import com.calchoras.service.interfaces.IEmployeeService;
-import com.calchoras.util.LocalDateAdapter;
-import com.calchoras.util.LocalTimeAdapter;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 
-import java.io.*;
-import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class EmployeeService implements IEmployeeService {
 
-    private List<Employee> employeeList;
-    private EmployeeRepository employeeRepository;
+    private final IEmployeeRepository employeeRepository;
     private final ICompanyService companyService;
 
-    public EmployeeService(EmployeeRepository employeeRepository, ICompanyService companyService) {
+    public EmployeeService(IEmployeeRepository employeeRepository, ICompanyService companyService) {
         this.employeeRepository = employeeRepository;
-        this.employeeList = employeeRepository.getAll();
         this.companyService = companyService;
     }
 
     @Override
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.getAll();
+    public List<Employee> findAll() {
+        return employeeRepository.findAll();
     }
 
     @Override
-    public Optional<Employee> getEmployeeById(int employeeId) {
-        return employeeRepository.getEmployee(employeeId);
+    public Optional<Employee> findById(int employeeId) {
+        return employeeRepository.findById(employeeId);
     }
 
     @Override
-    public List<Employee> getEmployeesByCompany(int companyId) {
-        return employeeRepository.getEmployeesByCompany(companyId);
+    public List<Employee> findByCompanyId(int companyId) {
+        return employeeRepository.findByCompanyId(companyId);
     }
 
     @Override
-    public Employee addEmployee(Employee employee) {
-
-        if (employeeRepository.exists(employee.getName())) {
+    public Employee save(Employee employee) {
+        if (employeeRepository.existsByName(employee.getName())) {
             throw new IllegalArgumentException("Funcionário já existe.");
         }
 
-        if (!companyService.exists(employee.getCompanyId())) {
+        if (!companyService.existsById(employee.getCompanyId())) {
             throw new IllegalArgumentException("Empresa não encontrada.");
         }
 
-        int nextId = employeeList.stream()
+        // Definir ID via repository e salvar
+        int nextId = employeeRepository.findAll().stream()
                 .mapToInt(Employee::getId)
                 .max()
                 .orElse(0) + 1;
-
         employee.setId(nextId);
 
-        employeeRepository.add(employee);
-        employeeList =  employeeRepository.getAll();
-
-        return employee;
+        return employeeRepository.save(employee);
     }
 
     @Override
-    public void updateEmployee(Employee updatedEmployee) {
+    public Employee update(Employee employee) {
+        // Verifica se já existe outro funcionário da mesma empresa com o mesmo nome
+        boolean existsDuplicate = employeeRepository.findByCompanyId(employee.getCompanyId()).stream()
+                .anyMatch(e -> e.getName().equalsIgnoreCase(employee.getName()) && e.getId() != employee.getId());
 
-        employeeRepository.update(updatedEmployee);
-        employeeList = employeeRepository.getAll();
+        if (existsDuplicate) {
+            throw new IllegalArgumentException("Outro funcionário com esse nome já existe para a empresa.");
+        }
+        return employeeRepository.update(employee);
     }
 
     @Override
-    public void deleteEmployee(int employeeId) {
-        employeeRepository.remove(employeeId);
-        employeeList =  employeeRepository.getAll();
+    public boolean deleteById(int employeeId) {
+        return employeeRepository.deleteById(employeeId);
     }
 
+    @Override
+    public boolean existsById(int employeeId) {
+        return employeeRepository.existsById(employeeId);
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return employeeRepository.existsByName(name);
+    }
 }

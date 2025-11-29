@@ -2,13 +2,16 @@ package com.calchoras.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class TimeEntry {
+
     private int id;
     private int employeeId;
     private LocalDate entryDate;
@@ -16,15 +19,17 @@ public class TimeEntry {
     private LocalTime lunchIn;
     private LocalTime lunchOut;
     private LocalTime clockOut;
-    private boolean isDayOff = false;
+    private boolean dayOff = false;
 
+    // Construtor usado quando o ID será gerado pelo Service
     public TimeEntry(
             int employeeId,
             LocalDate entryDate,
             LocalTime clockIn,
             LocalTime lunchIn,
             LocalTime lunchOut,
-            LocalTime clockOut) {
+            LocalTime clockOut
+    ) {
         this.employeeId = employeeId;
         this.entryDate = entryDate;
         this.clockIn = clockIn;

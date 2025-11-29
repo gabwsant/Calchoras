@@ -1,6 +1,7 @@
 package com.calchoras.repository;
 
 import com.calchoras.model.Company;
+import com.calchoras.repository.interfaces.ICompanyRepository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -12,10 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class CompanyRepository {
+public class CompanyRepository implements ICompanyRepository {
+
     private final String filePath;
     private final Gson gson;
-
     private List<Company> companiesList;
 
     public CompanyRepository() {
@@ -25,15 +26,14 @@ public class CompanyRepository {
     public CompanyRepository(String filePath) {
         this.filePath = filePath;
         this.gson = new GsonBuilder().setPrettyPrinting().create();
-        this.companiesList = new ArrayList<>();
-        loadCompanies();
+        load();
     }
 
-    public void loadCompanies() {
+    private void load() {
         File file = new File(filePath);
 
         if (!file.exists() || file.length() == 0) {
-            this.companiesList = new ArrayList<>();
+            companiesList = new ArrayList<>();
             return;
         }
 
@@ -41,55 +41,71 @@ public class CompanyRepository {
             Type listType = new TypeToken<ArrayList<Company>>() {}.getType();
             List<Company> loaded = gson.fromJson(reader, listType);
             companiesList = (loaded != null) ? loaded : new ArrayList<>();
-
         } catch (IOException | JsonSyntaxException e) {
             companiesList = new ArrayList<>();
             e.printStackTrace();
         }
     }
 
-    public void save() {
+    private void persist() {
         try (Writer writer = new FileWriter(filePath)) {
             gson.toJson(companiesList, writer);
         } catch (IOException e) {
-            System.err.println("Erro ao salvar empresas.json");
             e.printStackTrace();
         }
     }
 
-    public List<Company> getAll() {
+    @Override
+    public List<Company> findAll() {
         return new ArrayList<>(companiesList);
     }
 
-    public Optional<Company> getCompany(int id) {
-        return companiesList.stream()
-                .filter(c -> c.getId() == id)
-                .findFirst();
+    @Override
+    public Optional<Company> findById(int id) {
+        return companiesList.stream().filter(c -> c.getId() == id).findFirst();
     }
 
+    @Override
+    public Company save(Company company) {
+        int nextId = companiesList.stream()
+                .mapToInt(Company::getId)
+                .max()
+                .orElse(0) + 1;
+        company.setId(nextId);
 
-    public void add(Company company) {
         companiesList.add(company);
-        save();
+        persist();
+        return company;
     }
 
-    public void update(Company company) {
+    @Override
+    public Company update(Company company) {
         for (int i = 0; i < companiesList.size(); i++) {
             if (companiesList.get(i).getId() == company.getId()) {
                 companiesList.set(i, company);
-                save();
-                return;
+                persist();
+                return company;
             }
         }
+        throw new IllegalArgumentException("Empresa não encontrada para atualização: " + company.getId());
     }
 
-    public void remove(int id) {
-        companiesList.removeIf(c -> c.getId() == id);
-        save();
+    @Override
+    public boolean deleteById(int id) {
+        boolean removed = companiesList.removeIf(c -> c.getId() == id);
+        if (removed) {
+            persist();
+        }
+        return removed;
     }
 
-    public boolean exists(String name) {
-        return companiesList.stream()
-                .anyMatch(c -> c.getName().equalsIgnoreCase(name));
+    @Override
+    public boolean existsById(int id) {
+        return companiesList.stream().anyMatch(c -> c.getId() == id);
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return companiesList.stream().anyMatch(c -> c.getName().equalsIgnoreCase(name));
     }
 }
