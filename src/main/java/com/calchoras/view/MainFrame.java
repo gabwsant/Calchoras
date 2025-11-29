@@ -12,31 +12,42 @@ import java.util.List;
 
 @Getter
 public class MainFrame extends JFrame {
+
     // Funcionários
     private DefaultListModel<String> employeeListModel;
     private JList<String> employeeList;
     private JButton addEmployeeButton;
     private JButton removeEmployeeButton;
-    // Campos de informação do funcionário
-    private JTextField companyField;
+
+    // Empresa
+    private JComboBox<String> companyComboBox;
+    private JButton addCompanyButton;
+
+    // Campos do funcionário
+    private JTextField nameField;
     private JTextField shiftInField;
     private JTextField shiftOutField;
     private JTextField lunchBreakMinutesField;
-    // Campos de batida de ponto
+
+    // Campos de ponto
     private JFormattedTextField dateField;
     private JTextField clockInField;
     private JTextField lunchInField;
     private JTextField lunchOutField;
     private JTextField clockOutField;
-    // Botões de ação
+
+    // Botões de ponto
     private JButton nextEntryButton;
     private JButton previousEntryButton;
     private JButton addTimeEntryButton;
     private JButton removeTimeEntryButton;
+
+    // Ações principais
     private JButton resetCalculationButton;
     private JButton calculateButton;
     private JButton printReportButton;
-    // Área de resultado
+
+    // Resultado
     private JTextArea resultArea;
 
     public MainFrame() {
@@ -45,142 +56,177 @@ public class MainFrame extends JFrame {
         initFrame();
         initComponents();
         layoutComponents();
+        addCompanyButton.addActionListener(e -> openCompanyDialog());
     }
 
     private void initFrame() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(475, 400);
-        setMinimumSize(new Dimension(475, 400));
+        setSize(500, 520);
+        setMinimumSize(new Dimension(500, 520));
         setLocationRelativeTo(null);
         setVisible(true);
     }
 
     private void initComponents() {
+
+        // LISTA DE FUNCIONÁRIOS
         employeeListModel = new DefaultListModel<>();
         employeeList = new JList<>(employeeListModel);
-        addEmployeeButton = new JButton("Adicionar");
-        removeEmployeeButton = new JButton("Remover");
-        companyField = new JTextField();
+
+        addEmployeeButton = new JButton("Salvar Funcionário");
+        removeEmployeeButton = new JButton("Remover Funcionário");
+
+        // EMPRESA
+        companyComboBox = new JComboBox<>();
+        addCompanyButton = new JButton("Cadastrar Empresa");
+
+        // CAMPOS DO FUNCIONÁRIO
+        nameField = new JTextField();
         shiftInField = new JTextField();
         shiftOutField = new JTextField();
         lunchBreakMinutesField = new JTextField();
+
+        // CAMPOS DE PONTO
         dateField = new JFormattedTextField();
         clockInField = new JTextField();
         lunchInField = new JTextField();
         lunchOutField = new JTextField();
         clockOutField = new JTextField();
-        nextEntryButton = new JButton("Próximo");
+
         previousEntryButton = new JButton("Anterior");
         addTimeEntryButton = new JButton("Adicionar");
         removeTimeEntryButton = new JButton("Remover");
+        nextEntryButton = new JButton("Próximo");
+
         resetCalculationButton = new JButton("Reiniciar");
         calculateButton = new JButton("Calcular");
         printReportButton = new JButton("Gerar Relatório");
+
         resultArea = new JTextArea();
     }
 
     private void layoutComponents() {
+
         this.setLayout(new BorderLayout(10, 10));
         ((JPanel) this.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // --- PAINEL DA ESQUERDA (GERENCIAMENTO DE FUNCIONÁRIOS) ---
-        JPanel employeePanel = new JPanel(new BorderLayout(5, 5));
-        employeePanel.setBorder(BorderFactory.createTitledBorder("Funcionários"));
+        // ================================
+        // PAINEL ESQUERDO — EMPRESAS + LISTA
+        // ================================
+        JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
+        leftPanel.setBorder(BorderFactory.createTitledBorder("Funcionários"));
 
-        // Painel para os botões de adicionar/remover funcionários
-        JPanel employeeButtonsPanel = new JPanel(new GridLayout(1, 2, 5, 5));
-        employeeButtonsPanel.add(addEmployeeButton);
-        employeeButtonsPanel.add(removeEmployeeButton);
+        leftPanel.add(new JScrollPane(employeeList), BorderLayout.CENTER);
 
-        // Adiciona a lista (com barra de rolagem) e os botões ao painel de funcionários
-        employeePanel.add(new JScrollPane(employeeList), BorderLayout.CENTER);
-        employeePanel.add(employeeButtonsPanel, BorderLayout.SOUTH);
+        JPanel companyPanel = new JPanel(new GridLayout(1, 1));
+        companyPanel.add(addCompanyButton);
 
-        // --- PAINEL CENTRAL (DADOS E AÇÕES) ---
+        leftPanel.add(companyPanel, BorderLayout.NORTH);
+
+        // ================================
+        // PAINEL CENTRAL — FUNCIONÁRIO + PONTO
+        // ================================
         JPanel centerPanel = new JPanel();
-
-        // BoxLayout empilha os componentes verticalmente.
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
-        // Sub-painel com as informações do funcionário selecionado
-        JPanel employeeInfoPanel = new JPanel(new GridLayout(4, 2, 5, 5));
-        employeeInfoPanel.setBorder(BorderFactory.createTitledBorder("Informações do Funcionário"));
+        // --- DADOS DO FUNCIONÁRIO ---
+        JPanel employeeInfoPanel = new JPanel(new GridLayout(5, 2, 5, 5));
+        employeeInfoPanel.setBorder(BorderFactory.createTitledBorder("Dados do Funcionário"));
+
         employeeInfoPanel.add(new JLabel("Empresa:"));
-        employeeInfoPanel.add(companyField);
-        employeeInfoPanel.add(new JLabel("Início Jornada:"));
+        employeeInfoPanel.add(companyComboBox);
+
+        employeeInfoPanel.add(new JLabel("Nome:"));
+        employeeInfoPanel.add(nameField);
+
+        employeeInfoPanel.add(new JLabel("Início da Jornada:"));
         employeeInfoPanel.add(shiftInField);
-        employeeInfoPanel.add(new JLabel("Fim Jornada:"));
+
+        employeeInfoPanel.add(new JLabel("Fim da Jornada:"));
         employeeInfoPanel.add(shiftOutField);
+
         employeeInfoPanel.add(new JLabel("Almoço (min):"));
         employeeInfoPanel.add(lunchBreakMinutesField);
 
-        // Sub-painel com as batidas de ponto
+        // Botões do funcionário (agora logo após os campos)
+        JPanel employeeActionButtons = new JPanel(new GridLayout(1, 2, 5, 5));
+        employeeActionButtons.add(addEmployeeButton);
+        employeeActionButtons.add(removeEmployeeButton);
+
+        // --- REGISTRO DE PONTO ---
         JPanel timeEntryPanel = new JPanel(new GridLayout(5, 2, 5, 5));
         timeEntryPanel.setBorder(BorderFactory.createTitledBorder("Registro de Ponto"));
+
         timeEntryPanel.add(new JLabel("Data:"));
         timeEntryPanel.add(dateField);
+
         timeEntryPanel.add(new JLabel("Entrada:"));
         timeEntryPanel.add(clockInField);
+
         timeEntryPanel.add(new JLabel("Saída Almoço:"));
         timeEntryPanel.add(lunchInField);
+
         timeEntryPanel.add(new JLabel("Volta Almoço:"));
         timeEntryPanel.add(lunchOutField);
+
         timeEntryPanel.add(new JLabel("Saída:"));
         timeEntryPanel.add(clockOutField);
 
-        // Sub-painel com botões de navegação e ações de batida
         JPanel entryActionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         entryActionsPanel.add(previousEntryButton);
         entryActionsPanel.add(addTimeEntryButton);
         entryActionsPanel.add(removeTimeEntryButton);
         entryActionsPanel.add(nextEntryButton);
 
-        // Adiciona os sub-painéis ao painel central
         centerPanel.add(employeeInfoPanel);
-        centerPanel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaçamento vertical
+        centerPanel.add(employeeActionButtons);
+        centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         centerPanel.add(timeEntryPanel);
         centerPanel.add(entryActionsPanel);
 
-        // --- PAINEL INFERIOR (AÇÕES PRINCIPAIS E RESULTADO) ---
+        // ================================
+        // PAINEL INFERIOR — AÇÕES GERAIS
+        // ================================
         JPanel southPanel = new JPanel(new BorderLayout(5, 5));
 
-        // Painel com os botões de cálculo
         JPanel mainActionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         mainActionsPanel.add(resetCalculationButton);
         mainActionsPanel.add(calculateButton);
         mainActionsPanel.add(printReportButton);
 
-        // Área de resultado com barra de rolagem
         JScrollPane resultScrollPane = new JScrollPane(resultArea);
         resultScrollPane.setBorder(BorderFactory.createTitledBorder("Resultados / Relatório"));
-        resultScrollPane.setPreferredSize(new Dimension(100, 120));
+        resultScrollPane.setPreferredSize(new Dimension(100, 150));
 
         southPanel.add(mainActionsPanel, BorderLayout.NORTH);
         southPanel.add(resultScrollPane, BorderLayout.CENTER);
 
-        // --- MONTAGEM FINAL ---
-        // Adiciona os painéis principais ao JFrame
-        this.add(employeePanel, BorderLayout.WEST);
+        // Adiciona tudo ao frame
+        this.add(leftPanel, BorderLayout.WEST);
         this.add(centerPanel, BorderLayout.CENTER);
         this.add(southPanel, BorderLayout.SOUTH);
 
-        // Ajusta o tamanho da janela para caber os componentes de forma organizada
         this.pack();
-        // Redefine o tamanho mínimo para o tamanho calculado pelo pack()
         this.setMinimumSize(this.getSize());
     }
 
+    // ================================
+    // MÉTODOS DE ATUALIZAÇÃO
+    // ================================
     public void updateEmployeeList(List<String> employeeNames) {
-        // Limpa a lista de qualquer nome que estivesse lá antes
         employeeListModel.clear();
-        // Adiciona todos os novos nomes ao modelo. A JList se atualiza sozinha.
         employeeNames.forEach(employeeListModel::addElement);
+    }
+
+    public void updateCompanyList(List<String> companyNames) {
+        companyComboBox.removeAllItems();
+        companyNames.forEach(companyComboBox::addItem);
     }
 
     public void displayEmployeeInfo(Employee employee) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-        companyField.setText(Integer.toString(employee.getCompanyId()));
+        companyComboBox.setSelectedItem(employee.getName());
         shiftInField.setText(employee.getShiftIn().format(timeFormatter));
         shiftOutField.setText(employee.getShiftOut().format(timeFormatter));
         lunchBreakMinutesField.setText(String.valueOf(employee.getLunchBreakMinutes()));
@@ -206,9 +252,31 @@ public class MainFrame extends JFrame {
     }
 
     public void clearEmployeeInfoFields() {
-        companyField.setText("");
+        companyComboBox.setSelectedIndex(-1);
         shiftInField.setText("");
         shiftOutField.setText("");
         lunchBreakMinutesField.setText("");
+    }
+
+    private void openCompanyDialog() {
+        CompanyDialog dialog = new CompanyDialog(this);
+
+        dialog.getSaveButton().addActionListener(e -> {
+            String name = dialog.getCompanyName();
+
+            if (name.isBlank()) {
+                JOptionPane.showMessageDialog(this,
+                        "Nome da empresa é obrigatório!",
+                        "Erro",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            companyComboBox.addItem(name);
+
+            dialog.dispose();
+        });
+
+        dialog.setVisible(true);
     }
 }

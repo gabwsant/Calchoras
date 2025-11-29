@@ -85,10 +85,15 @@ class EmployeeServiceTest {
         // cria nova instância para forçar leitura do arquivo
         EmployeeService newInstance = new EmployeeService(TEST_FILE_PATH, companyServiceMock);
 
+        // getAllEmployees
         List<Employee> loadedEmployees = newInstance.getAllEmployees();
-
         assertEquals(1, loadedEmployees.size());
-        assertEquals("Maria Oliveira", loadedEmployees.get(0).getName());
+        assertEquals("Maria Oliveira", loadedEmployees.getFirst().getName());
+
+        //getEmployeesByCompany
+        List<Employee> loadedEmployeesByCompany =  newInstance.getEmployeesByCompany(1);
+        assertEquals(1, loadedEmployeesByCompany.size());
+        assertEquals(1, loadedEmployeesByCompany.getFirst().getCompanyId());
     }
 
     @Test

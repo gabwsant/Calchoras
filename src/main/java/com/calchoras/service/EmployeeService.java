@@ -25,7 +25,6 @@ public class EmployeeService implements IEmployeeService {
     private final Gson gson;
     private final ICompanyService companyService;
 
-    // Construtor padrão, usado na aplicação
     public EmployeeService(ICompanyService companyService) {
         this("funcionarios.json", companyService);
     }
@@ -68,7 +67,6 @@ public class EmployeeService implements IEmployeeService {
     @Override
     public Employee addEmployee(Employee employee) {
 
-        // 🔍 VALIDAÇÃO IMPORTANTE: empresa deve existir
         if (!companyService.exists(employee.getCompanyId())) {
             throw new IllegalArgumentException(
                     "A empresa com ID " + employee.getCompanyId() + " não existe."
@@ -90,7 +88,6 @@ public class EmployeeService implements IEmployeeService {
     @Override
     public void updateEmployee(Employee updatedEmployee) {
 
-        // 🔍 VALIDAÇÃO ANTES DE ATUALIZAR
         if (!companyService.exists(updatedEmployee.getCompanyId())) {
             throw new IllegalArgumentException(
                     "A empresa com ID " + updatedEmployee.getCompanyId() + " não existe."
