@@ -35,7 +35,8 @@ class ReportServiceTest {
                     Duration.ofHours(8),
                     Duration.ofHours(8).plusMinutes(5),
                     Duration.ofMinutes(10),
-                    Duration.ofMinutes(15) // <--- O valor que acreditamos estar correto
+                    Duration.ofMinutes(15),
+                    false
             );
         }
     }
@@ -77,8 +78,8 @@ class ReportServiceTest {
 
         assertNotNull(result, "O resultado não deveria ser nulo.");
         assertEquals(3, result.dailyResults().size(), "A lista de resultados diários deveria conter 3 itens.");
-        assertEquals(expectedOvertime, result.totalOvertime(), "O total de horas extras está incorreto.");
-        assertEquals(expectedNegative, result.totalNegativeHours(), "O total de horas negativas está incorreto.");
+        assertEquals(expectedOvertime, result.totalOvertimeAccumulated(), "O total de horas extras está incorreto.");
+        assertEquals(expectedNegative, result.totalNegativeHoursAccumulated(), "O total de horas negativas está incorreto.");
     }
 
     @Test
@@ -94,7 +95,7 @@ class ReportServiceTest {
         // Assert
         assertNotNull(result);
         assertTrue(result.dailyResults().isEmpty(), "A lista de resultados diários deveria estar vazia.");
-        assertEquals(Duration.ZERO, result.totalOvertime(), "O total de horas extras deveria ser zero.");
-        assertEquals(Duration.ZERO, result.totalNegativeHours(), "O total de horas negativas deveria ser zero.");
+        assertEquals(Duration.ZERO, result.totalOvertimeAccumulated(), "O total de horas extras deveria ser zero.");
+        assertEquals(Duration.ZERO, result.totalNegativeHoursAccumulated(), "O total de horas negativas deveria ser zero.");
     }
 }

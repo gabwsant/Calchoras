@@ -35,6 +35,7 @@ public class MainFrame extends JFrame {
     private JTextField lunchInField;
     private JTextField lunchOutField;
     private JTextField clockOutField;
+    private JCheckBox isDayOffCheckBox;
 
     // Botões de ponto
     private JButton nextEntryButton;
@@ -92,6 +93,7 @@ public class MainFrame extends JFrame {
         lunchInField = new JTextField();
         lunchOutField = new JTextField();
         clockOutField = new JTextField();
+        isDayOffCheckBox = new JCheckBox("Dia de Folga (Ignorar Batidas)");
 
         previousEntryButton = new JButton("Anterior");
         addTimeEntryButton = new JButton("Adicionar");
@@ -154,7 +156,7 @@ public class MainFrame extends JFrame {
         employeeActionButtons.add(removeEmployeeButton);
 
         // --- REGISTRO DE PONTO ---
-        JPanel timeEntryPanel = new JPanel(new GridLayout(5, 2, 5, 5));
+        JPanel timeEntryPanel = new JPanel(new GridLayout(6, 2, 5, 5)); // <-- 6, 2
         timeEntryPanel.setBorder(BorderFactory.createTitledBorder("Registro de Ponto"));
 
         timeEntryPanel.add(new JLabel("Data:"));
@@ -171,6 +173,8 @@ public class MainFrame extends JFrame {
 
         timeEntryPanel.add(new JLabel("Saída:"));
         timeEntryPanel.add(clockOutField);
+
+        timeEntryPanel.add(isDayOffCheckBox);
 
         JPanel entryActionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         entryActionsPanel.add(previousEntryButton);

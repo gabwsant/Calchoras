@@ -8,5 +8,6 @@ public record DailyCalculationResult(
         Duration workedHours,
         Duration expectedHours,
         Duration overtimeHours,
-        Duration negativeHours
+        Duration negativeHours,
+        boolean isIncomplete
 ) {}

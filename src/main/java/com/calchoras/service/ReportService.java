@@ -22,15 +22,47 @@ public class ReportService implements IReportService {
     @Override
     public PeriodCalculationResult calculatePeriodBalance(Employee employee, List<TimeEntry> entries){
         List<DailyCalculationResult> dailyResults = new ArrayList<>();
-        Duration totalOvertime = Duration.ZERO;
-        Duration totalNegativeHours = Duration.ZERO;
+        Duration totalOvertimeAccumulated = Duration.ZERO;
+        Duration totalNegativeHoursAccumulated = Duration.ZERO;
+        int incompleteEntriesCount = 0;
 
         for (TimeEntry entry : entries) {
             DailyCalculationResult dailyResult = dailyCalculationService.calculate(entry, employee);
+
             dailyResults.add(dailyResult);
-            totalOvertime = totalOvertime.plus(dailyResult.overtimeHours());
-            totalNegativeHours = totalNegativeHours.plus(dailyResult.negativeHours());
+
+            totalOvertimeAccumulated = totalOvertimeAccumulated.plus(dailyResult.overtimeHours());
+            totalNegativeHoursAccumulated = totalNegativeHoursAccumulated.plus(dailyResult.negativeHours());
+
+            if (dailyResult.isIncomplete()) {
+                incompleteEntriesCount++;
+            }
         }
-        return new PeriodCalculationResult(dailyResults, totalOvertime, totalNegativeHours);
+
+        // --- 1. Cálculo do Saldo Final Líquido ---
+
+        // Saldo total é o total de horas extras menos o total de horas negativas
+        Duration finalBalance = totalOvertimeAccumulated.minus(totalNegativeHoursAccumulated);
+
+        Duration finalOvertime = Duration.ZERO;
+        Duration finalNegative = Duration.ZERO;
+
+        // Determinar se o saldo final é positivo ou negativo
+        if (finalBalance.isNegative()) {
+            finalNegative = finalBalance.abs(); // O valor absoluto das horas a dever
+        } else {
+            finalOvertime = finalBalance; // O valor das horas a receber
+        }
+
+        // --- 2. Retornar o Resultado Completo do Período ---
+
+        return new PeriodCalculationResult(
+                dailyResults,
+                totalOvertimeAccumulated,
+                totalNegativeHoursAccumulated,
+                finalOvertime,
+                finalNegative,
+                incompleteEntriesCount
+        );
     }
 }
