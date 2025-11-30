@@ -1,7 +1,9 @@
 package com.calchoras.view;
 
+import com.calchoras.model.Company;
 import com.calchoras.model.Employee;
 import com.calchoras.model.TimeEntry;
+
 import lombok.Getter;
 
 import javax.swing.*;
@@ -14,13 +16,13 @@ import java.util.List;
 public class MainFrame extends JFrame {
 
     // Funcionários
-    private DefaultListModel<String> employeeListModel;
-    private JList<String> employeeList;
+    private DefaultListModel<Employee> employeeListModel;
+    private JList<Employee> employeeList;
     private JButton addEmployeeButton;
     private JButton removeEmployeeButton;
 
     // Empresa
-    private JComboBox<String> companyComboBox;
+    private JComboBox<Company> companyComboBox;
     private JButton addCompanyButton;
 
     // Campos do funcionário
@@ -57,7 +59,6 @@ public class MainFrame extends JFrame {
         initFrame();
         initComponents();
         layoutComponents();
-        addCompanyButton.addActionListener(e -> openCompanyDialog());
     }
 
     private void initFrame() {
@@ -113,27 +114,29 @@ public class MainFrame extends JFrame {
         ((JPanel) this.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // ================================
-        // PAINEL ESQUERDO — EMPRESAS + LISTA
+        // PAINEL ESQUERDO — LISTA
         // ================================
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
         leftPanel.setBorder(BorderFactory.createTitledBorder("Funcionários"));
+        leftPanel.setPreferredSize(new Dimension(180, 300));
 
         leftPanel.add(new JScrollPane(employeeList), BorderLayout.CENTER);
 
-        JPanel companyPanel = new JPanel(new GridLayout(1, 1));
-        companyPanel.add(addCompanyButton);
-
-        leftPanel.add(companyPanel, BorderLayout.NORTH);
-
         // ================================
-        // PAINEL CENTRAL — FUNCIONÁRIO + PONTO
+        // PAINEL CENTRAL — CADASTRAR EMPRESA + FUNCIONÁRIO + PONTO
         // ================================
+
+        // --- CADASTRAR EMPRESA ---
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
         // --- DADOS DO FUNCIONÁRIO ---
         JPanel employeeInfoPanel = new JPanel(new GridLayout(5, 2, 5, 5));
         employeeInfoPanel.setBorder(BorderFactory.createTitledBorder("Dados do Funcionário"));
+
+        JPanel companyPanel = new JPanel(new GridLayout(1, 1));
+        companyPanel.add(addCompanyButton);
+        centerPanel.add(companyPanel, BorderLayout.NORTH);
 
         employeeInfoPanel.add(new JLabel("Empresa:"));
         employeeInfoPanel.add(companyComboBox);
@@ -217,14 +220,25 @@ public class MainFrame extends JFrame {
     // ================================
     // MÉTODOS DE ATUALIZAÇÃO
     // ================================
-    public void updateEmployeeList(List<String> employeeNames) {
+    public void updateEmployeeList(List<Employee> employees) {
         employeeListModel.clear();
-        employeeNames.forEach(employeeListModel::addElement);
+        employees.forEach(employeeListModel::addElement);
     }
 
-    public void updateCompanyList(List<String> companyNames) {
+    public void updateCompanyList(List<Company> companies) {
         companyComboBox.removeAllItems();
-        companyNames.forEach(companyComboBox::addItem);
+        for (Company company : companies) {
+            companyComboBox.addItem(company);
+        }
+    }
+
+    public int getSelectedCompanyId() {
+        Company selectedCompany = (Company) companyComboBox.getSelectedItem();
+        if (selectedCompany != null) {
+            return selectedCompany.getId();
+        }
+        // Retornar um valor padrão/erro ou lançar exceção se nada estiver selecionado
+        return -1;
     }
 
     public void displayEmployeeInfo(Employee employee) {
@@ -256,31 +270,10 @@ public class MainFrame extends JFrame {
     }
 
     public void clearEmployeeInfoFields() {
-        companyComboBox.setSelectedIndex(-1);
+        nameField.setText("");
         shiftInField.setText("");
         shiftOutField.setText("");
         lunchBreakMinutesField.setText("");
     }
 
-    private void openCompanyDialog() {
-        CompanyDialog dialog = new CompanyDialog(this);
-
-        dialog.getSaveButton().addActionListener(e -> {
-            String name = dialog.getCompanyName();
-
-            if (name.isBlank()) {
-                JOptionPane.showMessageDialog(this,
-                        "Nome da empresa é obrigatório!",
-                        "Erro",
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            companyComboBox.addItem(name);
-
-            dialog.dispose();
-        });
-
-        dialog.setVisible(true);
-    }
 }

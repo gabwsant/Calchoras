@@ -6,6 +6,7 @@ import com.calchoras.repository.EmployeeRepository;
 import com.calchoras.repository.TimeEntryRepository;
 import com.calchoras.service.*;
 import com.calchoras.service.interfaces.*;
+import com.calchoras.view.CompanyDialog;
 import com.calchoras.view.MainFrame;
 
 import javax.swing.*;

@@ -35,8 +35,9 @@ public class EmployeeService implements IEmployeeService {
 
     @Override
     public Employee save(Employee employee) {
-        if (employeeRepository.existsByName(employee.getName())) {
-            throw new IllegalArgumentException("Funcionário já existe.");
+        if (employeeRepository.existsByName(employee.getName()) &&
+                employeeRepository.existsByCompanyId(employee.getCompanyId())) {
+            throw new IllegalArgumentException("Funcionário já existe para esta empresa.");
         }
 
         if (!companyService.existsById(employee.getCompanyId())) {

@@ -27,4 +27,8 @@ public class Employee {
         this.shiftOut = shiftOut;
         this.lunchBreakMinutes = lunchBreakMinutes;
     }
+
+    public String toString() {
+        return name;
+    }
 }
