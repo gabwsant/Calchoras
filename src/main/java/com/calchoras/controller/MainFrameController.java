@@ -3,10 +3,13 @@ package com.calchoras.controller;
 import com.calchoras.model.Company;
 import com.calchoras.model.Employee;
 import com.calchoras.service.interfaces.*;
+import com.calchoras.util.validators.DateFieldValidator;
+import com.calchoras.util.validators.TimeFieldValidator;
+import com.calchoras.view.CompanyComboItem;
 import com.calchoras.view.CompanyDialog;
+import com.calchoras.view.EmployeeListItem;
 import com.calchoras.view.MainFrame;
 
-import javax.swing.*;
 import java.awt.event.ItemEvent;
 import java.time.LocalTime;
 import java.util.Comparator;
@@ -35,12 +38,16 @@ public class MainFrameController {
         this.reportService = reportService;
         this.timeEntryService = timeEntryService;
 
+        initValidators();
+
         view.getAddCompanyButton().addActionListener(e -> openCompanyDialog());
 
         view.getCompanyComboBox().addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
-                Company selectedCompany = (Company) e.getItem();
-                handleCompanySelectionChange(selectedCompany);
+                CompanyComboItem item = (CompanyComboItem) e.getItem();
+                if (item != null) {
+                    handleCompanySelectionChange(item.getId());
+                }
             }
         });
 
@@ -48,7 +55,33 @@ public class MainFrameController {
 
         view.getRemoveEmployeeButton().addActionListener(e -> handleRemoveEmployeeAction());
 
+        view.getEmployeeList().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                EmployeeListItem item = view.getEmployeeList().getSelectedValue();
+                if (item != null) {
+                    view.enableTimeEntryFields(true);
+                    handleEmployeeSelection(item.getId());
+                } else {
+                    view.clearTimeEntryFields();
+                    view.enableTimeEntryFields(false);
+                }
+            }
+        });
+
         loadInitalData();
+    }
+
+    private void initValidators() {
+        DateFieldValidator.apply(view.getDateField());
+        TimeFieldValidator.apply(view.getClockInField());
+        TimeFieldValidator.apply(view.getLunchInField());
+        TimeFieldValidator.apply(view.getLunchOutField());
+        TimeFieldValidator.apply(view.getClockOutField());
+    }
+
+    private void handleEmployeeSelection(int employeeId) {
+        employeeService.findById(employeeId)
+                .ifPresent(view::displayEmployeeInfo);
     }
 
     private void handleAddEmployeeAction() {
@@ -84,34 +117,30 @@ public class MainFrameController {
 
             view.clearEmployeeInfoFields();
 
-            Company currentCompany = (Company) view.getCompanyComboBox().getSelectedItem();
-            handleCompanySelectionChange(currentCompany);
+            handleCompanySelectionChange(companyId);
 
-            JOptionPane.showMessageDialog(view, "Funcionário salvo com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            view.showSuccess("Funcionário salvo com sucesso!");
 
         } catch (java.time.format.DateTimeParseException | NumberFormatException e) {
-            JOptionPane.showMessageDialog(view,
-                    "Erro no formato de Hora (HH:mm) ou Minutos (numérico).",
-                    "Erro de Formato",
-                    JOptionPane.ERROR_MESSAGE);
+            view.showError("Erro no formato de Hora (HH:mm) ou Minutos (numérico).");
         } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(view, e.getMessage(), "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+            view.showError(e.getMessage());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(view, "Erro ao salvar: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            view.showError( "Erro ao salvar: " + e.getMessage());
         }
     }
 
     private void handleRemoveEmployeeAction() {
         try {
-            Employee employeeToRemove = view.getEmployeeList().getSelectedValue();
-            employeeService.deleteById(employeeToRemove.getId());
-            view.clearEmployeeInfoFields();
+            int employeeId = view.getEmployeeList().getSelectedValue().getId();
+            int companyId = view.getSelectedCompanyId();
 
-            // atualiza lista de funcionários
-            Company currentCompany = (Company) view.getCompanyComboBox().getSelectedItem();
-            handleCompanySelectionChange(currentCompany);
+            employeeService.deleteById(employeeId);
+
+            view.clearEmployeeInfoFields();
+            handleCompanySelectionChange(companyId);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(view, "Erro ao deletar: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            view.showError( "Erro ao deletar: " + e.getMessage());
         }
     }
 
@@ -119,11 +148,10 @@ public class MainFrameController {
         try{
             List<Company> companies = companyService.findAll();
             view.updateCompanyList(companies);
+            view.clearTimeEntryFields();
         }
         catch (Exception e) {
-            JOptionPane.showMessageDialog(view,
-                    "Erro ao carregar dados iniciais de empresas: " + e.getMessage(),
-                    "Erro", JOptionPane.ERROR_MESSAGE);
+            view.showError( "Erro ao carregar dados iniciais de empresas: " + e.getMessage());
         }
     }
 
@@ -134,10 +162,7 @@ public class MainFrameController {
             String name = dialog.getCompanyName();
 
             if (name.isBlank()) {
-                JOptionPane.showMessageDialog(view,
-                        "Nome da empresa é obrigatório!",
-                        "Erro",
-                        JOptionPane.ERROR_MESSAGE);
+                view.showError("Nome da empresa é obrigatório!");
                 return;
             }
 
@@ -156,33 +181,23 @@ public class MainFrameController {
 
             Company newCompany = companyService.save(companyToSave);
 
-            view.getCompanyComboBox().addItem(newCompany);
+            view.getCompanyComboBox().addItem(
+                    new CompanyComboItem(newCompany.getId(), newCompany.getName())
+            );
 
         } catch (IllegalArgumentException ex) {
-            JOptionPane.showMessageDialog(view, "Empresa já existe.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+            view.showError( "Empresa já existe.");
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(view,
-                    "Erro ao salvar a empresa: " + ex.getMessage(),
-                    "Erro",
-                    JOptionPane.ERROR_MESSAGE);
+            view.showError("Erro ao salvar a empresa: " + ex.getMessage());
         }
     }
 
     // Método de ação que será chamado quando a seleção mudar
-    public void handleCompanySelectionChange(Company selectedCompany) {
-        if (selectedCompany != null) {
-            int companyId = selectedCompany.getId();
-            System.out.println("Empresa selecionada. ID: " + companyId);
-
-            List<Employee> employees = employeeService.findByCompanyId(companyId);
-
-            employees.sort(Comparator.comparing(Employee::getName));
-
-            view.updateEmployeeList(employees);
-
-        } else {
-            //view.updateEmployeeList(null);
-        }
+    public void handleCompanySelectionChange(int companyId) {
+        List<Employee> employees = employeeService.findByCompanyId(companyId);
+        employees.sort(Comparator.comparing(Employee::getName));
+        view.updateEmployeeList(employees);
+        view.clearEmployeeInfoFields();
     }
 
 }

@@ -4,6 +4,8 @@ import com.calchoras.model.Company;
 import com.calchoras.model.Employee;
 import com.calchoras.model.TimeEntry;
 
+import com.calchoras.util.validators.DateFieldValidator;
+import com.calchoras.util.validators.TimeFieldValidator;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -16,13 +18,13 @@ import java.util.List;
 public class MainFrame extends JFrame {
 
     // Funcionários
-    private DefaultListModel<Employee> employeeListModel;
-    private JList<Employee> employeeList;
+    private DefaultListModel<EmployeeListItem> employeeListModel;
+    private JList<EmployeeListItem> employeeList;
     private JButton addEmployeeButton;
     private JButton removeEmployeeButton;
 
     // Empresa
-    private JComboBox<Company> companyComboBox;
+    private JComboBox<CompanyComboItem> companyComboBox;
     private JButton addCompanyButton;
 
     // Campos do funcionário
@@ -59,6 +61,7 @@ public class MainFrame extends JFrame {
         initFrame();
         initComponents();
         layoutComponents();
+        enableTimeEntryFields(false);
     }
 
     private void initFrame() {
@@ -222,29 +225,32 @@ public class MainFrame extends JFrame {
     // ================================
     public void updateEmployeeList(List<Employee> employees) {
         employeeListModel.clear();
-        employees.forEach(employeeListModel::addElement);
+        for (Employee emp : employees) {
+            employeeListModel.addElement(
+                    new EmployeeListItem(emp.getId(), emp.getName())
+            );
+        }
     }
 
     public void updateCompanyList(List<Company> companies) {
         companyComboBox.removeAllItems();
         for (Company company : companies) {
-            companyComboBox.addItem(company);
+            companyComboBox.addItem(
+                    new CompanyComboItem(company.getId(), company.getName())
+            );
         }
     }
 
     public int getSelectedCompanyId() {
-        Company selectedCompany = (Company) companyComboBox.getSelectedItem();
-        if (selectedCompany != null) {
-            return selectedCompany.getId();
-        }
-        // Retornar um valor padrão/erro ou lançar exceção se nada estiver selecionado
-        return -1;
+        CompanyComboItem item = (CompanyComboItem) companyComboBox.getSelectedItem();
+        return (item != null) ? item.getId() : -1;
     }
 
     public void displayEmployeeInfo(Employee employee) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
         companyComboBox.setSelectedItem(employee.getName());
+        nameField.setText(employee.getName());
         shiftInField.setText(employee.getShiftIn().format(timeFormatter));
         shiftOutField.setText(employee.getShiftOut().format(timeFormatter));
         lunchBreakMinutesField.setText(String.valueOf(employee.getLunchBreakMinutes()));
@@ -262,11 +268,15 @@ public class MainFrame extends JFrame {
     }
 
     public void clearTimeEntryFields() {
-        dateField.setValue(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        dateField.setValue(
+                LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1)
+                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        );
         clockInField.setText("");
         lunchOutField.setText("");
         lunchInField.setText("");
         clockOutField.setText("");
+        isDayOffCheckBox.setSelected(false);
     }
 
     public void clearEmployeeInfoFields() {
@@ -274,6 +284,23 @@ public class MainFrame extends JFrame {
         shiftInField.setText("");
         shiftOutField.setText("");
         lunchBreakMinutesField.setText("");
+    }
+
+    public void showError(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    public void showSuccess(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    public void enableTimeEntryFields(boolean enable) {
+        dateField.setEnabled(enable);
+        clockInField.setEnabled(enable);
+        lunchInField.setEnabled(enable);
+        lunchOutField.setEnabled(enable);
+        clockOutField.setEnabled(enable);
+        isDayOffCheckBox.setEnabled(enable);
     }
 
 }
