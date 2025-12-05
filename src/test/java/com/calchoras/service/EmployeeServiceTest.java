@@ -81,17 +81,13 @@ class EmployeeServiceTest {
 
         employeeService.save(newEmployee);
 
-        // cria nova instância para forçar leitura do arquivo
         EmployeeService newInstance =
                 new EmployeeService(new EmployeeRepository(TEST_FILE_PATH), companyServiceMock);
 
-
-        // getAllEmployees
         List<Employee> loadedEmployees = newInstance.findAll();
         assertEquals(1, loadedEmployees.size());
         assertEquals("Maria Oliveira", loadedEmployees.getFirst().getName());
 
-        //getEmployeesByCompany
         List<Employee> loadedEmployeesByCompany =  newInstance.findByCompanyId(1);
         assertEquals(1, loadedEmployeesByCompany.size());
         assertEquals(1, loadedEmployeesByCompany.getFirst().getCompanyId());
@@ -110,7 +106,6 @@ class EmployeeServiceTest {
 
         Employee added = employeeService.save(original);
 
-        // edita
         added.setName("Carlos Pereira (Editado)");
         added.setShiftOut(LocalTime.of(17, 30));
 
@@ -126,7 +121,6 @@ class EmployeeServiceTest {
     @Test
     @DisplayName("Não deve permitir atualizar funcionário duplicando nome dentro da mesma empresa")
     void update_ShouldThrowException_WhenNameAlreadyExistsInCompany() {
-        // Adiciona dois funcionários diferentes na mesma empresa
         Employee emp1 = new Employee(1,
                 "Carlos Pereira",
                 LocalTime.of(8, 0),
@@ -141,7 +135,6 @@ class EmployeeServiceTest {
         employeeService.save(emp1);
         emp2 = employeeService.save(emp2);
 
-        // Tentar atualizar emp2 para ter o mesmo nome de emp1
         emp2.setName("Carlos Pereira");
 
         Employee finalEmp = emp2;
@@ -162,7 +155,7 @@ class EmployeeServiceTest {
                 60);
         emp = employeeService.save(emp);
 
-        emp.setName("Charles"); // Alteração de nome válida
+        emp.setName("Charles");
         Employee updated = employeeService.update(emp);
 
         Optional<Employee> loaded = employeeService.findById(updated.getId());
@@ -189,7 +182,6 @@ class EmployeeServiceTest {
         assertFalse(employeeService.findById(emp1.getId()).isPresent());
         assertTrue(employeeService.findById(emp2.getId()).isPresent());
 
-        // verifica persistência
         EmployeeService newInstance =
                 new EmployeeService(new EmployeeRepository(TEST_FILE_PATH), companyServiceMock);
         assertEquals(1, newInstance.findAll().size());

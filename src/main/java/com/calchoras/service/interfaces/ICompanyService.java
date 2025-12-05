@@ -5,26 +5,63 @@ import com.calchoras.model.Company;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service interface for company operations.
+ */
 public interface ICompanyService {
 
-    // Retorna todas as empresas
+    /**
+     * Returns all companies.
+     *
+     * @return a list of companies
+     */
     List<Company> findAll();
 
-    // Retorna uma empresa pelo ID
+    /**
+     * Returns a company by its ID.
+     *
+     * @param companyId the ID of the company
+     * @return an Optional containing the company if found
+     */
     Optional<Company> findById(int companyId);
 
-    // Adiciona uma empresa e retorna o objeto criado
+    /**
+     * Creates a new company.
+     *
+     * @param company the company to be saved
+     * @return the created company
+     */
     Company save(Company company);
 
-    // Atualiza uma empresa e retorna o objeto atualizado
+    /**
+     * Updates an existing company.
+     *
+     * @param company the company to be updated
+     * @return the updated company
+     */
     Company update(Company company);
 
-    // Remove uma empresa pelo ID e retorna boolean indicando sucesso
+    /**
+     * Deletes a company by ID.
+     *
+     * @param companyId the ID of the company to delete
+     * @return true if the company was deleted, false otherwise
+     */
     boolean deleteById(int companyId);
 
-    // Verifica existência por ID
+    /**
+     * Checks whether a company exists by ID.
+     *
+     * @param companyId the ID to check
+     * @return true if the company exists
+     */
     boolean existsById(int companyId);
 
-    // Verifica existência por nome
+    /**
+     * Checks whether a company exists by name.
+     *
+     * @param name the name to check
+     * @return true if a company with this name exists
+     */
     boolean existsByName(String name);
 }

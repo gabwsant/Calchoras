@@ -39,22 +39,17 @@ public class ReportService implements IReportService {
             }
         }
 
-        // --- 1. Cálculo do Saldo Final Líquido ---
 
-        // Saldo total é o total de horas extras menos o total de horas negativas
         Duration finalBalance = totalOvertimeAccumulated.minus(totalNegativeHoursAccumulated);
 
         Duration finalOvertime = Duration.ZERO;
         Duration finalNegative = Duration.ZERO;
 
-        // Determinar se o saldo final é positivo ou negativo
         if (finalBalance.isNegative()) {
-            finalNegative = finalBalance.abs(); // O valor absoluto das horas a dever
+            finalNegative = finalBalance.abs();
         } else {
-            finalOvertime = finalBalance; // O valor das horas a receber
+            finalOvertime = finalBalance;
         }
-
-        // --- 2. Retornar o Resultado Completo do Período ---
 
         return new PeriodCalculationResult(
                 dailyResults,

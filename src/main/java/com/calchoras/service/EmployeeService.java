@@ -44,7 +44,6 @@ public class EmployeeService implements IEmployeeService {
             throw new IllegalArgumentException("Empresa não encontrada.");
         }
 
-        // Definir ID via repository e salvar
         int nextId = employeeRepository.findAll().stream()
                 .mapToInt(Employee::getId)
                 .max()
@@ -56,7 +55,6 @@ public class EmployeeService implements IEmployeeService {
 
     @Override
     public Employee update(Employee employee) {
-        // Verifica se já existe outro funcionário da mesma empresa com o mesmo nome
         boolean existsDuplicate = employeeRepository.findByCompanyId(employee.getCompanyId()).stream()
                 .anyMatch(e -> e.getName().equalsIgnoreCase(employee.getName()) && e.getId() != employee.getId());
 

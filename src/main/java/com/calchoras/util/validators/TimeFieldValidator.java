@@ -16,19 +16,15 @@ public class TimeFieldValidator {
                     protected boolean isValid(String text) {
 
                         if (text.isEmpty()) return true;
-
-                        // Só números ou números + ":" (mesma regra que você já tem)
                         if (text.matches("^\\d{1,2}$")) return true;
                         if (text.matches("^\\d{1,2}:$")) return true;
 
-                        // Se tiver formato HH:MM, validar valores reais
                         if (text.matches("^\\d{1,2}:\\d{1,2}$")) {
 
                             String[] parts = text.split(":");
                             int hh = Integer.parseInt(parts[0]);
                             int mm = Integer.parseInt(parts[1]);
 
-                            // Validação REAL de horário
                             if (hh < 0 || hh > 23) return false;
                             if (mm < 0 || mm > 59) return false;
 

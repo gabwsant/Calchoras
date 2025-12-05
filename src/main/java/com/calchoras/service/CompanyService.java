@@ -31,7 +31,6 @@ public class CompanyService implements ICompanyService {
             throw new IllegalArgumentException("Empresa já existe.");
         }
 
-        // Geração do próximo ID
         int nextId = companyRepository.findAll().stream()
                 .mapToInt(Company::getId)
                 .max()

@@ -22,7 +22,6 @@ class DailyCalculationServiceTest {
     @BeforeEach
     void setUp() {
         service = new DailyCalculationService();
-        // Jornada Esperada: 8h às 17h, 60 min almoço = 8 horas de trabalho líquido
         standardEmployee = new Employee(
                 1,
                 "Funcionario Teste",
@@ -30,8 +29,6 @@ class DailyCalculationServiceTest {
                 LocalTime.of(17, 0),
                 60);
     }
-
-    // --- 1. CASOS DE BALANÇO (Worked Hours vs. Expected Hours) ---
 
     @Test
     @DisplayName("1.1. Deve gerar um resultado para um dia com 1 hora extra")
@@ -42,7 +39,7 @@ class DailyCalculationServiceTest {
                 LocalTime.parse("08:00"),
                 LocalTime.parse("12:00"),
                 LocalTime.parse("13:00"),
-                LocalTime.parse("18:00"), // Saiu 1h mais tarde
+                LocalTime.parse("18:00"),
                 false // isDayOff
         );
 
@@ -64,7 +61,7 @@ class DailyCalculationServiceTest {
                 LocalTime.parse("08:00"),
                 LocalTime.parse("12:00"),
                 LocalTime.parse("13:00"),
-                LocalTime.parse("16:00"), // Saiu 1h mais cedo
+                LocalTime.parse("16:00"),
                 false
         );
 
@@ -86,7 +83,7 @@ class DailyCalculationServiceTest {
                 LocalTime.parse("08:00"),
                 LocalTime.parse("12:00"),
                 LocalTime.parse("13:00"),
-                LocalTime.parse("17:00"), // Jornada exata
+                LocalTime.parse("17:00"),
                 false
         );
 
@@ -99,12 +96,9 @@ class DailyCalculationServiceTest {
         assertFalse(result.isIncomplete(), "Deve estar completo.");
     }
 
-    // --- 2. CASOS DE INCONSISTÊNCIA E EXCEÇÃO ---
-
     @Test
     @DisplayName("2.1. Deve retornar INCOMPLETO quando o Clock Out estiver faltando")
     void testCalculate_MissingClockOut_ShouldReturnIncomplete() {
-        // Clock Out está nulo
         TimeEntry timeEntry = new TimeEntry(
                 4, 1,
                 TODAY,
@@ -129,7 +123,6 @@ class DailyCalculationServiceTest {
     @Test
     @DisplayName("2.2. Deve retornar ZERO para um Day Off (Folga)")
     void testCalculate_DayOff_ShouldReturnZeroDurations() {
-        // isDayOff está TRUE
         TimeEntry timeEntry = new TimeEntry(
                 5, 1,
                 TODAY,
@@ -149,20 +142,16 @@ class DailyCalculationServiceTest {
         assertFalse(result.isIncomplete(), "Deve estar completo (por ser folga, é um registro válido).");
     }
 
-    // --- 3. CASOS DE JORNADA NOTURNA ---
-
     @Test
     @DisplayName("3.1. Deve calcular corretamente uma jornada noturna que vira o dia")
     void testCalculate_OvernightShift_ShouldReturnCorrectValues() {
-        // Jornada esperada noturna: 22h às 7h, 60 min almoço = 8 horas de trabalho líquido.
         Employee overnightEmployee = new Employee(
                 2,
                 "Func. Noturno",
-                LocalTime.of(22, 0), // 22:00 (dia 1)
-                LocalTime.of(7, 0),  // 07:00 (dia 2)
+                LocalTime.of(22, 0),
+                LocalTime.of(7, 0),
                 60);
 
-        // Ponto batido: 22:00 (In) -> 02:00 (LI) -> 03:00 (LO) -> 07:00 (Out) = 8h trabalhadas (Exato)
         TimeEntry timeEntry = new TimeEntry(
                 6, 1,
                 TODAY,

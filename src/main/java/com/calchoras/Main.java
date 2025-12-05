@@ -6,7 +6,6 @@ import com.calchoras.repository.EmployeeRepository;
 import com.calchoras.repository.TimeEntryRepository;
 import com.calchoras.service.*;
 import com.calchoras.service.interfaces.*;
-import com.calchoras.view.CompanyDialog;
 import com.calchoras.view.MainFrame;
 
 import javax.swing.*;
@@ -15,12 +14,12 @@ public class Main {
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> {
-			// Repositórios
+			// Repositories
 			CompanyRepository companyRepository = new CompanyRepository();
 			EmployeeRepository employeeRepository = new EmployeeRepository();
 			TimeEntryRepository timeEntryRepository = new TimeEntryRepository();
 
-			// Serviços
+			// Services
 			ICompanyService companyService = new CompanyService(companyRepository);
 			IEmployeeService employeeService = new EmployeeService(employeeRepository, companyService);
 			ITimeEntryService timeEntryService = new TimeEntryService(timeEntryRepository, employeeService); // <- aqui passamos o EmployeeService

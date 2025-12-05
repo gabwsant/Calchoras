@@ -5,29 +5,69 @@ import com.calchoras.model.Employee;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service interface for employee operations.
+ */
 public interface IEmployeeService {
 
-    // Retorna todos os funcionários
+    /**
+     * Returns all employees.
+     */
     List<Employee> findAll();
 
-    // Retorna um funcionário pelo ID
+    /**
+     * Returns an employee by its ID.
+     *
+     * @param employeeId the ID of the employee
+     * @return an Optional containing the employee if found
+     */
     Optional<Employee> findById(int employeeId);
 
-    // Retorna todos os funcionários de uma empresa
+    /**
+     * Returns all employees belonging to a company.
+     *
+     * @param companyId the company ID
+     * @return a list of employees
+     */
     List<Employee> findByCompanyId(int companyId);
 
-    // Adiciona um funcionário e retorna o objeto criado com ID definido
+    /**
+     * Creates a new employee.
+     *
+     * @param employee the employee to be saved
+     * @return the created employee
+     */
     Employee save(Employee employee);
 
-    // Atualiza um funcionário e retorna o objeto atualizado
+    /**
+     * Updates an existing employee.
+     *
+     * @param employee the employee to be updated
+     * @return the updated employee
+     */
     Employee update(Employee employee);
 
-    // Remove um funcionário pelo ID e retorna boolean indicando sucesso
+    /**
+     * Deletes an employee by ID.
+     *
+     * @param employeeId the ID of the employee to delete
+     * @return true if the employee was deleted, false otherwise
+     */
     boolean deleteById(int employeeId);
 
-    // Verifica existência por ID
+    /**
+     * Checks whether an employee exists by ID.
+     *
+     * @param employeeId the ID to check
+     * @return true if the employee exists
+     */
     boolean existsById(int employeeId);
 
-    // Verifica existência por nome
+    /**
+     * Checks whether an employee exists by name.
+     *
+     * @param name the name to check
+     * @return true if an employee with this name exists
+     */
     boolean existsByName(String name);
 }

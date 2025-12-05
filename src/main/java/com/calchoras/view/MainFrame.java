@@ -17,23 +17,23 @@ import java.util.List;
 @Getter
 public class MainFrame extends JFrame {
 
-    // Funcionários
+    // Employees
     private DefaultListModel<EmployeeListItem> employeeListModel;
     private JList<EmployeeListItem> employeeList;
     private JButton addEmployeeButton;
     private JButton removeEmployeeButton;
 
-    // Empresa
+    // Company
     private JComboBox<CompanyComboItem> companyComboBox;
     private JButton addCompanyButton;
 
-    // Campos do funcionário
+    // Employee fields
     private JTextField nameField;
     private JTextField shiftInField;
     private JTextField shiftOutField;
     private JTextField lunchBreakMinutesField;
 
-    // Campos de ponto
+    // Time entry fields
     private JFormattedTextField dateField;
     private JTextField clockInField;
     private JTextField lunchInField;
@@ -41,18 +41,18 @@ public class MainFrame extends JFrame {
     private JTextField clockOutField;
     private JCheckBox isDayOffCheckBox;
 
-    // Botões de ponto
+    // Time entry buttons
     private JButton nextEntryButton;
     private JButton previousEntryButton;
     private JButton addTimeEntryButton;
     private JButton removeTimeEntryButton;
 
-    // Ações principais
+    // Main actions
     private JButton resetCalculationButton;
     private JButton calculateButton;
     private JButton printReportButton;
 
-    // Resultado
+    // Result
     private JTextArea resultArea;
 
     public MainFrame() {
@@ -74,24 +74,24 @@ public class MainFrame extends JFrame {
 
     private void initComponents() {
 
-        // LISTA DE FUNCIONÁRIOS
+        // EMPLOYEES LIST
         employeeListModel = new DefaultListModel<>();
         employeeList = new JList<>(employeeListModel);
 
         addEmployeeButton = new JButton("Salvar Funcionário");
         removeEmployeeButton = new JButton("Remover Funcionário");
 
-        // EMPRESA
+        // COMPANY
         companyComboBox = new JComboBox<>();
         addCompanyButton = new JButton("Cadastrar Empresa");
 
-        // CAMPOS DO FUNCIONÁRIO
+        // EMPLOYEE FIELDS
         nameField = new JTextField();
         shiftInField = new JTextField();
         shiftOutField = new JTextField();
         lunchBreakMinutesField = new JTextField();
 
-        // CAMPOS DE PONTO
+        // TIME ENTRY FIELDS
         dateField = new JFormattedTextField();
         clockInField = new JTextField();
         lunchInField = new JTextField();
@@ -117,7 +117,7 @@ public class MainFrame extends JFrame {
         ((JPanel) this.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // ================================
-        // PAINEL ESQUERDO — LISTA
+        // LEFT PANEL — LIST
         // ================================
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
         leftPanel.setBorder(BorderFactory.createTitledBorder("Funcionários"));
@@ -126,14 +126,14 @@ public class MainFrame extends JFrame {
         leftPanel.add(new JScrollPane(employeeList), BorderLayout.CENTER);
 
         // ================================
-        // PAINEL CENTRAL — CADASTRAR EMPRESA + FUNCIONÁRIO + PONTO
+        // CENTER PANEL — REGISTER COMPANY + EMPLOYEE + TIME ENTRY
         // ================================
 
-        // --- CADASTRAR EMPRESA ---
+        // --- REGISTER COMPANY ---
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
-        // --- DADOS DO FUNCIONÁRIO ---
+        // --- EMPLOYEE DATA ---
         JPanel employeeInfoPanel = new JPanel(new GridLayout(5, 2, 5, 5));
         employeeInfoPanel.setBorder(BorderFactory.createTitledBorder("Dados do Funcionário"));
 
@@ -156,12 +156,12 @@ public class MainFrame extends JFrame {
         employeeInfoPanel.add(new JLabel("Almoço (min):"));
         employeeInfoPanel.add(lunchBreakMinutesField);
 
-        // Botões do funcionário (agora logo após os campos)
+        // Employee buttons
         JPanel employeeActionButtons = new JPanel(new GridLayout(1, 2, 5, 5));
         employeeActionButtons.add(addEmployeeButton);
         employeeActionButtons.add(removeEmployeeButton);
 
-        // --- REGISTRO DE PONTO ---
+        // --- TIME ENTRY ---
         JPanel timeEntryPanel = new JPanel(new GridLayout(6, 2, 5, 5)); // <-- 6, 2
         timeEntryPanel.setBorder(BorderFactory.createTitledBorder("Registro de Ponto"));
 
@@ -195,7 +195,7 @@ public class MainFrame extends JFrame {
         centerPanel.add(entryActionsPanel);
 
         // ================================
-        // PAINEL INFERIOR — AÇÕES GERAIS
+        // BOTTOM PANEL — MAIN ACTIONS
         // ================================
         JPanel southPanel = new JPanel(new BorderLayout(5, 5));
 
@@ -211,7 +211,6 @@ public class MainFrame extends JFrame {
         southPanel.add(mainActionsPanel, BorderLayout.NORTH);
         southPanel.add(resultScrollPane, BorderLayout.CENTER);
 
-        // Adiciona tudo ao frame
         this.add(leftPanel, BorderLayout.WEST);
         this.add(centerPanel, BorderLayout.CENTER);
         this.add(southPanel, BorderLayout.SOUTH);
@@ -220,9 +219,6 @@ public class MainFrame extends JFrame {
         this.setMinimumSize(this.getSize());
     }
 
-    // ================================
-    // MÉTODOS DE ATUALIZAÇÃO
-    // ================================
     public void updateEmployeeList(List<Employee> employees) {
         employeeListModel.clear();
         for (Employee emp : employees) {

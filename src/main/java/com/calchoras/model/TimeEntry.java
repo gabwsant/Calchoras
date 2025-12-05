@@ -21,7 +21,6 @@ public class TimeEntry {
     private LocalTime clockOut;
     private boolean dayOff = false;
 
-    // Construtor usado quando o ID será gerado pelo Service
     public TimeEntry(
             int employeeId,
             LocalDate entryDate,

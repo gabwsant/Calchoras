@@ -7,10 +7,9 @@ import java.awt.*;
 
 public class CompanyDialog extends JDialog {
 
-    private JTextField nameField;
+    private final JTextField nameField;
     @Getter
     private JButton saveButton;
-    private JButton cancelButton;
 
     public CompanyDialog(JFrame parent) {
         super(parent, "Cadastrar Empresa", true);
@@ -18,7 +17,7 @@ public class CompanyDialog extends JDialog {
         nameField = new JTextField();
 
         saveButton = new JButton("Salvar");
-        cancelButton = new JButton("Cancelar");
+        JButton cancelButton = new JButton("Cancelar");
 
         JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -34,7 +33,6 @@ public class CompanyDialog extends JDialog {
         pack();
         setLocationRelativeTo(parent);
 
-        // Botão cancelar
         cancelButton.addActionListener(e -> dispose());
     }
 

@@ -6,13 +6,17 @@ import com.calchoras.model.TimeEntry;
 
 import java.util.List;
 
+/**
+ * Service interface for generating reports.
+ */
 public interface IReportService {
 
     /**
-     * Calcula o balanço de horas consolidado para um funcionário em um dado período.
-     * @param employee O funcionário para o qual o cálculo será feito.
-     * @param entries A lista de batidas de ponto do período.
-     * @return Um objeto PeriodCalculationResult com os totais e os detalhes diários.
+     * Calculates the consolidated hour balance for an employee in a given period.
+     *
+     * @param employee The employee for whom the calculation will be performed.
+     * @param entries  The list of time entries for the period.
+     * @return A PeriodCalculationResult instance containing daily totals and details.
      */
     PeriodCalculationResult calculatePeriodBalance(Employee employee, List<TimeEntry> entries);
 }

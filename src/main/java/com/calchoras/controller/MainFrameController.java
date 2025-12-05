@@ -96,7 +96,7 @@ public class MainFrameController {
                 throw new IllegalArgumentException("Selecione uma empresa válida.");
             }
 
-            // campos obrigatórios
+            // mandatory fields
             if (name.isBlank() || shiftInStr.isBlank() || shiftOutStr.isBlank() || lunchBreakMinutesStr.isBlank()) {
                 throw new IllegalArgumentException("Todos os campos de funcionário são obrigatórios.");
             }
@@ -174,7 +174,6 @@ public class MainFrameController {
         dialog.setVisible(true);
     }
 
-    // Método de negócio (Controller chama o Service)
     private void handleAddCompanyAction(String name) {
         try {
             Company companyToSave = new Company(name);
@@ -192,7 +191,6 @@ public class MainFrameController {
         }
     }
 
-    // Método de ação que será chamado quando a seleção mudar
     public void handleCompanySelectionChange(int companyId) {
         List<Employee> employees = employeeService.findByCompanyId(companyId);
         employees.sort(Comparator.comparing(Employee::getName));

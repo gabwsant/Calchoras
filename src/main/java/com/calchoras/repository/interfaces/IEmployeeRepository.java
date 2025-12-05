@@ -5,32 +5,79 @@ import com.calchoras.model.Employee;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Repository interface for employee persistence operations.
+ */
 public interface IEmployeeRepository {
 
-    // Retorna todos os funcionários
+    /**
+     * Returns all employees.
+     *
+     * @return a list of employees
+     */
     List<Employee> findAll();
 
-    // Retorna um funcionário pelo ID
+    /**
+     * Returns an employee by its ID.
+     *
+     * @param id the employee ID
+     * @return an Optional containing the employee if found
+     */
     Optional<Employee> findById(int id);
 
-    // Retorna todos os funcionários de uma empresa
+    /**
+     * Returns all employees belonging to a specific company.
+     *
+     * @param companyId the company ID
+     * @return a list of employees
+     */
     List<Employee> findByCompanyId(int companyId);
 
-    // Adiciona um funcionário e retorna o objeto criado com ID definido
+    /**
+     * Saves a new employee and returns the created instance with its ID assigned.
+     *
+     * @param employee the employee to save
+     * @return the created employee
+     */
     Employee save(Employee employee);
 
-    // Atualiza um funcionário e retorna o objeto atualizado
+    /**
+     * Updates an existing employee and returns the updated instance.
+     *
+     * @param employee the employee to update
+     * @return the updated employee
+     */
     Employee update(Employee employee);
 
-    // Remove um funcionário pelo ID e retorna boolean indicando sucesso
+    /**
+     * Deletes an employee by its ID.
+     *
+     * @param id the employee ID
+     * @return true if the employee was successfully deleted, false otherwise
+     */
     boolean deleteById(int id);
 
-    // Verifica existência por ID
+    /**
+     * Checks whether an employee exists by ID.
+     *
+     * @param id the employee ID
+     * @return true if the employee exists
+     */
     boolean existsById(int id);
 
-    // Verifica existência por nome
+    /**
+     * Checks whether an employee exists by name.
+     *
+     * @param name the employee name
+     * @return true if an employee with this name exists
+     */
     boolean existsByName(String name);
 
-    // Verifica existência por empresa
+    /**
+     * Checks whether there are employees belonging to a specific company.
+     *
+     * @param companyId the company ID
+     * @return true if at least one employee exists for the company
+     */
     boolean existsByCompanyId(int companyId);
 }

@@ -34,7 +34,6 @@ class TimeEntryServiceTest {
         employeeServiceMock = Mockito.mock(IEmployeeService.class);
         when(employeeServiceMock.existsById(anyInt())).thenReturn(true);
 
-        // Criar TimeEntryService passando o mock e o arquivo de teste
         timeEntryService = new TimeEntryService(timeEntryRepository, employeeServiceMock);
     }
 
@@ -54,7 +53,6 @@ class TimeEntryServiceTest {
     @Test
     @DisplayName("Deve adicionar uma batida de ponto e atribuir ID")
     void save_ShouldAssignIdAndPersist() {
-        // Arrange
         when(employeeServiceMock.existsById(1)).thenReturn(true);
 
         TimeEntry entry = new TimeEntry();
@@ -62,10 +60,8 @@ class TimeEntryServiceTest {
         entry.setEntryDate(LocalDate.of(2025, 11, 29));
         entry.setClockIn(LocalTime.of(9, 0));
 
-        // Act
         TimeEntry saved = timeEntryService.save(entry);
 
-        // Assert
         assertNotNull(saved, "O objeto salvo não deveria ser nulo");
         assertEquals(1, saved.getId(), "O ID da primeira batida deveria ser 1");
 
@@ -98,7 +94,6 @@ class TimeEntryServiceTest {
     @Test
     @DisplayName("Deve lançar exceção ao tentar adicionar batida para funcionário inexistente")
     void save_ShouldThrowExceptionForNonExistentEmployee() {
-        // Arrange
         when(employeeServiceMock.existsById(999)).thenReturn(false);
 
         TimeEntry entry = new TimeEntry();
@@ -106,7 +101,6 @@ class TimeEntryServiceTest {
         entry.setEntryDate(LocalDate.of(2025, 11, 29));
         entry.setClockIn(LocalTime.of(9, 0));
 
-        // Act & Assert
         assertThrows(IllegalArgumentException.class,
                 () -> timeEntryService.save(entry),
                 "Deveria lançar exceção para funcionário inexistente");

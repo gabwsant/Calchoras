@@ -5,23 +5,58 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service interface for managing employee time entries.
+ */
 public interface ITimeEntryService {
 
-    // Retorna todas as batidas de ponto de um funcionário
+    /**
+     * Returns all time entries for a given employee.
+     *
+     * @param employeeId the ID of the employee
+     * @return a list of the employee's time entries
+     */
     List<TimeEntry> findByEmployeeId(int employeeId);
 
-    // Retorna uma batida de ponto pelo ID
+    /**
+     * Returns a time entry by its ID.
+     *
+     * @param id the time entry ID
+     * @return an Optional containing the time entry if found
+     */
     Optional<TimeEntry> findById(int id);
 
-    // Retorna uma batida de ponto de um funcionário em uma data específica
+    /**
+     * Returns the time entry of an employee for a specific date.
+     *
+     * @param employeeId the employee ID
+     * @param date the date of the time entry
+     * @return an Optional containing the time entry if found
+     */
     Optional<TimeEntry> findByEmployeeIdAndDate(int employeeId, LocalDate date);
 
-    // Adiciona uma batida de ponto e retorna o objeto criado com ID definido
+    /**
+     * Saves a new time entry and returns the created object with its ID assigned.
+     *
+     * @param timeEntry the time entry to save
+     * @return the created time entry
+     */
     TimeEntry save(TimeEntry timeEntry);
 
-    // Atualiza uma batida de ponto e retorna o objeto atualizado
+    /**
+     * Updates an existing time entry.
+     *
+     * @param timeEntry the updated time entry
+     * @return the updated time entry
+     */
     TimeEntry update(TimeEntry timeEntry);
 
-    // Remove uma batida de ponto pelo ID do funcionário e data e retorna boolean indicando sucesso
+    /**
+     * Deletes a time entry of an employee for a specific date.
+     *
+     * @param employeeId the employee ID
+     * @param date the date of the time entry
+     * @return true if the entry was deleted successfully, false otherwise
+     */
     boolean deleteByEmployeeIdAndDate(int employeeId, LocalDate date);
 }
