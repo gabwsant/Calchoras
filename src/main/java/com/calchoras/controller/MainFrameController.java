@@ -66,10 +66,13 @@ public class MainFrameController {
             if (!e.getValueIsAdjusting()) {
                 EmployeeListItem item = view.getEmployeeList().getSelectedValue();
                 if (item != null) {
+                    view.enableEmployeeFields(true);
                     view.enableTimeEntryFields(true);
                     handleEmployeeSelection(item.getId());
                 } else {
+                    view.clearEmployeeInfoFields();
                     view.clearTimeEntryFields();
+                    view.enableEmployeeFields(false);
                     view.enableTimeEntryFields(false);
                 }
             }

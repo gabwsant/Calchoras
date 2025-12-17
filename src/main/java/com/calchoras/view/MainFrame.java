@@ -67,6 +67,7 @@ public class MainFrame extends JFrame {
         initFrame();
         initComponents();
         layoutComponents();
+        enableEmployeeFields(false);
         enableTimeEntryFields(false);
     }
 
@@ -303,6 +304,19 @@ public class MainFrame extends JFrame {
         lunchOutField.setEnabled(enable);
         clockOutField.setEnabled(enable);
         isDayOffCheckBox.setEnabled(enable);
+        previousEntryButton.setEnabled(enable);
+        addTimeEntryButton.setEnabled(enable);
+        removeTimeEntryButton.setEnabled(enable);
+        nextEntryButton.setEnabled(enable);
+    }
+
+    public void enableEmployeeFields(boolean enable) {
+        nameField.setEnabled(enable);
+        shiftInField.setEnabled(enable);
+        shiftOutField.setEnabled(enable);
+        lunchBreakMinutesField.setEnabled(enable);
+        updateEmployeeButton.setEnabled(enable);
+        removeEmployeeButton.setEnabled(enable);
     }
 
     public boolean showConfirmationDialog(String message) {
