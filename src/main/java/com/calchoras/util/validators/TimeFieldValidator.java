@@ -26,9 +26,7 @@ public class TimeFieldValidator {
                             int mm = Integer.parseInt(parts[1]);
 
                             if (hh < 0 || hh > 23) return false;
-                            if (mm < 0 || mm > 59) return false;
-
-                            return true;
+                            return mm >= 0 && mm <= 59;
                         }
 
                         return false;

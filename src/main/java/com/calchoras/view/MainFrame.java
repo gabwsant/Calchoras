@@ -3,24 +3,24 @@ package com.calchoras.view;
 import com.calchoras.model.Company;
 import com.calchoras.model.Employee;
 import com.calchoras.model.TimeEntry;
-
-import com.calchoras.util.validators.DateFieldValidator;
-import com.calchoras.util.validators.TimeFieldValidator;
 import lombok.Getter;
-
 import javax.swing.*;
+import javax.swing.text.MaskFormatter;
 import java.awt.*;
-import java.time.LocalDate;
+import java.text.ParseException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Getter
 public class MainFrame extends JFrame {
 
+    MaskFormatter dateMask;
+
     // Employees
     private DefaultListModel<EmployeeListItem> employeeListModel;
     private JList<EmployeeListItem> employeeList;
     private JButton addEmployeeButton;
+    private JButton updateEmployeeButton;
     private JButton removeEmployeeButton;
 
     // Company
@@ -58,6 +58,12 @@ public class MainFrame extends JFrame {
     public MainFrame() {
         super("Calchoras - Cálculadora de Horas Extras");
 
+        try {
+            dateMask = new MaskFormatter("##/##/####");
+        } catch (ParseException e){
+            throw new RuntimeException(e);
+        }
+
         initFrame();
         initComponents();
         layoutComponents();
@@ -78,7 +84,9 @@ public class MainFrame extends JFrame {
         employeeListModel = new DefaultListModel<>();
         employeeList = new JList<>(employeeListModel);
 
-        addEmployeeButton = new JButton("Salvar Funcionário");
+        // EMPLOYEES BUTTONS
+        addEmployeeButton = new JButton("Cadastrar Funcionário");
+        updateEmployeeButton = new JButton("Salvar Funcionário");
         removeEmployeeButton = new JButton("Remover Funcionário");
 
         // COMPANY
@@ -92,7 +100,8 @@ public class MainFrame extends JFrame {
         lunchBreakMinutesField = new JTextField();
 
         // TIME ENTRY FIELDS
-        dateField = new JFormattedTextField();
+        dateField = new JFormattedTextField(dateMask);
+        dateField.setColumns(10);
         clockInField = new JTextField();
         lunchInField = new JTextField();
         lunchOutField = new JTextField();
@@ -126,10 +135,10 @@ public class MainFrame extends JFrame {
         leftPanel.add(new JScrollPane(employeeList), BorderLayout.CENTER);
 
         // ================================
-        // CENTER PANEL — REGISTER COMPANY + EMPLOYEE + TIME ENTRY
+        // CENTER PANEL — REGISTER COMPANY + REGISTER EMPLOYEE + TIME ENTRY
         // ================================
 
-        // --- REGISTER COMPANY ---
+        // --- REGISTER COMPANY AND EMPLOYEE ---
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
@@ -137,9 +146,10 @@ public class MainFrame extends JFrame {
         JPanel employeeInfoPanel = new JPanel(new GridLayout(5, 2, 5, 5));
         employeeInfoPanel.setBorder(BorderFactory.createTitledBorder("Dados do Funcionário"));
 
-        JPanel companyPanel = new JPanel(new GridLayout(1, 1));
-        companyPanel.add(addCompanyButton);
-        centerPanel.add(companyPanel, BorderLayout.NORTH);
+        JPanel insertPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+        insertPanel.add(addCompanyButton);
+        insertPanel.add(addEmployeeButton);
+        centerPanel.add(insertPanel, BorderLayout.NORTH);
 
         employeeInfoPanel.add(new JLabel("Empresa:"));
         employeeInfoPanel.add(companyComboBox);
@@ -158,7 +168,7 @@ public class MainFrame extends JFrame {
 
         // Employee buttons
         JPanel employeeActionButtons = new JPanel(new GridLayout(1, 2, 5, 5));
-        employeeActionButtons.add(addEmployeeButton);
+        employeeActionButtons.add(updateEmployeeButton);
         employeeActionButtons.add(removeEmployeeButton);
 
         // --- TIME ENTRY ---
@@ -264,13 +274,9 @@ public class MainFrame extends JFrame {
     }
 
     public void clearTimeEntryFields() {
-        dateField.setValue(
-                LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1)
-                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-        );
         clockInField.setText("");
-        lunchOutField.setText("");
         lunchInField.setText("");
+        lunchOutField.setText("");
         clockOutField.setText("");
         isDayOffCheckBox.setSelected(false);
     }
@@ -297,6 +303,17 @@ public class MainFrame extends JFrame {
         lunchOutField.setEnabled(enable);
         clockOutField.setEnabled(enable);
         isDayOffCheckBox.setEnabled(enable);
+    }
+
+    public boolean showConfirmationDialog(String message) {
+        Object[] options = {"Sim", "Não"};
+        int decision = JOptionPane.showOptionDialog(this, message, "Atenção", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[1]);
+
+        if  (decision == JOptionPane.YES_OPTION) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

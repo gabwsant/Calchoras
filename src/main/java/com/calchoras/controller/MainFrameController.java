@@ -2,16 +2,18 @@ package com.calchoras.controller;
 
 import com.calchoras.model.Company;
 import com.calchoras.model.Employee;
+import com.calchoras.model.TimeEntry;
 import com.calchoras.service.interfaces.*;
-import com.calchoras.util.validators.DateFieldValidator;
 import com.calchoras.util.validators.TimeFieldValidator;
-import com.calchoras.view.CompanyComboItem;
-import com.calchoras.view.CompanyDialog;
-import com.calchoras.view.EmployeeListItem;
-import com.calchoras.view.MainFrame;
+import com.calchoras.view.*;
 
+import javax.swing.*;
 import java.awt.event.ItemEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 
@@ -22,6 +24,7 @@ public class MainFrameController {
     private final IReportService reportService;
     private final ITimeEntryService timeEntryService;
     private final MainFrame view;
+    private final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public MainFrameController(
             MainFrame view,
@@ -40,7 +43,11 @@ public class MainFrameController {
 
         initValidators();
 
+        initAutoAdvance();
+
         view.getAddCompanyButton().addActionListener(e -> openCompanyDialog());
+
+        view.getAddEmployeeButton().addActionListener(e -> openEmployeeDialog());
 
         view.getCompanyComboBox().addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -51,7 +58,7 @@ public class MainFrameController {
             }
         });
 
-        view.getAddEmployeeButton().addActionListener(e -> handleAddEmployeeAction());
+        view.getUpdateEmployeeButton().addActionListener(e -> handleUpdateEmployeeAction());
 
         view.getRemoveEmployeeButton().addActionListener(e -> handleRemoveEmployeeAction());
 
@@ -68,11 +75,127 @@ public class MainFrameController {
             }
         });
 
+        view.getAddTimeEntryButton().addActionListener(e -> {handleAddTimeEntryAction();});
+
         loadInitalData();
     }
 
+    private void handleUpdateEmployeeAction() {
+        EmployeeListItem selectedEmployee = view.getEmployeeList().getSelectedValue();
+
+        if (selectedEmployee == null) {
+            view.showError("Selecione um funcionário para atualizar!");
+            return;
+        }
+
+        try {
+            int employeeId = selectedEmployee.getId();
+            int companyId = view.getSelectedCompanyId();
+            String emplooyeName = view.getNameField().getText();
+            String shiftInStr = view.getShiftInField().getText();
+            String shiftOutStr = view.getShiftOutField().getText();
+            String lunchBreakMinutesStr = view.getLunchBreakMinutesField().getText();
+
+            if (!employeeService.existsById(employeeId)) {
+                throw new IllegalArgumentException("Funcionário não encontrado na base de dados!");
+            }
+
+            if (!companyService.existsById(companyId)) {
+                throw new IllegalArgumentException("Empresa inválida!");
+            }
+
+            LocalTime shiftIn = LocalTime.parse(shiftInStr);
+            LocalTime shiftOut = LocalTime.parse(shiftOutStr);
+            int lunchBreakMinutes = Integer.parseInt(lunchBreakMinutesStr);
+
+            Employee employeeToUpdate = new Employee(
+                    employeeId,
+                    companyId,
+                    emplooyeName,
+                    shiftIn,
+                    shiftOut,
+                    lunchBreakMinutes
+            );
+
+            employeeService.update(employeeToUpdate);
+
+            view.clearEmployeeInfoFields();
+            handleCompanySelectionChange(companyId);
+            view.showSuccess("Funcionário salvo com sucesso!");
+
+        } catch (java.time.format.DateTimeParseException | NumberFormatException e) {
+            view.showError("Erro no formato de Hora (HH:mm) ou Minutos (numérico).");
+        } catch (IllegalArgumentException e) {
+            view.showError(e.getMessage());
+        } catch (Exception e) {
+            view.showError("Erro ao salvar: " + e.getMessage());
+        }
+    }
+
+    private void handleAddTimeEntryAction() {
+        EmployeeListItem selectedEmployee = view.getEmployeeList().getSelectedValue();
+
+        if (selectedEmployee == null) {
+            view.showError("Selecione um funcionário antes de adicionar um ponto.");
+            return;
+        }
+        try {
+            int employeeId = selectedEmployee.getId();
+
+            LocalDate date = LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER);
+
+            boolean isDayOff = view.getIsDayOffCheckBox().isSelected();
+
+            LocalTime clockIn = parseTimeField(view.getClockInField().getText());
+            LocalTime lunchIn = parseTimeField(view.getLunchInField().getText());
+            LocalTime lunchOut = parseTimeField(view.getLunchOutField().getText());
+            LocalTime clockOut = parseTimeField(view.getClockOutField().getText());
+
+            if (!isDayOff && clockIn == null && clockOut == null && lunchIn == null && lunchOut == null) {
+                throw new IllegalArgumentException("Selecione 'Dia de Folga' ou insira pelo menos um ponto de batida.");
+            }
+
+            TimeEntry timeEntry = new TimeEntry();
+            timeEntry.setEmployeeId(employeeId);
+            timeEntry.setEntryDate(date);
+            timeEntry.setClockIn(clockIn);
+            timeEntry.setLunchIn(lunchIn);
+            timeEntry.setLunchOut(lunchOut);
+            timeEntry.setClockOut(clockOut);
+            timeEntry.setDayOff(isDayOff);
+
+            timeEntryService.save(timeEntry);
+
+            view.getDateField().setValue(date.plusDays(1).format(DATE_FORMATTER));
+            view.clearTimeEntryFields();
+            view.getResultArea().append("\nBatida adicionada para " + timeEntry.getEntryDate().format(DATE_FORMATTER));
+
+        }catch (java.time.format.DateTimeParseException e) {
+            JOptionPane.showMessageDialog(view, "Erro de formato de Data (DD/MM/AAAA) ou Hora (HH:MM).", "Erro de Formato", JOptionPane.ERROR_MESSAGE);
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(view, e.getMessage(), "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(view, "Erro ao salvar o ponto: " + e.getMessage(), "Erro Interno", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private LocalTime parseTimeField(String timeStr) throws java.time.format.DateTimeParseException {
+        if (timeStr == null || timeStr.trim().isEmpty()) {
+            return null;
+        }
+        return LocalTime.parse(timeStr.trim());
+    }
+
+    private void initAutoAdvance() {
+        addAutoAdvanceToField(view.getClockInField());
+        addAutoAdvanceToField(view.getLunchInField());
+        addAutoAdvanceToField(view.getLunchOutField());
+        addAutoAdvanceToField(view.getLunchInField());
+    }
+
     private void initValidators() {
-        DateFieldValidator.apply(view.getDateField());
+        TimeFieldValidator.apply(view.getShiftInField());
+        TimeFieldValidator.apply(view.getShiftOutField());
         TimeFieldValidator.apply(view.getClockInField());
         TimeFieldValidator.apply(view.getLunchInField());
         TimeFieldValidator.apply(view.getLunchOutField());
@@ -84,15 +207,15 @@ public class MainFrameController {
                 .ifPresent(view::displayEmployeeInfo);
     }
 
-    private void handleAddEmployeeAction() {
-        int companyId = view.getSelectedCompanyId();
-        String name = view.getNameField().getText();
-        String shiftInStr = view.getShiftInField().getText();
-        String shiftOutStr = view.getShiftOutField().getText();
-        String lunchBreakMinutesStr = view.getLunchBreakMinutesField().getText();
-
+    private void handleAddEmployeeAction(
+            int companyId,
+            String name,
+            String shiftInStr,
+            String shiftOutStr,
+            String lunchBreakMinutesStr
+    ) {
         try {
-            if (companyId <= 0) {
+            if (!companyService.existsById(companyId)) {
                 throw new IllegalArgumentException("Selecione uma empresa válida.");
             }
 
@@ -116,9 +239,7 @@ public class MainFrameController {
             employeeService.save(employeeToAdd);
 
             view.clearEmployeeInfoFields();
-
             handleCompanySelectionChange(companyId);
-
             view.showSuccess("Funcionário salvo com sucesso!");
 
         } catch (java.time.format.DateTimeParseException | NumberFormatException e) {
@@ -132,6 +253,10 @@ public class MainFrameController {
 
     private void handleRemoveEmployeeAction() {
         try {
+            if (!view.showConfirmationDialog("Deseja realmente remover o funcionário selecionado?")) {
+                return;
+            }
+
             int employeeId = view.getEmployeeList().getSelectedValue().getId();
             int companyId = view.getSelectedCompanyId();
 
@@ -149,6 +274,10 @@ public class MainFrameController {
             List<Company> companies = companyService.findAll();
             view.updateCompanyList(companies);
             view.clearTimeEntryFields();
+            view.getDateField().setValue(
+                    LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1)
+                            .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+            );
         }
         catch (Exception e) {
             view.showError( "Erro ao carregar dados iniciais de empresas: " + e.getMessage());
@@ -174,6 +303,33 @@ public class MainFrameController {
         dialog.setVisible(true);
     }
 
+    private void openEmployeeDialog() {
+        EmployeeDialog dialog = new EmployeeDialog(view);
+        List<Company> companies = companyService.findAll();
+        dialog.updateCompanyList(companies);
+
+        //validators
+        TimeFieldValidator.apply(dialog.getShiftIn());
+        TimeFieldValidator.apply(dialog.getShiftOut());
+
+        dialog.getSaveButton().addActionListener(e -> {
+            try {
+                int companyId = dialog.getCompanyId();
+                String name = dialog.getName();
+                String shiftIn = dialog.getShiftInStr();
+                String shiftOut = dialog.getShiftOutStr();
+                String lunchBreak = dialog.getLunchBreak();
+
+                handleAddEmployeeAction(companyId, name, shiftIn, shiftOut, lunchBreak);
+
+                dialog.dispose();
+            } catch (IllegalArgumentException ex) {
+                view.showError(ex.getMessage());
+            }
+        });
+        dialog.setVisible(true);
+    }
+
     private void handleAddCompanyAction(String name) {
         try {
             Company companyToSave = new Company(name);
@@ -196,6 +352,17 @@ public class MainFrameController {
         employees.sort(Comparator.comparing(Employee::getName));
         view.updateEmployeeList(employees);
         view.clearEmployeeInfoFields();
+    }
+
+    private void addAutoAdvanceToField (JTextField field) {
+        field.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (field.getText().length() == 5) {
+                    field.transferFocus();
+                }
+            }
+        });
     }
 
 }
