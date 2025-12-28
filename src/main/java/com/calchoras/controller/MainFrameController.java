@@ -8,6 +8,8 @@ import com.calchoras.util.validators.TimeFieldValidator;
 import com.calchoras.view.*;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -190,10 +192,10 @@ public class MainFrameController {
     }
 
     private void initAutoAdvance() {
-        addAutoAdvanceToField(view.getClockInField());
-        addAutoAdvanceToField(view.getLunchInField());
-        addAutoAdvanceToField(view.getLunchOutField());
-        addAutoAdvanceToField(view.getLunchInField());
+        view.addAutoAdvanceToField(view.getClockInField());
+        view.addAutoAdvanceToField(view.getLunchInField());
+        view.addAutoAdvanceToField(view.getLunchOutField());
+        view.addAutoAdvanceToField(view.getLunchInField());
     }
 
     private void initValidators() {
@@ -355,17 +357,6 @@ public class MainFrameController {
         employees.sort(Comparator.comparing(Employee::getName));
         view.updateEmployeeList(employees);
         view.clearEmployeeInfoFields();
-    }
-
-    private void addAutoAdvanceToField (JTextField field) {
-        field.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (field.getText().length() == 5) {
-                    field.transferFocus();
-                }
-            }
-        });
     }
 
 }

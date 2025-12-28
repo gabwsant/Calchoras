@@ -7,6 +7,8 @@ import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.text.ParseException;
@@ -149,13 +151,12 @@ public class MainFrame extends JFrame {
         JPanel employeeInfoPanel = new JPanel(new MigLayout("wrap 2, fillx, insets 0", "[right]10[grow, fill]", "[]10[]"));
         employeeInfoPanel.setBorder(BorderFactory.createTitledBorder("Dados do Funcionário"));
 
-        JPanel insertPanel = new JPanel(new GridLayout(1, 2, 5, 5));
+        JPanel insertPanel = new JPanel(new MigLayout("wrap 2", "[grow, fill]", "[]10[]"));
         insertPanel.add(addCompanyButton);
         insertPanel.add(addEmployeeButton);
+        insertPanel.add(new JLabel("Empresa:"), "split 2, span, gapright 10");
+        insertPanel.add(companyComboBox, "growx, wrap");
         centerPanel.add(insertPanel);
-
-        employeeInfoPanel.add(new JLabel("Empresa:"));
-        employeeInfoPanel.add(companyComboBox);
 
         employeeInfoPanel.add(new JLabel("Nome:"));
         employeeInfoPanel.add(nameField);
@@ -330,6 +331,27 @@ public class MainFrame extends JFrame {
         } else {
             return false;
         }
+    }
+    public void addAutoAdvanceToField(JTextField field) {
+        field.getDocument().addDocumentListener(new DocumentListener() {
+
+            private void check() {
+                if (field.getText().length() == 5) {
+                    field.transferFocus();
+                }
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                check();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {}
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {}
+        });
     }
 
 }
