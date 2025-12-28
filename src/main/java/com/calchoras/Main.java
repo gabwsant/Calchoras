@@ -7,12 +7,16 @@ import com.calchoras.repository.TimeEntryRepository;
 import com.calchoras.service.*;
 import com.calchoras.service.interfaces.*;
 import com.calchoras.view.MainFrame;
+import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.*;
 
 public class Main {
 
 	public static void main(String[] args) {
+		System.setProperty("flatlaf.uiScale", "1.5");
+		FlatLightLaf.setup();
+
 		SwingUtilities.invokeLater(() -> {
 			// Repositories
 			CompanyRepository companyRepository = new CompanyRepository();

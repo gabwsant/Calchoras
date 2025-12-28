@@ -4,6 +4,8 @@ import com.calchoras.model.Company;
 import com.calchoras.model.Employee;
 import com.calchoras.model.TimeEntry;
 import lombok.Getter;
+import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
@@ -131,7 +133,7 @@ public class MainFrame extends JFrame {
         // ================================
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
         leftPanel.setBorder(BorderFactory.createTitledBorder("Funcionários"));
-        leftPanel.setPreferredSize(new Dimension(180, 300));
+        leftPanel.setPreferredSize(new Dimension(250, 300));
 
         leftPanel.add(new JScrollPane(employeeList), BorderLayout.CENTER);
 
@@ -141,16 +143,16 @@ public class MainFrame extends JFrame {
 
         // --- REGISTER COMPANY AND EMPLOYEE ---
         JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+        centerPanel.setLayout(new MigLayout("wrap 1, fillx", "[grow, fill]", "[]10[]"));
 
         // --- EMPLOYEE DATA ---
-        JPanel employeeInfoPanel = new JPanel(new GridLayout(5, 2, 5, 5));
+        JPanel employeeInfoPanel = new JPanel(new MigLayout("wrap 2, fillx, insets 0", "[right]10[grow, fill]", "[]10[]"));
         employeeInfoPanel.setBorder(BorderFactory.createTitledBorder("Dados do Funcionário"));
 
         JPanel insertPanel = new JPanel(new GridLayout(1, 2, 5, 5));
         insertPanel.add(addCompanyButton);
         insertPanel.add(addEmployeeButton);
-        centerPanel.add(insertPanel, BorderLayout.NORTH);
+        centerPanel.add(insertPanel);
 
         employeeInfoPanel.add(new JLabel("Empresa:"));
         employeeInfoPanel.add(companyComboBox);
@@ -173,7 +175,7 @@ public class MainFrame extends JFrame {
         employeeActionButtons.add(removeEmployeeButton);
 
         // --- TIME ENTRY ---
-        JPanel timeEntryPanel = new JPanel(new GridLayout(6, 2, 5, 5)); // <-- 6, 2
+        JPanel timeEntryPanel = new JPanel(new MigLayout("wrap 2", "[right]10[grow, fill]", "[]10[]"));
         timeEntryPanel.setBorder(BorderFactory.createTitledBorder("Registro de Ponto"));
 
         timeEntryPanel.add(new JLabel("Data:"));
@@ -191,7 +193,7 @@ public class MainFrame extends JFrame {
         timeEntryPanel.add(new JLabel("Saída:"));
         timeEntryPanel.add(clockOutField);
 
-        timeEntryPanel.add(isDayOffCheckBox);
+        timeEntryPanel.add(isDayOffCheckBox, "span 2, wrap");
 
         JPanel entryActionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         entryActionsPanel.add(previousEntryButton);
