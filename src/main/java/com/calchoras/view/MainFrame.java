@@ -12,6 +12,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -271,10 +272,22 @@ public class MainFrame extends JFrame {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         dateField.setValue(timeEntry.getEntryDate().format(dateFormatter));
-        clockInField.setText(timeEntry.getClockIn().format(timeFormatter));
-        lunchOutField.setText(timeEntry.getLunchOut().format(timeFormatter));
-        lunchInField.setText(timeEntry.getLunchIn().format(timeFormatter));
-        clockOutField.setText(timeEntry.getClockOut().format(timeFormatter));
+
+        if (timeEntry.getClockIn() != null) {
+            clockInField.setText(timeEntry.getClockIn().format(timeFormatter));
+        }
+        if (timeEntry.getLunchIn() != null) {
+            lunchInField.setText(timeEntry.getLunchIn().format(timeFormatter));
+        }
+        if (timeEntry.getLunchOut() != null) {
+            lunchOutField.setText(timeEntry.getLunchOut().format(timeFormatter));
+        }
+
+        if (timeEntry.getClockOut() != null) {
+            clockOutField.setText(timeEntry.getClockOut().format(timeFormatter));
+        }
+
+        isDayOffCheckBox.setSelected(timeEntry.isDayOff());
     }
 
     public void clearTimeEntryFields() {
@@ -290,6 +303,13 @@ public class MainFrame extends JFrame {
         shiftInField.setText("");
         shiftOutField.setText("");
         lunchBreakMinutesField.setText("");
+    }
+
+    public void resetDateField() {
+        dateField.setValue(
+                LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1)
+                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        );
     }
 
     public void showError(String message) {

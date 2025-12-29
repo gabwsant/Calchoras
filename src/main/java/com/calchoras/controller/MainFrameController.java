@@ -82,7 +82,22 @@ public class MainFrameController {
 
         view.getAddTimeEntryButton().addActionListener(e -> {handleAddTimeEntryAction();});
 
+        view.getPreviousEntryButton().addActionListener(e -> handlePreviousEntryButton());
+
         loadInitalData();
+    }
+
+    private void handlePreviousEntryButton() {
+        EmployeeListItem selectedEmployee = view.getEmployeeList().getSelectedValue();
+
+        if (selectedEmployee == null) {
+            return;
+        }
+
+        int employeeId = selectedEmployee.getId();
+        LocalDate date = LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER).minusDays(1);
+
+        loadTimeEntry(employeeId, date);
     }
 
     private void handleUpdateEmployeeAction() {
@@ -210,6 +225,18 @@ public class MainFrameController {
     private void handleEmployeeSelection(int employeeId) {
         employeeService.findById(employeeId)
                 .ifPresent(view::displayEmployeeInfo);
+        loadTimeEntry(employeeId, LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER));
+    }
+
+    private void loadTimeEntry(int timeEntryId){
+        view.clearTimeEntryFields();
+        timeEntryService.findById(timeEntryId).ifPresent(view::displayTimeEntry);
+    }
+
+    private void loadTimeEntry(int employeeId, LocalDate date) {
+        view.clearTimeEntryFields();
+        timeEntryService.findByEmployeeIdAndDate(employeeId, date)
+                .ifPresent(view::displayTimeEntry);
     }
 
     private void handleAddEmployeeAction(
@@ -279,10 +306,7 @@ public class MainFrameController {
             List<Company> companies = companyService.findAll();
             view.updateCompanyList(companies);
             view.clearTimeEntryFields();
-            view.getDateField().setValue(
-                    LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1)
-                            .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-            );
+            view.resetDateField();
         }
         catch (Exception e) {
             view.showError( "Erro ao carregar dados iniciais de empresas: " + e.getMessage());
@@ -357,6 +381,7 @@ public class MainFrameController {
         employees.sort(Comparator.comparing(Employee::getName));
         view.updateEmployeeList(employees);
         view.clearEmployeeInfoFields();
+        view.resetDateField();
     }
 
 }
