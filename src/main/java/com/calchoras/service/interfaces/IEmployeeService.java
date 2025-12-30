@@ -56,6 +56,22 @@ public interface IEmployeeService {
     boolean deleteById(int employeeId);
 
     /**
+     * Disable an employee by its ID
+     *
+     * @param employeeId the ID of the employee to disable
+     * @return true if the employee was disabled, false otherwise
+     */
+    boolean disableEmployee(int employeeId);
+
+    /**
+     * Enables an employee by its ID
+     *
+     * @param employeeId the ID of the employee to enable
+     * @return true if the employee was enabled, false otherwise
+     */
+    boolean enableEmployee(int employeeId);
+
+    /**
      * Checks whether an employee exists by ID.
      *
      * @param employeeId the ID to check

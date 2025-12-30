@@ -14,6 +14,7 @@ public class Employee {
     private LocalTime shiftIn;
     private LocalTime shiftOut;
     private long lunchBreakMinutes;
+    private boolean active = true;
 
     public Employee(
             int companyId,
