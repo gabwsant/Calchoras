@@ -78,10 +78,9 @@ public class MainFrame extends JFrame {
 
     private void initFrame() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(500, 520);
-        setMinimumSize(new Dimension(500, 520));
+        setMinimumSize(new Dimension(800, 600));
+        setPreferredSize(new Dimension(960, 850));
         setLocationRelativeTo(null);
-        setVisible(true);
     }
 
     private void initComponents() {
@@ -127,92 +126,112 @@ public class MainFrame extends JFrame {
     }
 
     private void layoutComponents() {
-
-        this.setLayout(new BorderLayout(10, 10));
-        ((JPanel) this.getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        this.setLayout(new BorderLayout());
 
         // ================================
         // LEFT PANEL — LIST
         // ================================
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
         leftPanel.setBorder(BorderFactory.createTitledBorder("Funcionários"));
-        leftPanel.setPreferredSize(new Dimension(250, 300));
-
         leftPanel.add(new JScrollPane(employeeList), BorderLayout.CENTER);
 
         // ================================
-        // CENTER PANEL — REGISTER COMPANY + REGISTER EMPLOYEE + TIME ENTRY
+        // CENTER PANEL — FORMS
         // ================================
 
-        // --- REGISTER COMPANY AND EMPLOYEE ---
-        JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new MigLayout("wrap 1, fillx", "[grow, fill]", "[]10[]"));
+        JPanel centerFormPanel = new JPanel();
+        centerFormPanel.setLayout(new MigLayout("wrap 1, fillx, insets 10", "[grow, fill]", "[]10[]"));
+
+        // --- INSERTION PANEL (COMPANY/EMPLOYEE) ---
+        JPanel insertPanel = new JPanel(new MigLayout("wrap 2, fillx, insets 0", "[][grow, fill]", "[]5[]"));
+
+        // UPPER BUTTONS
+        JPanel topButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        topButtonsPanel.add(addCompanyButton);
+        topButtonsPanel.add(Box.createHorizontalStrut(5));
+        topButtonsPanel.add(addEmployeeButton);
+
+        insertPanel.add(topButtonsPanel, "span 2, wrap");
+        insertPanel.add(new JLabel("Empresa:"));
+        insertPanel.add(companyComboBox);
+
+        centerFormPanel.add(insertPanel);
 
         // --- EMPLOYEE DATA ---
-        JPanel employeeInfoPanel = new JPanel(new MigLayout("wrap 2, fillx, insets 0", "[right]10[grow, fill]", "[]10[]"));
+        JPanel employeeInfoPanel = new JPanel(new MigLayout("wrap 4, fillx, insets 5", "[right][grow, fill][right][grow, fill]", "[]5[]"));
         employeeInfoPanel.setBorder(BorderFactory.createTitledBorder("Dados do Funcionário"));
 
-        JPanel insertPanel = new JPanel(new MigLayout("wrap 2", "[grow, fill]", "[]10[]"));
-        insertPanel.add(addCompanyButton);
-        insertPanel.add(addEmployeeButton);
-        insertPanel.add(new JLabel("Empresa:"), "split 2, span, gapright 10");
-        insertPanel.add(companyComboBox, "growx, wrap");
-        centerPanel.add(insertPanel);
-
         employeeInfoPanel.add(new JLabel("Nome:"));
-        employeeInfoPanel.add(nameField);
+        employeeInfoPanel.add(nameField, "span 3");
 
-        employeeInfoPanel.add(new JLabel("Início da Jornada:"));
+        employeeInfoPanel.add(new JLabel("Início jornada:"));
         employeeInfoPanel.add(shiftInField);
 
-        employeeInfoPanel.add(new JLabel("Fim da Jornada:"));
+        employeeInfoPanel.add(new JLabel("Fim jornada:"));
         employeeInfoPanel.add(shiftOutField);
 
         employeeInfoPanel.add(new JLabel("Almoço (min):"));
-        employeeInfoPanel.add(lunchBreakMinutesField);
+        employeeInfoPanel.add(lunchBreakMinutesField, "wrap");
 
-        // Employee buttons
+        // Employee action buttons
         JPanel employeeActionButtons = new JPanel(new GridLayout(1, 2, 5, 5));
         employeeActionButtons.add(updateEmployeeButton);
         employeeActionButtons.add(removeEmployeeButton);
 
-        // --- TIME ENTRY ---
-        JPanel timeEntryPanel = new JPanel(new MigLayout("wrap 2", "[right]10[grow, fill]", "[]10[]"));
+        centerFormPanel.add(employeeInfoPanel);
+        centerFormPanel.add(employeeActionButtons, "growx");
+
+        // --- TIME ENTRIES ---
+        JPanel timeEntryPanel = new JPanel(new MigLayout("wrap 4, fillx, insets 5", "[right][grow, fill][right][grow, fill]", "[]5[]"));
         timeEntryPanel.setBorder(BorderFactory.createTitledBorder("Registro de Ponto"));
 
         timeEntryPanel.add(new JLabel("Data:"));
         timeEntryPanel.add(dateField);
 
+        timeEntryPanel.add(isDayOffCheckBox, "span 2");
+
         timeEntryPanel.add(new JLabel("Entrada:"));
         timeEntryPanel.add(clockInField);
 
-        timeEntryPanel.add(new JLabel("Saída Almoço:"));
+        timeEntryPanel.add(new JLabel("Início Almoço:"));
         timeEntryPanel.add(lunchInField);
 
-        timeEntryPanel.add(new JLabel("Volta Almoço:"));
+        timeEntryPanel.add(new JLabel("Fim Almoço:"));
         timeEntryPanel.add(lunchOutField);
 
         timeEntryPanel.add(new JLabel("Saída:"));
         timeEntryPanel.add(clockOutField);
 
-        timeEntryPanel.add(isDayOffCheckBox, "span 2, wrap");
+        centerFormPanel.add(timeEntryPanel);
 
+        // Nav buttons + time entry action buttons
         JPanel entryActionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         entryActionsPanel.add(previousEntryButton);
         entryActionsPanel.add(addTimeEntryButton);
         entryActionsPanel.add(removeTimeEntryButton);
         entryActionsPanel.add(nextEntryButton);
 
-        centerPanel.add(employeeInfoPanel);
-        centerPanel.add(employeeActionButtons);
-        centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        centerPanel.add(timeEntryPanel);
-        centerPanel.add(entryActionsPanel);
+        centerFormPanel.add(entryActionsPanel, "growx");
 
         // ================================
-        // BOTTOM PANEL — MAIN ACTIONS
+        // CENTER SCROLL PANE
+        // ================================
+        JScrollPane centerScrollPane = new JScrollPane(centerFormPanel);
+        centerScrollPane.setBorder(null);
+        centerScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        // ================================
+        // SPLIT PANE
+        // ================================
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, centerScrollPane);
+        splitPane.setDividerLocation(250);
+        splitPane.setResizeWeight(0.0);
+
+        // ================================
+        // BOTTOM PANEL — ACTION AND RESULTS
         // ================================
         JPanel southPanel = new JPanel(new BorderLayout(5, 5));
+        southPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
         JPanel mainActionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         mainActionsPanel.add(resetCalculationButton);
@@ -221,17 +240,16 @@ public class MainFrame extends JFrame {
 
         JScrollPane resultScrollPane = new JScrollPane(resultArea);
         resultScrollPane.setBorder(BorderFactory.createTitledBorder("Resultados / Relatório"));
-        resultScrollPane.setPreferredSize(new Dimension(100, 150));
+        resultScrollPane.setPreferredSize(new Dimension(0, 150));
 
         southPanel.add(mainActionsPanel, BorderLayout.NORTH);
         southPanel.add(resultScrollPane, BorderLayout.CENTER);
 
-        this.add(leftPanel, BorderLayout.WEST);
-        this.add(centerPanel, BorderLayout.CENTER);
+        this.add(splitPane, BorderLayout.CENTER);
         this.add(southPanel, BorderLayout.SOUTH);
 
         this.pack();
-        this.setMinimumSize(this.getSize());
+        this.setVisible(true);
     }
 
     public void updateEmployeeList(List<Employee> employees) {
