@@ -364,11 +364,7 @@ public class MainFrame extends JFrame {
         Object[] options = {"Sim", "Não"};
         int decision = JOptionPane.showOptionDialog(this, message, "Atenção", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[1]);
 
-        if  (decision == JOptionPane.YES_OPTION) {
-            return true;
-        } else {
-            return false;
-        }
+        return decision == JOptionPane.YES_OPTION;
     }
     public void addAutoAdvanceToField(JTextField field) {
         field.getDocument().addDocumentListener(new DocumentListener() {

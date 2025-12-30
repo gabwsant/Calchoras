@@ -9,10 +9,10 @@ public class CompanyDialog extends JDialog {
 
     private final JTextField nameField;
     @Getter
-    private JButton saveButton;
+    private final JButton saveButton;
 
     public CompanyDialog(JFrame parent) {
-        super(parent, "Cadastrar Empresa", true);
+        super(parent, "Calchoras - Cadastrar Empresa", true);
 
         nameField = new JTextField();
 

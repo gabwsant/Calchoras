@@ -9,7 +9,7 @@ import java.util.List;
 
 public class EmployeeDialog extends JDialog {
 
-    private JComboBox<CompanyComboItem> companyComboBox;
+    private final JComboBox<CompanyComboItem> companyComboBox;
     private final JTextField nameField;
     @Getter
     private final JTextField shiftIn;
@@ -17,10 +17,10 @@ public class EmployeeDialog extends JDialog {
     private final JTextField shiftOut;
     private final JTextField lunchBreak;
     @Getter
-    private JButton saveButton;
+    private final JButton saveButton;
 
     public EmployeeDialog(JFrame parent) {
-        super(parent, "Cadastrar Funcionário", true);
+        super(parent, "Calchoras - Cadastrar Funcionário", true);
 
         companyComboBox = new JComboBox<>();
         nameField = new JTextField();
