@@ -1,18 +1,13 @@
 package com.calchoras;
 
-import com.calchoras.controller.MainFrameController;
-import com.calchoras.repository.CompanyRepository;
-import com.calchoras.repository.EmployeeRepository;
-import com.calchoras.repository.TimeEntryRepository;
-import com.calchoras.repository.interfaces.ICompanyRepository;
-import com.calchoras.repository.interfaces.IEmployeeRepository;
-import com.calchoras.repository.interfaces.ITimeEntryRepository;
-import com.calchoras.service.*;
+import javax.swing.*;
+import com.calchoras.controller.*;
+import com.calchoras.repository.interfaces.*;
+import com.calchoras.repository.*;
 import com.calchoras.service.interfaces.*;
+import com.calchoras.service.*;
 import com.calchoras.view.MainFrame;
 import com.formdev.flatlaf.FlatLightLaf;
-
-import javax.swing.*;
 
 public class Main {
 
@@ -28,7 +23,7 @@ public class Main {
 			// Services
 			ICompanyService companyService = new CompanyService(companyRepository);
 			IEmployeeService employeeService = new EmployeeService(employeeRepository, companyService);
-			ITimeEntryService timeEntryService = new TimeEntryService(timeEntryRepository, employeeService); // <- aqui passamos o EmployeeService
+			ITimeEntryService timeEntryService = new TimeEntryService(timeEntryRepository, employeeService);
 			IDailyCalculationService dailyCalculationService = new DailyCalculationService();
 			IReportService reportService = new ReportService(dailyCalculationService);
 
