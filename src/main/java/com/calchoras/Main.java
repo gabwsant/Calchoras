@@ -4,6 +4,9 @@ import com.calchoras.controller.MainFrameController;
 import com.calchoras.repository.CompanyRepository;
 import com.calchoras.repository.EmployeeRepository;
 import com.calchoras.repository.TimeEntryRepository;
+import com.calchoras.repository.interfaces.ICompanyRepository;
+import com.calchoras.repository.interfaces.IEmployeeRepository;
+import com.calchoras.repository.interfaces.ITimeEntryRepository;
 import com.calchoras.service.*;
 import com.calchoras.service.interfaces.*;
 import com.calchoras.view.MainFrame;
@@ -14,14 +17,13 @@ import javax.swing.*;
 public class Main {
 
 	public static void main(String[] args) {
-		//System.setProperty("flatlaf.uiScale", "1.5");
 		FlatLightLaf.setup();
 
 		SwingUtilities.invokeLater(() -> {
 			// Repositories
-			CompanyRepository companyRepository = new CompanyRepository();
-			EmployeeRepository employeeRepository = new EmployeeRepository();
-			TimeEntryRepository timeEntryRepository = new TimeEntryRepository();
+			ICompanyRepository companyRepository = new CompanyRepository();
+			IEmployeeRepository employeeRepository = new EmployeeRepository();
+			ITimeEntryRepository timeEntryRepository = new TimeEntryRepository();
 
 			// Services
 			ICompanyService companyService = new CompanyService(companyRepository);
