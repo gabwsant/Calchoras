@@ -94,9 +94,9 @@ public class MainFrame extends JFrame {
 
         // EMPLOYEES BUTTONS
         addEmployeeButton = new JButton("Cadastrar Funcionário");
-        updateEmployeeButton = new JButton("Salvar Funcionário");
+        updateEmployeeButton = new JButton("Salvar alterações");
         removeEmployeeButton = new JButton("Remover Funcionário");
-        enableEmployeeButton = new JButton("Habilitar Funcionário");
+        enableEmployeeButton = new JButton("Habilitar");
 
         // COMPANY
         companyComboBox = new JComboBox<>();
@@ -118,7 +118,7 @@ public class MainFrame extends JFrame {
         isDayOffCheckBox = new JCheckBox("Dia de Folga (Ignorar Batidas)");
 
         previousEntryButton = new JButton("Anterior");
-        addTimeEntryButton = new JButton("Adicionar");
+        addTimeEntryButton = new JButton("Salvar");
         removeTimeEntryButton = new JButton("Remover");
         nextEntryButton = new JButton("Próximo");
 
@@ -178,18 +178,19 @@ public class MainFrame extends JFrame {
         employeeInfoPanel.add(new JLabel("Almoço (min):"));
         employeeInfoPanel.add(lunchBreakMinutesField, "wrap");
 
-        // Employee action buttons
-        JPanel employeeActionButtons = new JPanel(new GridLayout(1, 2, 5, 5));
-        employeeActionButtons.add(updateEmployeeButton);
-        //employeeActionButtons.add(removeEmployeeButton);
-        employeeActionButtons.add(enableEmployeeButton);
+        //Employee action buttons
+        employeeInfoPanel.add(updateEmployeeButton, "span 4, split 2, center, width 200!");
+        employeeInfoPanel.add(enableEmployeeButton, "width 200!");
 
         centerFormPanel.add(employeeInfoPanel);
-        centerFormPanel.add(employeeActionButtons, "growx");
 
         // --- TIME ENTRIES ---
         JPanel timeEntryPanel = new JPanel(new MigLayout("wrap 4, fillx, insets 5", "[right][grow, fill][right][grow, fill]", "[]5[]"));
         timeEntryPanel.setBorder(BorderFactory.createTitledBorder("Registro de Ponto"));
+
+        // Nav buttons
+        timeEntryPanel.add(previousEntryButton, "span 4, split 2, center, width 200!");
+        timeEntryPanel.add(nextEntryButton, "width 200!");
 
         timeEntryPanel.add(new JLabel("Data:"));
         timeEntryPanel.add(dateField);
@@ -208,16 +209,11 @@ public class MainFrame extends JFrame {
         timeEntryPanel.add(new JLabel("Saída:"));
         timeEntryPanel.add(clockOutField);
 
+        // Time entry action buttons
+        timeEntryPanel.add(addTimeEntryButton, "span 4, split 2, center, width 200!");
+        timeEntryPanel.add(removeTimeEntryButton, "width 200!");
+
         centerFormPanel.add(timeEntryPanel);
-
-        // Nav buttons + time entry action buttons
-        JPanel entryActionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        entryActionsPanel.add(previousEntryButton);
-        entryActionsPanel.add(addTimeEntryButton);
-        entryActionsPanel.add(removeTimeEntryButton);
-        entryActionsPanel.add(nextEntryButton);
-
-        centerFormPanel.add(entryActionsPanel, "growx");
 
         // ================================
         // CENTER SCROLL PANE
@@ -291,9 +287,9 @@ public class MainFrame extends JFrame {
         lunchBreakMinutesField.setText(String.valueOf(employee.getLunchBreakMinutes()));
 
         if (employee.isActive()) {
-            enableEmployeeButton.setText("Desabilitar Funcionário");
+            enableEmployeeButton.setText("Desabilitar");
         } else {
-            enableEmployeeButton.setText("Habilitar Funcionário");
+            enableEmployeeButton.setText("Habilitar");
         }
 
     }

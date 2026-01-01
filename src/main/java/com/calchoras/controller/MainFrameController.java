@@ -156,6 +156,7 @@ public class MainFrameController {
             String shiftInStr = view.getShiftInField().getText();
             String shiftOutStr = view.getShiftOutField().getText();
             String lunchBreakMinutesStr = view.getLunchBreakMinutesField().getText();
+            boolean active = view.getEmployeeList().getSelectedValue().isActive();
 
             if (!employeeService.existsById(employeeId)) {
                 throw new IllegalArgumentException("Funcionário não encontrado na base de dados!");
@@ -176,7 +177,7 @@ public class MainFrameController {
                     shiftIn,
                     shiftOut,
                     lunchBreakMinutes,
-                    true
+                    active
             );
 
             employeeService.update(employeeToUpdate);
