@@ -62,6 +62,8 @@ public class MainFrameController {
 
         view.getUpdateEmployeeButton().addActionListener(e -> handleUpdateEmployeeAction());
 
+        view.getEnableEmployeeButton().addActionListener(e -> handleEnableEmployeeAction());
+
         view.getRemoveEmployeeButton().addActionListener(e -> handleRemoveEmployeeAction());
 
         view.getEmployeeList().addListSelectionListener(e -> {
@@ -85,6 +87,38 @@ public class MainFrameController {
         view.getPreviousEntryButton().addActionListener(e -> handlePreviousEntryButton());
 
         loadInitalData();
+    }
+
+    private void handleEnableEmployeeAction() {
+        EmployeeListItem selectedEmployee = view.getEmployeeList().getSelectedValue();
+
+        if (selectedEmployee == null) {
+            view.showError("Selecione um funcionário para realizar a ação!");
+            return;
+        }
+        try {
+            int employeeId = selectedEmployee.getId();
+            int companyId = view.getSelectedCompanyId();
+
+            if (!employeeService.existsById(employeeId)) {
+                throw new IllegalArgumentException("Funcionário não encontrado na base de dados!");
+            }
+
+            if(selectedEmployee.isActive()){
+                employeeService.disableById(selectedEmployee.getId());
+            } else  {
+                employeeService.enableById(selectedEmployee.getId());
+            }
+
+            view.clearEmployeeInfoFields();
+            handleCompanySelectionChange(companyId);
+            view.showSuccess("Ação realizada com sucesso!");
+
+        } catch (IllegalArgumentException e) {
+            view.showError(e.getMessage());
+        } catch (Exception e) {
+            view.showError("Erro ao salvar: " + e.getMessage());
+        }
     }
 
     private void handlePreviousEntryButton() {
@@ -379,7 +413,10 @@ public class MainFrameController {
 
     public void handleCompanySelectionChange(int companyId) {
         List<Employee> employees = employeeService.findByCompanyId(companyId);
-        employees.sort(Comparator.comparing(Employee::getName));
+        employees.sort(
+                Comparator.comparing(Employee::isActive, Comparator.reverseOrder())
+                        .thenComparing(Employee::getName)
+        );
         view.updateEmployeeList(employees);
         view.clearEmployeeInfoFields();
         view.resetDateField();
