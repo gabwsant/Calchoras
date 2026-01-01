@@ -34,6 +34,14 @@ public interface IEmployeeRepository {
     List<Employee> findByCompanyId(int companyId);
 
     /**
+     * Returns all ACTIVE employees belonging to a specific company.
+     *
+     * @param companyId the company ID
+     * @return a list of active employees
+     */
+    List<Employee> findActivesByCompanyId(int companyId);
+
+    /**
      * Saves a new employee and returns the created instance with its ID assigned.
      *
      * @param employee the employee to save

@@ -32,6 +32,14 @@ public interface IEmployeeService {
     List<Employee> findByCompanyId(int companyId);
 
     /**
+     * Returns ACTIVES employees belonging to a company.
+     *
+     * @param companyId the company ID
+     * @return a list of active employees
+     */
+    List<Employee> findActivesByCompanyId(int companyId);
+
+    /**
      * Creates a new employee.
      *
      * @param employee the employee to be saved

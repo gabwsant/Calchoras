@@ -34,6 +34,9 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Override
+    public List<Employee> findActivesByCompanyId(int companyId) { return employeeRepository.findActivesByCompanyId(companyId); }
+
+    @Override
     public Employee save(Employee employee) {
         if (employeeRepository.existsByName(employee.getName()) &&
                 employeeRepository.existsByCompanyId(employee.getCompanyId())) {

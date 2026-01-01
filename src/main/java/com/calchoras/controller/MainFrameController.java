@@ -86,7 +86,14 @@ public class MainFrameController {
 
         view.getPreviousEntryButton().addActionListener(e -> handlePreviousEntryButton());
 
+        view.getShowAllEmployees().addActionListener(e -> handleShowAllEmployeesChange());
+
         loadInitalData();
+    }
+
+    private void handleShowAllEmployeesChange() {
+        int companyId = view.getSelectedCompanyId();
+        handleCompanySelectionChange(companyId);
     }
 
     private void handleEnableEmployeeAction() {
@@ -412,7 +419,13 @@ public class MainFrameController {
     }
 
     public void handleCompanySelectionChange(int companyId) {
-        List<Employee> employees = employeeService.findByCompanyId(companyId);
+        List<Employee> employees;
+        if (view.getShowAllEmployees().isSelected()) {
+            employees = employeeService.findByCompanyId(companyId);
+        } else {
+            employees = employeeService.findActivesByCompanyId(companyId);
+        }
+
         employees.sort(
                 Comparator.comparing(Employee::isActive, Comparator.reverseOrder())
                         .thenComparing(Employee::getName)

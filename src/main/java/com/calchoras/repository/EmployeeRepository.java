@@ -79,6 +79,14 @@ public class EmployeeRepository implements IEmployeeRepository {
     }
 
     @Override
+    public List<Employee> findActivesByCompanyId(int companyId) {
+        return employeesList.stream()
+                .filter(e -> e.getCompanyId() == companyId)
+                .filter(Employee::isActive)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Employee save(Employee employee) {
         int nextId = employeesList.stream()
                 .mapToInt(Employee::getId)
