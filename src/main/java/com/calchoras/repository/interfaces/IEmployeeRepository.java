@@ -63,7 +63,7 @@ public interface IEmployeeRepository {
      * @param id the employee ID
      * @return true if the employee was successfully disabled, false otherwise
      */
-    boolean disableEmployee(int id);
+    boolean disableById(int id);
 
     /**
      * Enables an employee by its ID
@@ -71,7 +71,7 @@ public interface IEmployeeRepository {
      * @param id the employee ID
      * @return true if the employee was successfully enabled, false otherwise
      */
-    boolean enableEmployee(int id);
+    boolean enableById(int id);
 
     /**
      * Checks whether an employee exists by ID.

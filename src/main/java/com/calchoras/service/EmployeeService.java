@@ -70,6 +70,12 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Override
+    public boolean disableById(int employeeId) { return employeeRepository.disableById(employeeId); }
+
+    @Override
+    public boolean enableById(int employeeId) { return employeeRepository.enableById(employeeId); }
+
+    @Override
     public boolean existsById(int employeeId) {
         return employeeRepository.existsById(employeeId);
     }

@@ -24,9 +24,11 @@ public class MainFrame extends JFrame {
     // Employees
     private DefaultListModel<EmployeeListItem> employeeListModel;
     private JList<EmployeeListItem> employeeList;
+    private JCheckBox showAllEmployees;
     private JButton addEmployeeButton;
     private JButton updateEmployeeButton;
     private JButton removeEmployeeButton;
+    private JButton enableEmployeeButton;
 
     // Company
     private JComboBox<CompanyComboItem> companyComboBox;
@@ -79,7 +81,6 @@ public class MainFrame extends JFrame {
     private void initFrame() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(800, 600));
-        setPreferredSize(new Dimension(960, 850));
         setLocationRelativeTo(null);
     }
 
@@ -88,11 +89,14 @@ public class MainFrame extends JFrame {
         // EMPLOYEES LIST
         employeeListModel = new DefaultListModel<>();
         employeeList = new JList<>(employeeListModel);
+        employeeList.setCellRenderer(new EmployeeListRenderer());
+        showAllEmployees = new JCheckBox("Mostrar tudo");
 
         // EMPLOYEES BUTTONS
         addEmployeeButton = new JButton("Cadastrar Funcionário");
         updateEmployeeButton = new JButton("Salvar Funcionário");
         removeEmployeeButton = new JButton("Remover Funcionário");
+        enableEmployeeButton = new JButton("Habilitar Funcionário");
 
         // COMPANY
         companyComboBox = new JComboBox<>();
@@ -134,6 +138,7 @@ public class MainFrame extends JFrame {
         JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
         leftPanel.setBorder(BorderFactory.createTitledBorder("Funcionários"));
         leftPanel.add(new JScrollPane(employeeList), BorderLayout.CENTER);
+        leftPanel.add(showAllEmployees, BorderLayout.SOUTH);
 
         // ================================
         // CENTER PANEL — FORMS
@@ -176,7 +181,8 @@ public class MainFrame extends JFrame {
         // Employee action buttons
         JPanel employeeActionButtons = new JPanel(new GridLayout(1, 2, 5, 5));
         employeeActionButtons.add(updateEmployeeButton);
-        employeeActionButtons.add(removeEmployeeButton);
+        //employeeActionButtons.add(removeEmployeeButton);
+        employeeActionButtons.add(enableEmployeeButton);
 
         centerFormPanel.add(employeeInfoPanel);
         centerFormPanel.add(employeeActionButtons, "growx");
@@ -256,7 +262,7 @@ public class MainFrame extends JFrame {
         employeeListModel.clear();
         for (Employee emp : employees) {
             employeeListModel.addElement(
-                    new EmployeeListItem(emp.getId(), emp.getName())
+                    new EmployeeListItem(emp.getId(), emp.getName(), emp.isActive())
             );
         }
     }
@@ -283,6 +289,13 @@ public class MainFrame extends JFrame {
         shiftInField.setText(employee.getShiftIn().format(timeFormatter));
         shiftOutField.setText(employee.getShiftOut().format(timeFormatter));
         lunchBreakMinutesField.setText(String.valueOf(employee.getLunchBreakMinutes()));
+
+        if (employee.isActive()) {
+            enableEmployeeButton.setText("Desabilitar Funcionário");
+        } else {
+            enableEmployeeButton.setText("Habilitar Funcionário");
+        }
+
     }
 
     public void displayTimeEntry(TimeEntry timeEntry) {
@@ -358,6 +371,7 @@ public class MainFrame extends JFrame {
         lunchBreakMinutesField.setEnabled(enable);
         updateEmployeeButton.setEnabled(enable);
         removeEmployeeButton.setEnabled(enable);
+        enableEmployeeButton.setEnabled(enable);
     }
 
     public boolean showConfirmationDialog(String message) {
@@ -387,5 +401,4 @@ public class MainFrame extends JFrame {
             public void changedUpdate(DocumentEvent e) {}
         });
     }
-
 }

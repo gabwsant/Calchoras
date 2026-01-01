@@ -110,6 +110,34 @@ public class EmployeeRepository implements IEmployeeRepository {
     }
 
     @Override
+    public boolean disableById(int id){
+        Optional<Employee> employee = employeesList.stream()
+                .filter(e -> e.getId() == id)
+                .findFirst();
+
+        if (employee.isPresent()) {
+            employee.get().setActive(false);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean enableById(int id){
+        Optional<Employee> employee = employeesList.stream()
+                .filter(e -> e.getId() == id)
+                .findFirst();
+
+        if (employee.isPresent()) {
+            employee.get().setActive(true);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     public boolean existsById(int id) {
         return employeesList.stream().anyMatch(e -> e.getId() == id);
     }

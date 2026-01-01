@@ -134,7 +134,8 @@ public class MainFrameController {
                     emplooyeName,
                     shiftIn,
                     shiftOut,
-                    lunchBreakMinutes
+                    lunchBreakMinutes,
+                    true
             );
 
             employeeService.update(employeeToUpdate);

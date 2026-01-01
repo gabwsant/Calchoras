@@ -61,7 +61,7 @@ public interface IEmployeeService {
      * @param employeeId the ID of the employee to disable
      * @return true if the employee was disabled, false otherwise
      */
-    boolean disableEmployee(int employeeId);
+    boolean disableById(int employeeId);
 
     /**
      * Enables an employee by its ID
@@ -69,7 +69,7 @@ public interface IEmployeeService {
      * @param employeeId the ID of the employee to enable
      * @return true if the employee was enabled, false otherwise
      */
-    boolean enableEmployee(int employeeId);
+    boolean enableById(int employeeId);
 
     /**
      * Checks whether an employee exists by ID.
