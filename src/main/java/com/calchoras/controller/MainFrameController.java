@@ -92,6 +92,13 @@ public class MainFrameController {
 
         view.getDateField().addActionListener(e -> handleDateChangeAction());
 
+        view.getDateField().addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                handleDateChangeAction();
+            }
+        });
+
         addHandleMouseRightClick();
 
         loadInitalData();
@@ -108,6 +115,8 @@ public class MainFrameController {
         LocalDate date = LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER);
 
         loadTimeEntry(employeeId, date);
+
+        view.getIsDayOffCheckBox().requestFocus();
     }
 
     private void handleNextEntryAction() {
