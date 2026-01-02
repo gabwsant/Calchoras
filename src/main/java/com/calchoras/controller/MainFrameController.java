@@ -8,11 +8,7 @@ import com.calchoras.util.validators.TimeFieldValidator;
 import com.calchoras.view.*;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -88,7 +84,78 @@ public class MainFrameController {
 
         view.getShowAllEmployees().addActionListener(e -> handleShowAllEmployeesChange());
 
+        view.getToggleStatusItem().addActionListener(e -> handleEnableEmployeeAction());
+
+        view.getRemoveEmployeeItem().addActionListener(e -> handleRemoveEmployeeAction());
+
+        view.getNextEntryButton().addActionListener(e -> handleNextEntryAction());
+
+        view.getDateField().addActionListener(e -> handleDateChangeAction());
+
+        addHandleMouseRightClick();
+
         loadInitalData();
+    }
+
+    private void handleDateChangeAction() {
+        EmployeeListItem selectedEmployee = view.getEmployeeList().getSelectedValue();
+
+        if (selectedEmployee == null) {
+            return;
+        }
+
+        int employeeId = selectedEmployee.getId();
+        LocalDate date = LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER);
+
+        loadTimeEntry(employeeId, date);
+    }
+
+    private void handleNextEntryAction() {
+        EmployeeListItem selectedEmployee = view.getEmployeeList().getSelectedValue();
+
+        if (selectedEmployee == null) {
+            return;
+        }
+
+        int employeeId = selectedEmployee.getId();
+        LocalDate date = LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER).plusDays(1);
+        view.getDateField().setText(date.format(DATE_FORMATTER));
+
+        loadTimeEntry(employeeId, date);
+    }
+
+    private void addHandleMouseRightClick() {
+        JList<EmployeeListItem> list = view.getEmployeeList();
+
+        list.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                handlePopup(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                handlePopup(e);
+            }
+
+            private void handlePopup(MouseEvent e) {
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    int index = list.locationToIndex(e.getPoint());
+
+                    if (index != -1 && list.getCellBounds(index, index).contains(e.getPoint())) {
+                        list.setSelectedIndex(index);
+                        EmployeeListItem item = list.getSelectedValue();
+
+                        if (item != null) {
+                            view.getToggleStatusItem().setText(item.isActive() ?
+                                    "Desabilitar Funcionário" : "Habilitar Funcionário");
+
+                            view.getPopupMenu().show(list, e.getX(), e.getY());
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private void handleShowAllEmployeesChange() {
@@ -137,6 +204,7 @@ public class MainFrameController {
 
         int employeeId = selectedEmployee.getId();
         LocalDate date = LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER).minusDays(1);
+        view.getDateField().setText(date.format(DATE_FORMATTER));
 
         loadTimeEntry(employeeId, date);
     }
@@ -328,7 +396,11 @@ public class MainFrameController {
 
     private void handleRemoveEmployeeAction() {
         try {
-            if (!view.showConfirmationDialog("Deseja realmente remover o funcionário selecionado?")) {
+            if (!view.showConfirmationDialog(
+                    "O funcionário e todos os seus registros de ponto " +
+                    "serão excluídos da base de dados. O recomendado é " +
+                    "desabilitar o funcionário. Deseja prosseguir com a " +
+                    "exclusão mesmo assim?")) {
                 return;
             }
 

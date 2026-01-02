@@ -62,6 +62,11 @@ public class MainFrame extends JFrame {
     // Result
     private JTextArea resultArea;
 
+    // Mouse right button actions
+    private JPopupMenu popupMenu;
+    private JMenuItem toggleStatusItem;
+    private JMenuItem removeEmployeeItem;
+
     public MainFrame() {
         super("Calchoras - Cálculadora de Horas Extras");
 
@@ -127,6 +132,12 @@ public class MainFrame extends JFrame {
         printReportButton = new JButton("Gerar Relatório");
 
         resultArea = new JTextArea();
+
+        popupMenu = new JPopupMenu();
+        toggleStatusItem = new JMenuItem();
+        removeEmployeeItem = new JMenuItem("Excluir");
+        popupMenu.add(toggleStatusItem);
+        popupMenu.add(removeEmployeeItem);
     }
 
     private void layoutComponents() {
@@ -296,9 +307,6 @@ public class MainFrame extends JFrame {
 
     public void displayTimeEntry(TimeEntry timeEntry) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-        dateField.setValue(timeEntry.getEntryDate().format(dateFormatter));
 
         if (timeEntry.getClockIn() != null) {
             clockInField.setText(timeEntry.getClockIn().format(timeFormatter));
