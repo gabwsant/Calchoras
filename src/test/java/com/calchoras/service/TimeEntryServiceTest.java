@@ -1,8 +1,7 @@
 package com.calchoras.service;
 
-import com.calchoras.model.TimeEntry;
+import com.calchoras.dto.TimeEntryDTO;
 import com.calchoras.repository.TimeEntryRepository;
-import com.calchoras.service.interfaces.ITimeEntryService;
 import com.calchoras.service.interfaces.IEmployeeService;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
@@ -16,20 +15,21 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 
 @DisplayName("Testes para TimeEntryService")
 class TimeEntryServiceTest {
 
     private final String TEST_FILE_PATH = "batidas_teste.json";
     private TimeEntryService timeEntryService;
-    private TimeEntryRepository timeEntryRepository;
     private IEmployeeService employeeServiceMock;
 
     @BeforeEach
     void setUp() {
         deleteTestFile();
-        timeEntryRepository = new TimeEntryRepository(TEST_FILE_PATH);
+
+        TimeEntryRepository timeEntryRepository = new TimeEntryRepository(TEST_FILE_PATH);
 
         employeeServiceMock = Mockito.mock(IEmployeeService.class);
         when(employeeServiceMock.existsById(anyInt())).thenReturn(true);
@@ -55,40 +55,53 @@ class TimeEntryServiceTest {
     void save_ShouldAssignIdAndPersist() {
         when(employeeServiceMock.existsById(1)).thenReturn(true);
 
-        TimeEntry entry = new TimeEntry();
-        entry.setEmployeeId(1);
-        entry.setEntryDate(LocalDate.of(2025, 11, 29));
-        entry.setClockIn(LocalTime.of(9, 0));
+        TimeEntryDTO entry = new TimeEntryDTO(
+                0,
+                1,
+                LocalDate.of(2025, 11, 29),
+                LocalTime.of(9, 0),
+                null, null, null,
+                false
+        );
 
-        TimeEntry saved = timeEntryService.save(entry);
+        TimeEntryDTO saved = timeEntryService.save(entry);
 
         assertNotNull(saved, "O objeto salvo não deveria ser nulo");
-        assertEquals(1, saved.getId(), "O ID da primeira batida deveria ser 1");
+        assertTrue(saved.id() > 0, "O ID da batida deveria ser gerado (> 0)");
 
-        List<TimeEntry> entries = timeEntryService.findByEmployeeId(1);
+        List<TimeEntryDTO> entries = timeEntryService.findByEmployeeId(1);
         assertEquals(1, entries.size(), "Deveria ter uma batida de ponto registrada");
     }
 
     @Test
-    @DisplayName("Deve lançar exceção ao tentar salvar batida duplicada")
+    @DisplayName("Deve lançar exceção ao tentar salvar batida duplicada (mesmo funcionário e data)")
     void save_ShouldThrowExceptionOnDuplicate() {
         when(employeeServiceMock.existsById(1)).thenReturn(true);
 
-        TimeEntry entry = new TimeEntry();
-        entry.setEmployeeId(1);
-        entry.setEntryDate(LocalDate.of(2025, 11, 29));
-        entry.setClockIn(LocalTime.of(9, 0));
+        TimeEntryDTO entry = new TimeEntryDTO(
+                0,
+                1,
+                LocalDate.of(2025, 11, 29),
+                LocalTime.of(9, 0),
+                null, null, null, false
+        );
 
         timeEntryService.save(entry);
 
-        TimeEntry duplicate = new TimeEntry();
-        duplicate.setEmployeeId(1);
-        duplicate.setEntryDate(LocalDate.of(2025, 11, 29));
-        duplicate.setClockIn(LocalTime.of(10, 0));
+        // Tentativa de salvar outro registro para o mesmo dia
+        TimeEntryDTO duplicate = new TimeEntryDTO(
+                0,
+                1,
+                LocalDate.of(2025, 11, 29), // Mesma data
+                LocalTime.of(10, 0),       // Horário diferente, mas data igual bloqueia
+                null, null, null, false
+        );
 
-        assertThrows(IllegalArgumentException.class,
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> timeEntryService.save(duplicate),
                 "Deveria lançar exceção ao tentar adicionar batida duplicada");
+
+        assertEquals("Já existe um lançamento para esse funcionário nessa data.", ex.getMessage());
     }
 
     @Test
@@ -96,14 +109,19 @@ class TimeEntryServiceTest {
     void save_ShouldThrowExceptionForNonExistentEmployee() {
         when(employeeServiceMock.existsById(999)).thenReturn(false);
 
-        TimeEntry entry = new TimeEntry();
-        entry.setEmployeeId(999);
-        entry.setEntryDate(LocalDate.of(2025, 11, 29));
-        entry.setClockIn(LocalTime.of(9, 0));
+        TimeEntryDTO entry = new TimeEntryDTO(
+                0,
+                999,
+                LocalDate.of(2025, 11, 29),
+                LocalTime.of(9, 0),
+                null, null, null, false
+        );
 
-        assertThrows(IllegalArgumentException.class,
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> timeEntryService.save(entry),
                 "Deveria lançar exceção para funcionário inexistente");
+
+        assertEquals("Funcionário não encontrado.", ex.getMessage());
     }
 
     @Test
@@ -111,19 +129,32 @@ class TimeEntryServiceTest {
     void update_ShouldModifyExistingEntry() {
         when(employeeServiceMock.existsById(1)).thenReturn(true);
 
-        TimeEntry entry = new TimeEntry();
-        entry.setEmployeeId(1);
-        entry.setEntryDate(LocalDate.of(2025, 11, 29));
-        entry.setClockIn(LocalTime.of(9, 0));
+        // 1. Cria e Salva
+        TimeEntryDTO original = new TimeEntryDTO(
+                0,
+                1,
+                LocalDate.of(2025, 11, 29),
+                LocalTime.of(9, 0),
+                null, null, null, false
+        );
+        TimeEntryDTO saved = timeEntryService.save(original);
 
-        TimeEntry saved = timeEntryService.save(entry);
+        // 2. Cria objeto de atualização (Mesmo ID, horário alterado)
+        TimeEntryDTO updateRequest = new TimeEntryDTO(
+                saved.id(), // ID retornado pelo save
+                1,
+                LocalDate.of(2025, 11, 29),
+                LocalTime.of(10, 0), // Horário alterado
+                null, null, null, false
+        );
 
-        saved.setClockIn(LocalTime.of(10, 0));
-        timeEntryService.update(saved);
+        // 3. Executa Update
+        timeEntryService.update(updateRequest);
 
-        Optional<TimeEntry> loaded = timeEntryService.findById(saved.getId());
+        // 4. Verifica
+        Optional<TimeEntryDTO> loaded = timeEntryService.findById(saved.id());
         assertTrue(loaded.isPresent(), "A batida atualizada deveria existir");
-        assertEquals(LocalTime.of(10, 0), loaded.get().getClockIn(), "O horário deveria ser atualizado");
+        assertEquals(LocalTime.of(10, 0), loaded.get().clockIn(), "O horário deveria ser atualizado");
     }
 
     @Test
@@ -131,16 +162,24 @@ class TimeEntryServiceTest {
     void deleteByEmployeeIdAndDate_ShouldRemoveEntry() {
         when(employeeServiceMock.existsById(1)).thenReturn(true);
 
-        TimeEntry entry = new TimeEntry();
-        entry.setEmployeeId(1);
-        entry.setEntryDate(LocalDate.of(2025, 11, 29));
-        entry.setClockIn(LocalTime.of(9, 0));
+        TimeEntryDTO entry = new TimeEntryDTO(
+                0,
+                1,
+                LocalDate.of(2025, 11, 29),
+                LocalTime.of(9, 0),
+                null, null, null, false
+        );
 
         timeEntryService.save(entry);
 
-        timeEntryService.deleteByEmployeeIdAndDate(1, LocalDate.of(2025, 11, 29));
+        // Verifica que salvou
+        assertEquals(1, timeEntryService.findByEmployeeId(1).size());
 
-        List<TimeEntry> entries = timeEntryService.findByEmployeeId(1);
+        // Deleta
+        boolean deleted = timeEntryService.deleteByEmployeeIdAndDate(1, LocalDate.of(2025, 11, 29));
+
+        assertTrue(deleted);
+        List<TimeEntryDTO> entries = timeEntryService.findByEmployeeId(1);
         assertEquals(0, entries.size(), "A lista de batidas deveria estar vazia");
     }
 }

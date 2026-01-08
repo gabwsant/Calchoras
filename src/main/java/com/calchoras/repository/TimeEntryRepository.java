@@ -92,6 +92,7 @@ public class TimeEntryRepository implements ITimeEntryRepository {
                 .mapToInt(TimeEntry::getId)
                 .max()
                 .orElse(0) + 1;
+        entry.setId(nextId);
         timeEntryList.add(entry);
         persist();
         return entry;

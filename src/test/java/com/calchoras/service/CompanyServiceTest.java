@@ -1,5 +1,7 @@
 package com.calchoras.service;
 
+import com.calchoras.dto.CompanyDTO;
+import com.calchoras.mapper.CompanyMapper;
 import com.calchoras.model.Company;
 import com.calchoras.repository.interfaces.ICompanyRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +35,7 @@ class CompanyServiceTest {
 
         when(companyRepository.findAll()).thenReturn(Arrays.asList(c1, c2));
 
-        List<Company> result = companyService.findAll();
+        List<CompanyDTO> result = companyService.findAll();
 
         assertEquals(2, result.size());
         verify(companyRepository).findAll();
@@ -45,27 +47,27 @@ class CompanyServiceTest {
         Company company = new Company(1, "Locarvel", 0);
         when(companyRepository.findById(1)).thenReturn(Optional.of(company));
 
-        Optional<Company> result = companyService.findById(1);
+        Optional<CompanyDTO> result = companyService.findById(1);
 
         assertTrue(result.isPresent());
-        assertEquals("Locarvel", result.get().getName());
+        assertEquals("Locarvel", result.get().name());
         verify(companyRepository).findById(1);
     }
 
     @Test
     @DisplayName("Deve salvar empresa e retornar o objeto com ID")
     void save_ShouldAssignIdAndReturnCompany() {
-        Company company = new Company(0, "Locarvel", 0);
+        CompanyDTO company = new CompanyDTO(1, "Locarvel", 0);
         when(companyRepository.existsByName("Locarvel")).thenReturn(false);
         when(companyRepository.findAll()).thenReturn(List.of());
         when(companyRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Company saved = companyService.save(company);
+        CompanyDTO saved = companyService.save(company);
 
         assertNotNull(saved);
-        assertEquals(1, saved.getId());
-        assertEquals("Locarvel", saved.getName());
-        verify(companyRepository).save(saved);
+        assertEquals(1, saved.id());
+        assertEquals("Locarvel", saved.name());
+        verify(companyRepository).save(CompanyMapper.toEntity(saved));
     }
 
     @Test
@@ -75,9 +77,9 @@ class CompanyServiceTest {
         when(companyRepository.existsById(1)).thenReturn(true);
         when(companyRepository.update(company)).thenReturn(company);
 
-        Company updated = companyService.update(company);
+        CompanyDTO updated = companyService.update(CompanyMapper.toDTO(company));
 
-        assertEquals(company, updated);
+        assertEquals(CompanyMapper.toDTO(company), updated);
         verify(companyRepository).update(company);
     }
 
