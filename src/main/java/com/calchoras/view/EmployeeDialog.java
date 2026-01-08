@@ -1,5 +1,6 @@
 package com.calchoras.view;
 
+import com.calchoras.dto.CompanyDTO;
 import com.calchoras.model.Company;
 import lombok.Getter;
 
@@ -9,7 +10,7 @@ import java.util.List;
 
 public class EmployeeDialog extends JDialog {
 
-    private final JComboBox<CompanyComboItem> companyComboBox;
+    private final JComboBox<CompanyDTO> companyComboBox;
     private final JTextField nameField;
     @Getter
     private final JTextField shiftIn;
@@ -60,12 +61,10 @@ public class EmployeeDialog extends JDialog {
         cancelButton.addActionListener(e -> dispose());
     }
 
-    public void updateCompanyList(List<Company> companies) {
+    public void updateCompanyList(List<CompanyDTO> companies) {
         companyComboBox.removeAllItems();
-        for (Company company : companies) {
-            companyComboBox.addItem(
-                    new CompanyComboItem(company.getId(), company.getName())
-            );
+        for (CompanyDTO company : companies) {
+            companyComboBox.addItem(company);
         }
     }
 
@@ -73,7 +72,7 @@ public class EmployeeDialog extends JDialog {
         if (companyComboBox.getSelectedItem() == null) {
             throw new IllegalArgumentException("Selecione uma empresa!");
         } else {
-            return ((CompanyComboItem) companyComboBox.getSelectedItem()).getId();
+            return ((CompanyDTO) companyComboBox.getSelectedItem()).id();
         }
     }
 

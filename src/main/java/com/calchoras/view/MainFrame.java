@@ -1,8 +1,8 @@
 package com.calchoras.view;
 
-import com.calchoras.model.Company;
-import com.calchoras.model.Employee;
-import com.calchoras.model.TimeEntry;
+import com.calchoras.dto.CompanyDTO;
+import com.calchoras.dto.EmployeeDTO;
+import com.calchoras.dto.TimeEntryDTO;
 import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
 
@@ -13,12 +13,17 @@ import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Getter
 public class MainFrame extends JFrame {
 
+    // Formatters
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     MaskFormatter dateMask;
 
     // Employees
@@ -31,7 +36,7 @@ public class MainFrame extends JFrame {
     private JButton enableEmployeeButton;
 
     // Company
-    private JComboBox<CompanyComboItem> companyComboBox;
+    private JComboBox<CompanyDTO> companyComboBox;
     private JButton addCompanyButton;
 
     // Employee fields
@@ -72,7 +77,7 @@ public class MainFrame extends JFrame {
 
         try {
             dateMask = new MaskFormatter("##/##/####");
-        } catch (ParseException e){
+        } catch (ParseException e) {
             throw new RuntimeException(e);
         }
 
@@ -80,7 +85,7 @@ public class MainFrame extends JFrame {
         initComponents();
         layoutComponents();
         enableEmployeeFields(false);
-        enableTimeEntryFields(false);
+        setTimeEntryEditModeEnabled(false);
     }
 
     private void initFrame() {
@@ -265,64 +270,86 @@ public class MainFrame extends JFrame {
         this.setVisible(true);
     }
 
-    public void updateEmployeeList(List<Employee> employees) {
+    // ===================================================================================
+    // DATA UPDATE METHODS (MODEL -> VIEW)
+    // ===================================================================================
+
+    public void updateEmployeeList(List<EmployeeDTO> employees) {
         employeeListModel.clear();
-        for (Employee emp : employees) {
+        for (EmployeeDTO emp : employees) {
             employeeListModel.addElement(
-                    new EmployeeListItem(emp.getId(), emp.getName(), emp.isActive())
+                    new EmployeeListItem(emp.id(), emp.name(), emp.active())
             );
         }
     }
 
-    public void updateCompanyList(List<Company> companies) {
+    public void updateCompanyList(List<CompanyDTO> companies) {
         companyComboBox.removeAllItems();
-        for (Company company : companies) {
-            companyComboBox.addItem(
-                    new CompanyComboItem(company.getId(), company.getName())
-            );
+        for (CompanyDTO company : companies) {
+            companyComboBox.addItem(company);
         }
     }
 
-    public int getSelectedCompanyId() {
-        CompanyComboItem item = (CompanyComboItem) companyComboBox.getSelectedItem();
-        return (item != null) ? item.getId() : -1;
-    }
-
-    public void displayEmployeeInfo(Employee employee) {
+    public void displayEmployeeInfo(EmployeeDTO employeeDTO) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-        companyComboBox.setSelectedItem(employee.getName());
-        nameField.setText(employee.getName());
-        shiftInField.setText(employee.getShiftIn().format(timeFormatter));
-        shiftOutField.setText(employee.getShiftOut().format(timeFormatter));
-        lunchBreakMinutesField.setText(String.valueOf(employee.getLunchBreakMinutes()));
+        for (int i = 0; i < companyComboBox.getItemCount(); i++) {
+            CompanyDTO dto = companyComboBox.getItemAt(i);
+            if (dto.id() == employeeDTO.companyId()) {
+                companyComboBox.setSelectedIndex(i);
+                break;
+            }
+        }
 
-        if (employee.isActive()) {
+        nameField.setText(employeeDTO.name());
+
+        if (employeeDTO.shiftIn() != null)
+            shiftInField.setText(employeeDTO.shiftIn().format(timeFormatter));
+        else
+            shiftInField.setText("");
+
+        if (employeeDTO.shiftOut() != null)
+            shiftOutField.setText(employeeDTO.shiftOut().format(timeFormatter));
+        else
+            shiftOutField.setText("");
+
+        lunchBreakMinutesField.setText(String.valueOf(employeeDTO.lunchBreakMinutes()));
+
+        if (employeeDTO.active()) {
             enableEmployeeButton.setText("Desabilitar");
         } else {
             enableEmployeeButton.setText("Habilitar");
         }
-
     }
 
-    public void displayTimeEntry(TimeEntry timeEntry) {
+    public void displayTimeEntry(TimeEntryDTO timeEntryDTO) {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
-        if (timeEntry.getClockIn() != null) {
-            clockInField.setText(timeEntry.getClockIn().format(timeFormatter));
+        if (timeEntryDTO.clockIn() != null) {
+            clockInField.setText(timeEntryDTO.clockIn().format(timeFormatter));
         }
-        if (timeEntry.getLunchIn() != null) {
-            lunchInField.setText(timeEntry.getLunchIn().format(timeFormatter));
+        if (timeEntryDTO.lunchIn() != null) {
+            lunchInField.setText(timeEntryDTO.lunchIn().format(timeFormatter));
         }
-        if (timeEntry.getLunchOut() != null) {
-            lunchOutField.setText(timeEntry.getLunchOut().format(timeFormatter));
+        if (timeEntryDTO.lunchOut() != null) {
+            lunchOutField.setText(timeEntryDTO.lunchOut().format(timeFormatter));
+        }
+        if (timeEntryDTO.clockOut() != null) {
+            clockOutField.setText(timeEntryDTO.clockOut().format(timeFormatter));
         }
 
-        if (timeEntry.getClockOut() != null) {
-            clockOutField.setText(timeEntry.getClockOut().format(timeFormatter));
-        }
+        isDayOffCheckBox.setSelected(timeEntryDTO.dayOff());
+    }
 
-        isDayOffCheckBox.setSelected(timeEntry.isDayOff());
+    public void resetDateField() {
+        dateField.setValue(
+                LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1)
+                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+        );
+    }
+
+    public void plusEntryDate(int plusDays) {
+        dateField.setValue(getEntryDate().plusDays(plusDays).format(DATE_FORMATTER));
     }
 
     public void clearTimeEntryFields() {
@@ -340,22 +367,66 @@ public class MainFrame extends JFrame {
         lunchBreakMinutesField.setText("");
     }
 
-    public void resetDateField() {
-        dateField.setValue(
-                LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1)
-                        .format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-        );
+    // ===================================================================================
+    // DATA RETRIEVAL METHODS (VIEW -> CONTROLLER)
+    // ===================================================================================
+
+    public int getSelectedCompanyId() {
+        CompanyDTO item = (CompanyDTO) companyComboBox.getSelectedItem();
+        return (item != null) ? item.id() : -1;
     }
 
-    public void showError(String message) {
-        JOptionPane.showMessageDialog(this, message);
+    public int getSelectedEmployeeId() {
+        EmployeeListItem selected = employeeList.getSelectedValue();
+        return (selected != null) ? selected.getId() : -1;
     }
 
-    public void showSuccess(String message) {
-        JOptionPane.showMessageDialog(this, message);
+    public EmployeeListItem getSelectedEmployeeItem() {
+        return employeeList.getSelectedValue();
     }
 
-    public void enableTimeEntryFields(boolean enable) {
+    public boolean hasSelectedEmployee() {
+        return !employeeList.isSelectionEmpty();
+    }
+
+    public boolean isSelectedEmployeeActive() {
+        EmployeeListItem selected = employeeList.getSelectedValue();
+        return (selected != null) && selected.isActive();
+    }
+
+    public LocalDate getEntryDate() {
+        try {
+            return LocalDate.parse(dateField.getText(), DATE_FORMATTER);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
+
+    public LocalTime getClockIn() {
+        return parseTime(clockInField.getText());
+    }
+
+    public LocalTime getLunchIn() {
+        return parseTime(lunchInField.getText());
+    }
+
+    public LocalTime getLunchOut() {
+        return parseTime(lunchOutField.getText());
+    }
+
+    public LocalTime getClockOut() {
+        return parseTime(clockOutField.getText());
+    }
+
+    public boolean isDayOffSelected() {
+        return isDayOffCheckBox.isSelected();
+    }
+
+    // ===================================================================================
+    // UI STATE & BEHAVIOR METHODS
+    // ===================================================================================
+
+    public void setTimeEntryEditModeEnabled(boolean enable) {
         dateField.setEnabled(enable);
         clockInField.setEnabled(enable);
         lunchInField.setEnabled(enable);
@@ -368,6 +439,13 @@ public class MainFrame extends JFrame {
         nextEntryButton.setEnabled(enable);
     }
 
+    public void setClockingFieldsEnabled(boolean enable) {
+        clockInField.setEnabled(enable);
+        lunchInField.setEnabled(enable);
+        lunchOutField.setEnabled(enable);
+        clockOutField.setEnabled(enable);
+    }
+
     public void enableEmployeeFields(boolean enable) {
         nameField.setEnabled(enable);
         shiftInField.setEnabled(enable);
@@ -378,31 +456,48 @@ public class MainFrame extends JFrame {
         enableEmployeeButton.setEnabled(enable);
     }
 
-    public boolean showConfirmationDialog(String message) {
-        Object[] options = {"Sim", "Não"};
-        int decision = JOptionPane.showOptionDialog(this, message, "Atenção", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[1]);
-
-        return decision == JOptionPane.YES_OPTION;
-    }
     public void addAutoAdvanceToField(JTextField field) {
         field.getDocument().addDocumentListener(new DocumentListener() {
-
             private void check() {
                 if (field.getText().length() == 5) {
                     field.transferFocus();
                 }
             }
-
             @Override
-            public void insertUpdate(DocumentEvent e) {
-                check();
-            }
-
+            public void insertUpdate(DocumentEvent e) { check(); }
             @Override
             public void removeUpdate(DocumentEvent e) {}
-
             @Override
             public void changedUpdate(DocumentEvent e) {}
         });
+    }
+
+    public void showError(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    public void showSuccess(String message) {
+        JOptionPane.showMessageDialog(this, message);
+    }
+
+    public boolean showConfirmationDialog(String message) {
+        Object[] options = {"Sim", "Não"};
+        int decision = JOptionPane.showOptionDialog(this, message, "Atenção", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[1]);
+        return decision == JOptionPane.YES_OPTION;
+    }
+
+    // ===================================================================================
+    // PRIVATE HELPERS
+    // ===================================================================================
+
+    private LocalTime parseTime(String text) {
+        if (text == null || text.trim().isEmpty() || text.contains("_")) {
+            return null;
+        }
+        try {
+            return LocalTime.parse(text, TIME_FORMATTER);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
     }
 }

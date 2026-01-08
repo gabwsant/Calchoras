@@ -1,5 +1,7 @@
 package com.calchoras.service;
 
+import com.calchoras.dto.TimeEntryDTO;
+import com.calchoras.mapper.TimeEntryMapper;
 import com.calchoras.model.TimeEntry;
 import com.calchoras.repository.interfaces.ITimeEntryRepository;
 import com.calchoras.service.interfaces.IEmployeeService;
@@ -20,49 +22,67 @@ public class TimeEntryService implements ITimeEntryService {
     }
 
     @Override
-    public Optional<TimeEntry> findById(int id) {
-        return repository.findById(id);
+    public Optional<TimeEntryDTO> findById(int id) {
+        return repository.findById(id)
+                .map(TimeEntryMapper::toDTO);
     }
 
     @Override
-    public List<TimeEntry> findByEmployeeId(int employeeId) {
-        return repository.findByEmployeeId(employeeId);
+    public List<TimeEntryDTO> findByEmployeeId(int employeeId) {
+        return repository.findByEmployeeId(employeeId)
+                .stream()
+                .map(TimeEntryMapper::toDTO)
+                .toList();
     }
 
     @Override
-    public Optional<TimeEntry> findByEmployeeIdAndDate(int employeeId, LocalDate date) {
-        return repository.findByEmployeeIdAndDate(employeeId, date);
+    public Optional<TimeEntryDTO> findByEmployeeIdAndDate(int employeeId, LocalDate date) {
+        return repository.findByEmployeeIdAndDate(employeeId, date)
+                .map(TimeEntryMapper::toDTO);
     }
 
     @Override
-    public TimeEntry save(TimeEntry entry) {
+    public TimeEntryDTO save(TimeEntryDTO entryDTO) {
 
-        if (!employeeService.existsById(entry.getEmployeeId())) {
+        if (!employeeService.existsById(entryDTO.employeeId())) {
             throw new IllegalArgumentException("Funcionário não encontrado.");
         }
 
-        if (repository.findByEmployeeIdAndDate(entry.getEmployeeId(), entry.getEntryDate()).isPresent()) {
+        if (repository.findByEmployeeIdAndDate(entryDTO.employeeId(), entryDTO.entryDate()).isPresent()) {
             throw new IllegalArgumentException("Já existe um lançamento para esse funcionário nessa data.");
         }
 
-        int nextId = repository.findAll().stream()
-                .mapToInt(TimeEntry::getId)
-                .max()
-                .orElse(0) + 1;
+        TimeEntry timeEntry = TimeEntryMapper.toEntity(entryDTO);
+        TimeEntry savedTimeEntry = repository.save(timeEntry);
 
-        entry.setId(nextId);
-        repository.save(entry);
-        return entry;
+        return TimeEntryMapper.toDTO(savedTimeEntry);
     }
 
 
     @Override
-    public TimeEntry update(TimeEntry entry) {
-        if (repository.findById(entry.getId()).isPresent()) {
-            return repository.update(entry);
-        } else {
-            throw new IllegalArgumentException("Registro não encontrado para atualização.");
+    public TimeEntryDTO update(TimeEntryDTO entryDTO) {
+        if (!repository.existsById(entryDTO.id())) {
+            throw new IllegalArgumentException("Registro de ponto com ID " + entryDTO.id() + " não encontrado.");
         }
+
+        TimeEntry entity = TimeEntryMapper.toEntity(entryDTO);
+        TimeEntry updatedEntity = repository.update(entity);
+
+        return TimeEntryMapper.toDTO(updatedEntity);
+    }
+
+    public TimeEntryDTO saveOrUpdate(TimeEntryDTO dto) {
+        Optional<TimeEntry> existing = repository.findByEmployeeIdAndDate(dto.employeeId(), dto.entryDate());
+
+        TimeEntry entity = TimeEntryMapper.toEntity(dto);
+
+        if (existing.isPresent()) {
+            entity.setId(existing.get().getId());
+            repository.update(entity);
+        } else {
+            repository.save(entity);
+        }
+        return TimeEntryMapper.toDTO(entity);
     }
 
     @Override

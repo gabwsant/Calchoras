@@ -1,6 +1,6 @@
 package com.calchoras.service.interfaces;
 
-import com.calchoras.model.Company;
+import com.calchoras.dto.CompanyDTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +15,7 @@ public interface ICompanyService {
      *
      * @return a list of companies
      */
-    List<Company> findAll();
+    List<CompanyDTO> findAll();
 
     /**
      * Returns a company by its ID.
@@ -23,23 +23,23 @@ public interface ICompanyService {
      * @param companyId the ID of the company
      * @return an Optional containing the company if found
      */
-    Optional<Company> findById(int companyId);
+    Optional<CompanyDTO> findById(int companyId);
 
     /**
      * Creates a new company.
      *
-     * @param company the company to be saved
+     * @param companyDTO the company to be saved
      * @return the created company
      */
-    Company save(Company company);
+    CompanyDTO save(CompanyDTO companyDTO);
 
     /**
      * Updates an existing company.
      *
-     * @param company the company to be updated
+     * @param companyDTO the company to be updated
      * @return the updated company
      */
-    Company update(Company company);
+    CompanyDTO update(CompanyDTO companyDTO);
 
     /**
      * Deletes a company by ID.

@@ -88,6 +88,10 @@ public class TimeEntryRepository implements ITimeEntryRepository {
 
     @Override
     public TimeEntry save(TimeEntry entry) {
+        int nextId = timeEntryList.stream()
+                .mapToInt(TimeEntry::getId)
+                .max()
+                .orElse(0) + 1;
         timeEntryList.add(entry);
         persist();
         return entry;
@@ -120,6 +124,10 @@ public class TimeEntryRepository implements ITimeEntryRepository {
         return removed;
     }
 
+    @Override
+    public boolean existsById(int id) {
+        return timeEntryList.stream().anyMatch(te -> te.getId() == id);
+    }
 
     @Override
     public boolean existsByEmployeeIdAndDate(int employeeId, LocalDate date) {

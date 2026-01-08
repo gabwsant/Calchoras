@@ -1,10 +1,13 @@
 package com.calchoras.service;
 
+import com.calchoras.dto.EmployeeDTO;
+import com.calchoras.mapper.EmployeeMapper;
 import com.calchoras.model.Employee;
 import com.calchoras.repository.interfaces.IEmployeeRepository;
 import com.calchoras.service.interfaces.ICompanyService;
 import com.calchoras.service.interfaces.IEmployeeService;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,52 +22,84 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Override
-    public List<Employee> findAll() {
-        return employeeRepository.findAll();
+    public List<EmployeeDTO> findAll() {
+        return employeeRepository.findAll()
+                .stream()
+                .map(EmployeeMapper::toDTO)
+                .toList();
     }
 
     @Override
-    public Optional<Employee> findById(int employeeId) {
-        return employeeRepository.findById(employeeId);
+    public Optional<EmployeeDTO> findById(int employeeId) {
+        return employeeRepository.findById(employeeId)
+                .map(EmployeeMapper::toDTO);
     }
 
     @Override
-    public List<Employee> findByCompanyId(int companyId) {
-        return employeeRepository.findByCompanyId(companyId);
+    public List<EmployeeDTO> findByCompanyId(int companyId) {
+        return employeeRepository.findByCompanyId(companyId)
+                .stream()
+                .map(EmployeeMapper::toDTO)
+                .sorted(
+                        Comparator.comparing(EmployeeDTO::active, Comparator.reverseOrder())
+                                .thenComparing(EmployeeDTO::name))
+                .toList();
     }
 
     @Override
-    public List<Employee> findActivesByCompanyId(int companyId) { return employeeRepository.findActivesByCompanyId(companyId); }
+    public List<EmployeeDTO> findActivesByCompanyId(int companyId) {
+        return employeeRepository.findActivesByCompanyId(companyId)
+                .stream()
+                .map(EmployeeMapper::toDTO)
+                .sorted(
+                        Comparator.comparing(EmployeeDTO::active, Comparator.reverseOrder())
+                                .thenComparing(EmployeeDTO::name))
+                .toList();
+    }
 
     @Override
-    public Employee save(Employee employee) {
-        if (employeeRepository.existsByName(employee.getName()) &&
-                employeeRepository.existsByCompanyId(employee.getCompanyId())) {
+    public EmployeeDTO save(EmployeeDTO employeeDTO) {
+        if (
+            employeeRepository.existsByName(employeeDTO.name()) &&
+            employeeRepository.existsByCompanyId(employeeDTO.companyId())
+        ) {
             throw new IllegalArgumentException("Funcionário já existe para esta empresa.");
         }
 
-        if (!companyService.existsById(employee.getCompanyId())) {
+        if (!companyService.existsById(employeeDTO.companyId())) {
             throw new IllegalArgumentException("Empresa não encontrada.");
         }
 
-        int nextId = employeeRepository.findAll().stream()
-                .mapToInt(Employee::getId)
-                .max()
-                .orElse(0) + 1;
-        employee.setId(nextId);
+        Employee employee = EmployeeMapper.toEntity(employeeDTO);
+        Employee savedEmployee = employeeRepository.save(employee);
 
-        return employeeRepository.save(employee);
+        return EmployeeMapper.toDTO(savedEmployee);
     }
 
     @Override
-    public Employee update(Employee employee) {
-        boolean existsDuplicate = employeeRepository.findByCompanyId(employee.getCompanyId()).stream()
-                .anyMatch(e -> e.getName().equalsIgnoreCase(employee.getName()) && e.getId() != employee.getId());
+    public EmployeeDTO update(EmployeeDTO employeeDTO) {
+
+        if (!existsById(employeeDTO.id())) {
+            throw new IllegalArgumentException("Funcionário não encontrado na base de dados!");
+        }
+
+        if (!companyService.existsById(employeeDTO.companyId())) {
+            throw new IllegalArgumentException("Empresa inválida ou não encontrada!");
+        }
+
+        boolean existsDuplicate = employeeRepository.findByCompanyId(employeeDTO.companyId())
+                .stream()
+                .anyMatch(e -> e.getName().equalsIgnoreCase(employeeDTO.name()) &&
+                        e.getId() != employeeDTO.id());
 
         if (existsDuplicate) {
-            throw new IllegalArgumentException("Outro funcionário com esse nome já existe para a empresa.");
+            throw new IllegalArgumentException("Já existe outro funcionário com este nome nesta empresa.");
         }
-        return employeeRepository.update(employee);
+
+        Employee employee = EmployeeMapper.toEntity(employeeDTO);
+        Employee updatedEmployee = employeeRepository.update(employee);
+
+        return EmployeeMapper.toDTO(updatedEmployee);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.calchoras.service.interfaces;
 
-import com.calchoras.model.TimeEntry;
+import com.calchoras.dto.TimeEntryDTO;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +16,7 @@ public interface ITimeEntryService {
      * @param employeeId the ID of the employee
      * @return a list of the employee's time entries
      */
-    List<TimeEntry> findByEmployeeId(int employeeId);
+    List<TimeEntryDTO> findByEmployeeId(int employeeId);
 
     /**
      * Returns a time entry by its ID.
@@ -24,7 +24,7 @@ public interface ITimeEntryService {
      * @param id the time entry ID
      * @return an Optional containing the time entry if found
      */
-    Optional<TimeEntry> findById(int id);
+    Optional<TimeEntryDTO> findById(int id);
 
     /**
      * Returns the time entry of an employee for a specific date.
@@ -33,23 +33,30 @@ public interface ITimeEntryService {
      * @param date the date of the time entry
      * @return an Optional containing the time entry if found
      */
-    Optional<TimeEntry> findByEmployeeIdAndDate(int employeeId, LocalDate date);
+    Optional<TimeEntryDTO> findByEmployeeIdAndDate(int employeeId, LocalDate date);
 
     /**
      * Saves a new time entry and returns the created object with its ID assigned.
      *
-     * @param timeEntry the time entry to save
+     * @param timeEntryDTO the time entry to save
      * @return the created time entry
      */
-    TimeEntry save(TimeEntry timeEntry);
+    TimeEntryDTO save(TimeEntryDTO timeEntryDTO);
 
     /**
      * Updates an existing time entry.
      *
-     * @param timeEntry the updated time entry
+     * @param timeEntryDTO the updated time entry
      * @return the updated time entry
      */
-    TimeEntry update(TimeEntry timeEntry);
+    TimeEntryDTO update(TimeEntryDTO timeEntryDTO);
+
+    /**
+     * Decides if insert a new time entry or update if it already exists
+     * @param timeEntryDTO time entry to insert or update
+     * @return the inserted or updated time entry
+     */
+    TimeEntryDTO saveOrUpdate(TimeEntryDTO timeEntryDTO);
 
     /**
      * Deletes a time entry of an employee for a specific date.

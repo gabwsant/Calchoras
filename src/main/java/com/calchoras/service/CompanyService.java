@@ -1,5 +1,7 @@
 package com.calchoras.service;
 
+import com.calchoras.dto.CompanyDTO;
+import com.calchoras.mapper.CompanyMapper;
 import com.calchoras.model.Company;
 import com.calchoras.repository.interfaces.ICompanyRepository;
 import com.calchoras.service.interfaces.ICompanyService;
@@ -16,36 +18,41 @@ public class CompanyService implements ICompanyService {
     }
 
     @Override
-    public List<Company> findAll() {
-        return companyRepository.findAll();
+    public List<CompanyDTO> findAll() {
+        List<Company> companies = companyRepository.findAll();
+        return companies.stream()
+                .map(CompanyMapper::toDTO)
+                .toList();
     }
 
     @Override
-    public Optional<Company> findById(int companyId) {
-        return companyRepository.findById(companyId);
+    public Optional<CompanyDTO> findById(int companyId) {
+        return companyRepository.findById(companyId)
+                .map(CompanyMapper::toDTO);
     }
 
     @Override
-    public Company save(Company company) {
-        if (companyRepository.existsByName(company.getName())) {
+    public CompanyDTO save(CompanyDTO companyDTO) {
+        if (companyRepository.existsByName(companyDTO.name())) {
             throw new IllegalArgumentException("Empresa já existe.");
         }
 
-        int nextId = companyRepository.findAll().stream()
-                .mapToInt(Company::getId)
-                .max()
-                .orElse(0) + 1;
-        company.setId(nextId);
+        Company company = CompanyMapper.toEntity(companyDTO);
+        Company savedCompany = companyRepository.save(company);
 
-        return companyRepository.save(company);
+        return CompanyMapper.toDTO(savedCompany);
     }
 
     @Override
-    public Company update(Company company) {
-        if (!companyRepository.existsById(company.getId())) {
+    public CompanyDTO update(CompanyDTO companyDTO) {
+        if (!companyRepository.existsById(companyDTO.id())) {
             throw new IllegalArgumentException("Empresa não encontrada para atualização.");
         }
-        return companyRepository.update(company);
+
+        Company company = CompanyMapper.toEntity(companyDTO);
+        Company savedCompany = companyRepository.update(company);
+
+        return CompanyMapper.toDTO(savedCompany);
     }
 
     @Override
@@ -65,4 +72,5 @@ public class CompanyService implements ICompanyService {
     public boolean existsByName(String name) {
         return companyRepository.existsByName(name);
     }
+
 }

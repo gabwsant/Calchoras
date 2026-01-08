@@ -31,7 +31,7 @@ public class Main {
 			MainFrame view = new MainFrame();
 
 			// Controller
-			new MainFrameController(view, companyService, dailyCalculationService, employeeService, reportService, timeEntryService);
+			new MainFrameController(view, companyService, employeeService, timeEntryService, dailyCalculationService, reportService);
 		});
 	}
 }

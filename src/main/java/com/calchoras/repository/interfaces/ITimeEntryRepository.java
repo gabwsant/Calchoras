@@ -77,6 +77,13 @@ public interface ITimeEntryRepository {
     boolean deleteByEmployeeIdAndDate(int employeeId, LocalDate date);
 
     /**
+     * Checks whether a time entry exists by an id.
+     * @param id the time entry id
+     * @return true if a time entry exists, false otherwise
+     */
+    boolean existsById(int id);
+
+    /**
      * Checks whether a time entry exists for an employee on a specific date.
      *
      * @param employeeId the employee ID
