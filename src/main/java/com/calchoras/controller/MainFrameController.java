@@ -164,7 +164,7 @@ public class MainFrameController {
         }
 
         try {
-            CompanyDTO companyToSave = new CompanyDTO(0, name, 0);
+            CompanyDTO companyToSave = new CompanyDTO(0, name);
             CompanyDTO newCompany = companyService.save(companyToSave);
 
             view.getCompanyComboBox().addItem(newCompany);

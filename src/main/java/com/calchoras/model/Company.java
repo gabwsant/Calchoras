@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class Company {
     private int id;
     private String name;
-    private int numOfEmployees;
 
     public Company(String name) {
         this.name = name;

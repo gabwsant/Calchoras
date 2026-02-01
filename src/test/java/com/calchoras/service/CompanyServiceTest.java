@@ -30,8 +30,8 @@ class CompanyServiceTest {
     @Test
     @DisplayName("Deve retornar todas as empresas")
     void findAll_ShouldReturnAllCompanies() {
-        Company c1 = new Company(1, "Locarvel", 0);
-        Company c2 = new Company(2, "Gontijo", 5);
+        Company c1 = new Company(1, "Locarvel");
+        Company c2 = new Company(2, "Gontijo");
 
         when(companyRepository.findAll()).thenReturn(Arrays.asList(c1, c2));
 
@@ -44,7 +44,7 @@ class CompanyServiceTest {
     @Test
     @DisplayName("Deve retornar empresa por ID")
     void findById_ShouldReturnCompany() {
-        Company company = new Company(1, "Locarvel", 0);
+        Company company = new Company(1, "Locarvel");
         when(companyRepository.findById(1)).thenReturn(Optional.of(company));
 
         Optional<CompanyDTO> result = companyService.findById(1);
@@ -57,7 +57,7 @@ class CompanyServiceTest {
     @Test
     @DisplayName("Deve salvar empresa e retornar o objeto com ID")
     void save_ShouldAssignIdAndReturnCompany() {
-        CompanyDTO company = new CompanyDTO(1, "Locarvel", 0);
+        CompanyDTO company = new CompanyDTO(1, "Locarvel");
         when(companyRepository.existsByName("Locarvel")).thenReturn(false);
         when(companyRepository.findAll()).thenReturn(List.of());
         when(companyRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -73,7 +73,7 @@ class CompanyServiceTest {
     @Test
     @DisplayName("Deve atualizar empresa existente")
     void update_ShouldReturnUpdatedCompany() {
-        Company company = new Company(1, "Locarvel", 0);
+        Company company = new Company(1, "Locarvel");
         when(companyRepository.existsById(1)).thenReturn(true);
         when(companyRepository.update(company)).thenReturn(company);
 

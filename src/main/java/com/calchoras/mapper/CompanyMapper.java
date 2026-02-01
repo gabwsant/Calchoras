@@ -12,8 +12,7 @@ public class CompanyMapper {
         }
         return new CompanyDTO(
                 entity.getId(),
-                entity.getName(),
-                entity.getNumOfEmployees()
+                entity.getName()
         );
     }
 
@@ -26,7 +25,6 @@ public class CompanyMapper {
         Company entity = new Company();
         entity.setId(dto.id());
         entity.setName(dto.name());
-        entity.setNumOfEmployees(dto.numOfEmployees());
 
         return entity;
     }

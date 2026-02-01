@@ -2,8 +2,7 @@ package com.calchoras.dto;
 
 public record CompanyDTO(
         int id,
-        String name,
-        int numOfEmployees
+        String name
 ) {
     @Override
     public String toString() {

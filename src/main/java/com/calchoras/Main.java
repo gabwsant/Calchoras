@@ -16,9 +16,12 @@ public class Main {
 
 		SwingUtilities.invokeLater(() -> {
 			// Repositories
-			ICompanyRepository companyRepository = new CompanyRepository();
-			IEmployeeRepository employeeRepository = new EmployeeRepository();
-			ITimeEntryRepository timeEntryRepository = new TimeEntryRepository();
+//			ICompanyRepository companyRepository = new CompanyRepository();
+//			IEmployeeRepository employeeRepository = new EmployeeRepository();
+//			ITimeEntryRepository timeEntryRepository = new TimeEntryRepository();
+			ICompanyRepository companyRepository = new SQLiteCompanyRepository();
+			IEmployeeRepository employeeRepository = new SQLiteEmployeeRepository();
+			ITimeEntryRepository timeEntryRepository = new SQLiteTimeEntryRepository();
 
 			// Services
 			ICompanyService companyService = new CompanyService(companyRepository);
