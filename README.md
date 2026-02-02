@@ -1,4 +1,4 @@
-# Calchoras
+# Calchoras - Cálculo de Horas Extras
 
 O Calchoras é uma aplicação desktop desenvolvida em Java para o gerenciamento eficiente de horas trabalhadas. O foco principal do projeto é oferecer uma interface intuitiva para o controle de ponto, cálculos de horas extras e gestão de jornadas de trabalho de funcionários.
 
