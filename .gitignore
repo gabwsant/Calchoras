@@ -32,6 +32,4 @@ build/
 .vscode/
 
 ### Dados ###
-batidas.json
-funcionarios.json
-empresas.json
+calchoras.db
