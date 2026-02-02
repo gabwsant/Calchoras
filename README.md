@@ -17,8 +17,8 @@ O Calchoras é uma aplicação desktop desenvolvida em Java para o gerenciamento
     Geração de resumos de horas para conferência e gestão.
 
 ## Tecnologias Utilizadas
-Linguagem: Java
-Arquitetura: MVC
-Interface Gráfica: Swing
-Gerenciamento de Dependências: Maven
-Persistência de Dados: SQLite
+- Linguagem: Java
+- Arquitetura: MVC
+- Interface Gráfica: Swing
+- Gerenciamento de Dependências: Maven
+- Persistência de Dados: SQLite
