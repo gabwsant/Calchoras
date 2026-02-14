@@ -91,6 +91,7 @@ public class MainFrameController {
 
         // Time Entry
         view.getAddTimeEntryButton().addActionListener(e -> handleAddTimeEntryAction());
+        view.getRemoveTimeEntryButton().addActionListener(e -> handleRemoveTimeEntryAction());
         view.getPreviousEntryButton().addActionListener(e -> handlePreviousEntryButton());
         view.getNextEntryButton().addActionListener(e -> handleNextEntryAction());
         view.getIsDayOffCheckBox().addActionListener(e -> handleIsDayOffCheckBoxChange());
@@ -98,16 +99,53 @@ public class MainFrameController {
         // Date Handling
         view.getDateField().addActionListener(e -> handleDateChangeAction());
 
-        /*
-        view.getDateField().addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                handleDateChangeAction();
-            }
-        });*/
-
         // Mouse Listeners
         addHandleMouseRightClick();
+    }
+
+    private void handleRemoveTimeEntryAction() {
+        if (!view.hasSelectedEmployee()) {
+            view.showError("Selecione um funcionário antes de remover um ponto.");
+        }
+
+        try {
+            TimeEntryDTO timeEntryToDelete = buildTimeEntryDTOFromView();
+
+            boolean exists = timeEntryService.existsByEmployeeIdAndDate(
+                    timeEntryToDelete.employeeId(),
+                    timeEntryToDelete.entryDate()
+            );
+
+            if (!exists) {
+                view.showError("Não existe um ponto registrado para a data: " + timeEntryToDelete.entryDate());
+                return;
+            }
+
+            int confirm = JOptionPane.showConfirmDialog(
+                    view,
+                    "Tem certeza que deseja remover a batida de " + timeEntryToDelete.entryDate() + "?",
+                    "Confirmar Exclusão",
+                    JOptionPane.YES_NO_OPTION
+            );
+
+            if (confirm != JOptionPane.YES_OPTION) return;
+
+            boolean isDeleted = timeEntryService.deleteByEmployeeIdAndDate(
+                    timeEntryToDelete.employeeId(),
+                    timeEntryToDelete.entryDate()
+            );
+
+            if (isDeleted) {
+                view.clearTimeEntryFields();
+                view.getResultArea().append("\nBatida removida para " + timeEntryToDelete.entryDate());
+                handleIsDayOffCheckBoxChange();
+                view.getClockInField().requestFocus();
+            } else {
+                view.showError("Erro ao deletar batida.");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(view, "Erro ao deletar o ponto: " + e.getMessage(), "Erro Interno", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void initAutoAdvance() {
@@ -403,9 +441,9 @@ public class MainFrameController {
         } catch (java.time.format.DateTimeParseException e) {
             JOptionPane.showMessageDialog(view, "Erro de formato de Data (DD/MM/AAAA) ou Hora (HH:MM).", "Erro de Formato", JOptionPane.ERROR_MESSAGE);
         } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(view, e.getMessage(), "Erro de Validação", JOptionPane.ERROR_MESSAGE);
+            view.showError(e.getMessage());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(view, "Erro ao salvar o ponto: " + e.getMessage(), "Erro Interno", JOptionPane.ERROR_MESSAGE);
+            view.showError("Erro ao salvar o ponto: " + e.getMessage());
         }
     }
 
@@ -453,13 +491,15 @@ public class MainFrameController {
     }
 
     private void handleIsDayOffCheckBoxChange() {
-        view.setClockingFieldsEnabled(!view.getIsDayOffCheckBox().isSelected());
+        boolean isDayOff = view.getIsDayOffCheckBox().isSelected();
+        view.setClockingFieldsEnabled(!isDayOff);
     }
 
     private void loadTimeEntry(int employeeId, LocalDate date) {
         view.clearTimeEntryFields();
         timeEntryService.findByEmployeeIdAndDate(employeeId, date)
                 .ifPresent(view::displayTimeEntry);
+        handleIsDayOffCheckBoxChange();
     }
 
     private TimeEntryDTO buildTimeEntryDTOFromView() {

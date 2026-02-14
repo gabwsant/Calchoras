@@ -66,4 +66,13 @@ public interface ITimeEntryService {
      * @return true if the entry was deleted successfully, false otherwise
      */
     boolean deleteByEmployeeIdAndDate(int employeeId, LocalDate date);
+
+    /**
+     * Checks whether a time entry exists by employee ID and date.
+     *
+     * @param employeeId the employee ID to check
+     * @param date the time entry date
+     * @return true if the employee exists
+     */
+    boolean existsByEmployeeIdAndDate(int employeeId, LocalDate date);
 }

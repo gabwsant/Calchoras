@@ -22,7 +22,7 @@ public class SQLiteEmployeeRepository implements IEmployeeRepository {
                 "shift_out TEXT, " +
                 "lunch_break_minutes INTEGER, " +
                 "active INTEGER DEFAULT 1, " +
-                "FOREIGN KEY (company_id) REFERENCES Company(id));";
+                "FOREIGN KEY (company_id) REFERENCES Company(id) ON DELETE CASCADE);";
 
         try (Connection conn = SQLiteConnection.getConnection();
              Statement stmt = conn.createStatement()) {

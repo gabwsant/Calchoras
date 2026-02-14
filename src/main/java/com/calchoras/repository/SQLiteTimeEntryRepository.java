@@ -25,7 +25,7 @@ public class SQLiteTimeEntryRepository implements ITimeEntryRepository {
                 "lunch_out TEXT, " +
                 "clock_out TEXT, " +
                 "day_off INTEGER DEFAULT 0, " +
-                "FOREIGN KEY (employee_id) REFERENCES employee(id)" +
+                "FOREIGN KEY (employee_id) REFERENCES employee(id) ON DELETE CASCADE" +
                 ");";
 
         String sqlIndex = "CREATE INDEX IF NOT EXISTS idx_timeentry_emp_date ON TimeEntry(employee_id, entry_date);";

@@ -89,4 +89,8 @@ public class TimeEntryService implements ITimeEntryService {
     public boolean deleteByEmployeeIdAndDate(int employeeId, LocalDate date) {
         return repository.deleteByEmployeeIdAndDate(employeeId, date);
     }
+
+    public boolean existsByEmployeeIdAndDate(int employeeId, LocalDate date) {
+        return repository.existsByEmployeeIdAndDate(employeeId, date);
+    }
 }

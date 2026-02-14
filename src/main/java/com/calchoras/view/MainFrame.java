@@ -339,6 +339,10 @@ public class MainFrame extends JFrame {
         }
 
         isDayOffCheckBox.setSelected(timeEntryDTO.dayOff());
+
+        if(timeEntryDTO.dayOff()){
+
+        }
     }
 
     public void resetDateField() {
