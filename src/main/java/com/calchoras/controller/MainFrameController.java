@@ -97,12 +97,14 @@ public class MainFrameController {
 
         // Date Handling
         view.getDateField().addActionListener(e -> handleDateChangeAction());
+
+        /*
         view.getDateField().addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
                 handleDateChangeAction();
             }
-        });
+        });*/
 
         // Mouse Listeners
         addHandleMouseRightClick();
@@ -112,7 +114,7 @@ public class MainFrameController {
         view.addAutoAdvanceToField(view.getClockInField());
         view.addAutoAdvanceToField(view.getLunchInField());
         view.addAutoAdvanceToField(view.getLunchOutField());
-        view.addAutoAdvanceToField(view.getLunchInField());
+        view.addAutoAdvanceToField(view.getClockOutField());
     }
 
     private void initValidators() {
@@ -396,6 +398,7 @@ public class MainFrameController {
             view.plusEntryDate(1);
             view.clearTimeEntryFields();
             view.getResultArea().append("\nBatida adicionada para " + timeEntry.entryDate());
+            view.getClockInField().requestFocus();
 
         } catch (java.time.format.DateTimeParseException e) {
             JOptionPane.showMessageDialog(view, "Erro de formato de Data (DD/MM/AAAA) ou Hora (HH:MM).", "Erro de Formato", JOptionPane.ERROR_MESSAGE);

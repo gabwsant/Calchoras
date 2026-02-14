@@ -459,16 +459,21 @@ public class MainFrame extends JFrame {
     public void addAutoAdvanceToField(JTextField field) {
         field.getDocument().addDocumentListener(new DocumentListener() {
             private void check() {
-                if (field.getText().length() == 5) {
-                    field.transferFocus();
+                if (field.getText().trim().length() == 5) {
+                    SwingUtilities.invokeLater(() -> {
+                        if (field.isFocusOwner()) {
+                            field.transferFocus();
+                        }
+                    });
                 }
             }
+
             @Override
             public void insertUpdate(DocumentEvent e) { check(); }
             @Override
-            public void removeUpdate(DocumentEvent e) {}
+            public void removeUpdate(DocumentEvent e) { }
             @Override
-            public void changedUpdate(DocumentEvent e) {}
+            public void changedUpdate(DocumentEvent e) { check(); }
         });
     }
 
