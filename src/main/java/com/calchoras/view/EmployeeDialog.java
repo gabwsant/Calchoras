@@ -107,4 +107,14 @@ public class EmployeeDialog extends JDialog {
             return lunchBreak.getText();
         }
     }
+
+    public void setSelectedCompany(int companyId) {
+        for (int i = 0; i < companyComboBox.getItemCount(); i++) {
+            CompanyDTO item = companyComboBox.getItemAt(i);
+            if (item != null && item.id() == companyId) {
+                companyComboBox.setSelectedItem(item);
+                return;
+            }
+        }
+    }
 }

@@ -38,6 +38,7 @@ public class MainFrame extends JFrame {
     // Company
     private JComboBox<CompanyDTO> companyComboBox;
     private JButton addCompanyButton;
+    private JButton updateCompanyButton;
 
     // Employee fields
     private JTextField nameField;
@@ -111,6 +112,7 @@ public class MainFrame extends JFrame {
         // COMPANY
         companyComboBox = new JComboBox<>();
         addCompanyButton = new JButton("Cadastrar Empresa");
+        updateCompanyButton = new JButton("Editar Empresa");
 
         // EMPLOYEE FIELDS
         nameField = new JTextField();
@@ -163,10 +165,8 @@ public class MainFrame extends JFrame {
         JPanel centerFormPanel = new JPanel();
         centerFormPanel.setLayout(new MigLayout("wrap 1, fillx, insets 10", "[grow, fill]", "[]10[]"));
 
-        // --- INSERTION PANEL (COMPANY/EMPLOYEE) ---
         JPanel insertPanel = new JPanel(new MigLayout("wrap 2, fillx, insets 0", "[][grow, fill]", "[]5[]"));
 
-        // UPPER BUTTONS
         JPanel topButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         topButtonsPanel.add(addCompanyButton);
         topButtonsPanel.add(Box.createHorizontalStrut(5));
@@ -174,7 +174,8 @@ public class MainFrame extends JFrame {
 
         insertPanel.add(topButtonsPanel, "span 2, wrap");
         insertPanel.add(new JLabel("Empresa:"));
-        insertPanel.add(companyComboBox);
+        insertPanel.add(companyComboBox, "split 2, growx");
+        insertPanel.add(updateCompanyButton, "shrink 0, wrap");
 
         centerFormPanel.add(insertPanel);
 

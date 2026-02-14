@@ -1,5 +1,6 @@
 package com.calchoras.view;
 
+import com.calchoras.dto.CompanyDTO;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -8,35 +9,72 @@ import java.awt.*;
 public class CompanyDialog extends JDialog {
 
     private final JTextField nameField;
+
+    @Getter
+    private Integer companyId = null;
+
     @Getter
     private final JButton saveButton;
+    @Getter
+    private final JButton deleteButton;
+    @Getter
+    private final JButton cancelButton;
 
-    public CompanyDialog(JFrame parent) {
-        super(parent, "Calchoras - Cadastrar Empresa", true);
+    public CompanyDialog(Frame parent) {
+        this(parent, null);
+    }
 
-        nameField = new JTextField();
+    public CompanyDialog(Frame parent, CompanyDTO companyToEdit) {
+        super(parent, true);
 
-        saveButton = new JButton("Salvar");
-        JButton cancelButton = new JButton("Cancelar");
+        setTitle(companyToEdit == null ? "Calchoras - Nova Empresa" : "Calchoras - Editar Empresa");
 
-        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        nameField = new JTextField(20);
 
-        panel.add(new JLabel("Nome da Empresa:"));
-        panel.add(nameField);
+        if (companyToEdit != null) {
+            this.companyId = companyToEdit.id();
+            nameField.setText(companyToEdit.name());
+        }
 
-        panel.add(saveButton);
-        panel.add(cancelButton);
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        add(panel);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        formPanel.add(new JLabel("Nome da Empresa:"), gbc);
+
+        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 1.0;
+        formPanel.add(nameField, gbc);
+
+        saveButton = new JButton(companyToEdit == null ? "Salvar" : "Atualizar");
+        deleteButton = new JButton("Excluir");
+        cancelButton = new JButton("Cancelar");
+
+        deleteButton.setForeground(Color.RED);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+        if (companyToEdit != null) {
+            buttonPanel.add(deleteButton);
+        }
+        buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
+
+        setLayout(new BorderLayout());
+        add(formPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
 
         pack();
         setLocationRelativeTo(parent);
+        setResizable(false);
 
         cancelButton.addActionListener(e -> dispose());
     }
 
     public String getCompanyName() {
-        return nameField.getText();
+        return nameField.getText().trim();
     }
 }

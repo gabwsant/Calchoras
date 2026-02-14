@@ -54,7 +54,16 @@ public class MainFrameController {
 
     private void initListeners() {
         // Company
-        view.getAddCompanyButton().addActionListener(e -> openCompanyDialog());
+        view.getAddCompanyButton().addActionListener(e -> openCompanyDialog(null));
+        view.getUpdateCompanyButton().addActionListener(e -> {
+            Object selected = view.getCompanyComboBox().getSelectedItem();
+
+            if (selected instanceof CompanyDTO selectedCompany) {
+                openCompanyDialog(selectedCompany);
+            } else {
+                view.showError("Selecione uma empresa válida para editar.");
+            }
+        });
         view.getCompanyComboBox().addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 CompanyDTO item = (CompanyDTO) e.getItem();
@@ -179,8 +188,8 @@ public class MainFrameController {
     // COMPANY ACTIONS
     // ===================================================================================
 
-    private void openCompanyDialog() {
-        CompanyDialog dialog = new CompanyDialog(view);
+    private void openCompanyDialog(CompanyDTO companyToEdit) {
+        CompanyDialog dialog = new CompanyDialog(view, companyToEdit);
 
         dialog.getSaveButton().addActionListener(e -> {
             String name = dialog.getCompanyName();
@@ -190,9 +199,31 @@ public class MainFrameController {
                 return;
             }
 
-            handleAddCompanyAction(name);
+            if (companyToEdit == null) {
+                handleAddCompanyAction(name);
+            } else {
+                handleUpdateCompanyAction(companyToEdit.id(), name);
+            }
             dialog.dispose();
         });
+
+        if (companyToEdit != null) {
+            dialog.getDeleteButton().addActionListener(e -> {
+                int confirm = JOptionPane.showConfirmDialog(
+                        dialog,
+                        "Tem certeza que deseja excluir a empresa '" + companyToEdit.name() + "'?\n" +
+                                "Todos os funcionários da empresa e seus registros de ponto serão excluídos permanentemente.",
+                        "Excluir Empresa",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+                if (confirm == JOptionPane.YES_OPTION) {
+                    handleDeleteCompanyAction(companyToEdit.id());
+                    dialog.dispose();
+                }
+            });
+        }
 
         dialog.setVisible(true);
     }
@@ -231,6 +262,32 @@ public class MainFrameController {
         view.resetDateField();
     }
 
+    private void handleUpdateCompanyAction(int id, String newName) {
+        try {
+            CompanyDTO dto = new CompanyDTO(id, newName);
+            companyService.update(dto);
+
+            loadInitialData();
+
+            view.showSuccess("Empresa atualizada com sucesso!");
+        } catch (Exception ex) {
+            view.showError("Erro ao atualizar empresa: " + ex.getMessage());
+        }
+    }
+
+    private void handleDeleteCompanyAction(int id) {
+        try {
+            companyService.deleteById(id);
+
+            loadInitialData();
+            view.clearEmployeeInfoFields();
+            view.clearTimeEntryFields();
+            view.showSuccess("Empresa excluída com sucesso!");
+        } catch (Exception ex) {
+            view.showError("Erro ao excluir empresa: " + ex.getMessage());
+        }
+    }
+
     // ===================================================================================
     // EMPLOYEE ACTIONS
     // ===================================================================================
@@ -240,6 +297,7 @@ public class MainFrameController {
 
         List<CompanyDTO> companies = companyService.findAll();
         dialog.updateCompanyList(companies);
+        dialog.setSelectedCompany(view.getSelectedCompanyId());
 
         TimeFieldValidator.apply(dialog.getShiftIn());
         TimeFieldValidator.apply(dialog.getShiftOut());
@@ -433,10 +491,9 @@ public class MainFrameController {
 
             TimeEntryDTO timeEntry = timeEntryService.saveOrUpdate(timeEntryToInsertOrUpdate);
 
-            view.plusEntryDate(1);
-            view.clearTimeEntryFields();
             view.getResultArea().append("\nBatida adicionada para " + timeEntry.entryDate());
             view.getClockInField().requestFocus();
+            handleNextEntryAction();
 
         } catch (java.time.format.DateTimeParseException e) {
             JOptionPane.showMessageDialog(view, "Erro de formato de Data (DD/MM/AAAA) ou Hora (HH:MM).", "Erro de Formato", JOptionPane.ERROR_MESSAGE);
