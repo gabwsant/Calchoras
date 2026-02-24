@@ -1,24 +1,18 @@
-# Calchoras - Cálculo de Horas Extras
+## Calchoras - Overtime Calculation
 
-O Calchoras é uma aplicação desktop desenvolvida em Java para o gerenciamento eficiente de horas trabalhadas. O foco principal do projeto é oferecer uma interface intuitiva para o controle de ponto, cálculos de horas extras e gestão de jornadas de trabalho de funcionários.
+**Calchoras** is a desktop application developed in Java for the efficient management of hours worked. The project's primary focus is to offer an intuitive interface for time tracking, overtime calculations, and employee work shift management.
 
-## Funcionalidades
-- Gestão de Cadastros:
-    Registro completo de funcionários e empresas.
+### Features
 
-- Controle de Ponto:
-    Registro de quatro marcações diárias (Entrada, Saída para Almoço, Retorno e Saída Final).
-    Opção rápida para marcação de "Dia de Folga".
+- **Registration Management:** Complete registration of employees and companies.
+- **Time Tracking:** Recording of four daily timestamps (Clock-in, Lunch Break, Return, and Clock-out). Quick option for marking a "Day Off."
+- **Automatic Calculations:** Immediate processing of overtime and negative hours based on the configured work shift for the employee.
+- **Reports:** Generation of hour summaries for verification and management.
 
-- Cálculos Automáticos:
-    Processamento imediato de horas extras e horas negativas com base na jornada configurada.
+### Technologies Used
 
-- Relatórios:
-    Geração de resumos de horas para conferência e gestão.
-
-## Tecnologias Utilizadas
-- Linguagem: Java
-- Arquitetura: MVC
-- Interface Gráfica: Swing
-- Gerenciamento de Dependências: Maven
-- Persistência de Dados: SQLite
+- **Language:** Java
+- **Architecture:** MVC
+- **Graphical User Interface:** Swing
+- **Dependency Management:** Maven
+- **Data Persistence:** SQLite
