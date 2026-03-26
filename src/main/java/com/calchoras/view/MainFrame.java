@@ -60,6 +60,10 @@ public class MainFrame extends JFrame {
     private JButton addTimeEntryButton;
     private JButton removeTimeEntryButton;
 
+    // Computation fields
+    private JFormattedTextField compInitialDateField;
+    private JFormattedTextField compFinalDateField;
+
     // Main actions
     private JButton resetCalculationButton;
     private JButton calculateButton;
@@ -86,12 +90,14 @@ public class MainFrame extends JFrame {
         initComponents();
         layoutComponents();
         enableEmployeeFields(false);
+        enableComputationFields(false);
         setTimeEntryEditModeEnabled(false);
     }
 
     private void initFrame() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(800, 600));
+        setPreferredSize(new Dimension(800, 600));
         setLocationRelativeTo(null);
     }
 
@@ -133,6 +139,12 @@ public class MainFrame extends JFrame {
         addTimeEntryButton = new JButton("Salvar");
         removeTimeEntryButton = new JButton("Remover");
         nextEntryButton = new JButton("Próximo");
+
+        // COMPUTATION FIELDS
+        compInitialDateField = new JFormattedTextField(dateMask);
+        compInitialDateField.setColumns(10);
+        compFinalDateField = new JFormattedTextField(dateMask);
+        compFinalDateField.setColumns(10);
 
         resetCalculationButton = new JButton("Reiniciar");
         calculateButton = new JButton("Calcular");
@@ -232,6 +244,21 @@ public class MainFrame extends JFrame {
 
         centerFormPanel.add(timeEntryPanel);
 
+        // --- COMPUTATIONS ---
+        JPanel computationPanel = new JPanel(new MigLayout("wrap 4, fillx, insets 2", "[right][grow, fill][right][grow, fill]", "[]5[]"));
+        computationPanel.setBorder(BorderFactory.createTitledBorder("Cálculo"));
+
+        computationPanel.add(new JLabel("Data Inicial:"));
+        computationPanel.add(compInitialDateField);
+
+        computationPanel.add(new JLabel("Data Final:"));
+        computationPanel.add(compFinalDateField);
+
+        computationPanel.add(calculateButton, "span 4, split 2, center, width 200!");
+        computationPanel.add(printReportButton, "width 200!");
+
+        centerFormPanel.add(computationPanel);
+
         // ================================
         // CENTER SCROLL PANE
         // ================================
@@ -252,16 +279,10 @@ public class MainFrame extends JFrame {
         JPanel southPanel = new JPanel(new BorderLayout(5, 5));
         southPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
 
-        JPanel mainActionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        mainActionsPanel.add(resetCalculationButton);
-        mainActionsPanel.add(calculateButton);
-        mainActionsPanel.add(printReportButton);
-
         JScrollPane resultScrollPane = new JScrollPane(resultArea);
-        resultScrollPane.setBorder(BorderFactory.createTitledBorder("Resultados / Relatório"));
+        resultScrollPane.setBorder(BorderFactory.createTitledBorder("Resultado"));
         resultScrollPane.setPreferredSize(new Dimension(0, 150));
 
-        southPanel.add(mainActionsPanel, BorderLayout.NORTH);
         southPanel.add(resultScrollPane, BorderLayout.CENTER);
 
         this.add(splitPane, BorderLayout.CENTER);
@@ -459,6 +480,13 @@ public class MainFrame extends JFrame {
         updateEmployeeButton.setEnabled(enable);
         removeEmployeeButton.setEnabled(enable);
         enableEmployeeButton.setEnabled(enable);
+    }
+
+    public void enableComputationFields(boolean enable) {
+        compInitialDateField.setEnabled(enable);
+        compFinalDateField.setEnabled(enable);
+        calculateButton.setEnabled(enable);
+        printReportButton.setEnabled(enable);
     }
 
     public void addAutoAdvanceToField(JTextField field) {

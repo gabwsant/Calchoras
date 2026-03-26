@@ -42,6 +42,14 @@ public class TimeEntryService implements ITimeEntryService {
     }
 
     @Override
+    public List<TimeEntryDTO> findByEmployeeIdAndRange(int employeeId, LocalDate dateFrom, LocalDate dateTo) {
+        return repository.findByEmployeeIdAndRange(employeeId, dateFrom, dateTo)
+                .stream()
+                .map(TimeEntryMapper::toDTO)
+                .toList();
+    }
+
+    @Override
     public TimeEntryDTO save(TimeEntryDTO entryDTO) {
 
         if (!employeeService.existsById(entryDTO.employeeId())) {

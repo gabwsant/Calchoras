@@ -5,6 +5,8 @@ import com.calchoras.model.Company;
 import lombok.Getter;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.List;
 
@@ -116,5 +118,26 @@ public class EmployeeDialog extends JDialog {
                 return;
             }
         }
+    }
+
+    public void addAutoAdvanceToField(JTextField field) {
+        field.getDocument().addDocumentListener(new DocumentListener() {
+            private void check() {
+                if (field.getText().trim().length() == 5) {
+                    SwingUtilities.invokeLater(() -> {
+                        if (field.isFocusOwner()) {
+                            field.transferFocus();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) { check(); }
+            @Override
+            public void removeUpdate(DocumentEvent e) { }
+            @Override
+            public void changedUpdate(DocumentEvent e) { check(); }
+        });
     }
 }

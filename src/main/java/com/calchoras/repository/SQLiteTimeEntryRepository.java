@@ -118,6 +118,32 @@ public class SQLiteTimeEntryRepository implements ITimeEntryRepository {
     }
 
     @Override
+    public List<TimeEntry> findByEmployeeIdAndRange(int employeeId, LocalDate dateFrom, LocalDate dateTo) {
+        List<TimeEntry> list = new ArrayList<>();
+        String sql =  "SELECT * FROM TimeEntry WHERE employee_id = ? AND entry_date between ? and ?";
+
+        try (Connection conn = SQLiteConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, employeeId);
+            pstmt.setString(2, dateFrom.toString());
+            pstmt.setString(3, dateTo.toString());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToTimeEntry(rs));
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException(
+                    "Erro ao buscar batidas do funcionário: " + employeeId +
+                    " no período de " + dateFrom.toString() + " até " + dateTo.toString(),
+                    e
+            );
+        }
+        return list;
+    }
+
+    @Override
     public TimeEntry save(TimeEntry entry) {
         String sql = "INSERT INTO TimeEntry (employee_id, entry_date, clock_in, lunch_in, lunch_out, clock_out, day_off) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?)";

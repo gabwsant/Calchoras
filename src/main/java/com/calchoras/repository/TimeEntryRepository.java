@@ -87,6 +87,16 @@ public class TimeEntryRepository implements ITimeEntryRepository {
     }
 
     @Override
+    public List<TimeEntry> findByEmployeeIdAndRange(int employeeId, LocalDate dateFrom, LocalDate dateTo) {
+        return timeEntryList.stream()
+                .filter(te ->
+                        te.getEmployeeId() == employeeId &&
+                        !te.getEntryDate().isBefore(dateFrom) &&
+                        !te.getEntryDate().isAfter(dateTo))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public TimeEntry save(TimeEntry entry) {
         int nextId = timeEntryList.stream()
                 .mapToInt(TimeEntry::getId)

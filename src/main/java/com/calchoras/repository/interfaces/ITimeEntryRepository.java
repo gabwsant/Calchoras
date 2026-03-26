@@ -44,6 +44,16 @@ public interface ITimeEntryRepository {
     Optional<TimeEntry> findByEmployeeIdAndDate(int employeeId, LocalDate date);
 
     /**
+     * Returns a list of time entries of an employee in a date range
+     *
+     * @param employeeId the employee ID
+     * @param dateFrom initial date of the range
+     * @param dateTo final date of the range
+     * @return a list of time entries
+     */
+    List<TimeEntry> findByEmployeeIdAndRange(int employeeId, LocalDate dateFrom, LocalDate dateTo);
+
+    /**
      * Saves a new time entry and returns the created object with its ID assigned.
      *
      * @param entry the time entry to save

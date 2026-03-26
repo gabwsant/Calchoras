@@ -3,6 +3,10 @@ package com.calchoras.controller;
 import com.calchoras.dto.CompanyDTO;
 import com.calchoras.dto.EmployeeDTO;
 import com.calchoras.dto.TimeEntryDTO;
+import com.calchoras.model.PeriodCalculationResult;
+import com.calchoras.model.TimeEntry;
+import com.calchoras.service.ReportService;
+import com.calchoras.service.TimeEntryService;
 import com.calchoras.service.interfaces.*;
 import com.calchoras.util.validators.TimeFieldValidator;
 import com.calchoras.view.*;
@@ -87,12 +91,14 @@ public class MainFrameController {
                 EmployeeListItem item = view.getEmployeeList().getSelectedValue();
                 if (item != null) {
                     view.enableEmployeeFields(true);
+                    view.enableComputationFields(true);
                     view.setTimeEntryEditModeEnabled(true);
                     handleEmployeeSelection(item.getId());
                 } else {
                     view.clearEmployeeInfoFields();
                     view.clearTimeEntryFields();
                     view.enableEmployeeFields(false);
+                    view.enableComputationFields(false);
                     view.setTimeEntryEditModeEnabled(false);
                 }
             }
@@ -107,6 +113,9 @@ public class MainFrameController {
 
         // Date Handling
         view.getDateField().addActionListener(e -> handleDateChangeAction());
+
+        // Computation
+        view.getCalculateButton().addActionListener(e -> handleCalculateAction());
 
         // Mouse Listeners
         addHandleMouseRightClick();
@@ -282,6 +291,13 @@ public class MainFrameController {
             loadInitialData();
             view.clearEmployeeInfoFields();
             view.clearTimeEntryFields();
+
+            CompanyDTO currentCompany = (CompanyDTO) view.getCompanyComboBox().getSelectedItem();
+            if (currentCompany != null) {
+                handleCompanySelectionChange(currentCompany.id());
+            } else {
+                view.updateEmployeeList(java.util.Collections.emptyList());
+            }
             view.showSuccess("Empresa excluída com sucesso!");
         } catch (Exception ex) {
             view.showError("Erro ao excluir empresa: " + ex.getMessage());
@@ -298,6 +314,8 @@ public class MainFrameController {
         List<CompanyDTO> companies = companyService.findAll();
         dialog.updateCompanyList(companies);
         dialog.setSelectedCompany(view.getSelectedCompanyId());
+        dialog.addAutoAdvanceToField(dialog.getShiftIn());
+        dialog.addAutoAdvanceToField(dialog.getShiftOut());
 
         TimeFieldValidator.apply(dialog.getShiftIn());
         TimeFieldValidator.apply(dialog.getShiftOut());
@@ -570,6 +588,39 @@ public class MainFrameController {
                 view.getClockOut(),
                 view.isDayOffSelected()
         );
+    }
+
+    // ===================================================================================
+    // CALCULATION ACTIONS
+    // ===================================================================================
+
+    private void handleCalculateAction() {
+
+        if (!view.hasSelectedEmployee()) {
+            view.showError("Selecione um funcionário antes de calcular.");
+        }
+
+        try {
+            EmployeeListItem selectedEmployee = view.getEmployeeList().getSelectedValue();
+            EmployeeDTO employeeToCalculate = buildEmployeeDTOFromView(selectedEmployee.getId());
+
+            LocalDate initialDate = LocalDate.parse(view.getCompInitialDateField().getText(), DATE_FORMATTER);
+            LocalDate finalDate = LocalDate.parse(view.getCompFinalDateField().getText(), DATE_FORMATTER);
+
+            List<TimeEntryDTO> timeEntries = timeEntryService.findByEmployeeIdAndRange(employeeToCalculate.id(), initialDate, finalDate);
+
+            PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries);
+
+            view.getResultArea().append(
+                    "\nTotal de horas positivas: " + result.totalOvertimeAccumulated().toString()
+                    + "\nTotal de horas negativas: " + result.totalNegativeHoursAccumulated().toString()
+
+            );
+
+        } catch (Exception e) {
+
+        }
+
     }
 
     // ===================================================================================

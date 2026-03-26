@@ -35,6 +35,17 @@ public interface ITimeEntryService {
      */
     Optional<TimeEntryDTO> findByEmployeeIdAndDate(int employeeId, LocalDate date);
 
+
+    /**
+     * Returns a list of time entries of an employee in a date range
+     *
+     * @param employeeId the employee ID
+     * @param dateFrom initial date
+     * @param dateTo final date
+     * @return a list of the employee's time entries in the date range
+     */
+    List<TimeEntryDTO> findByEmployeeIdAndRange(int employeeId, LocalDate dateFrom, LocalDate dateTo);
+
     /**
      * Saves a new time entry and returns the created object with its ID assigned.
      *

@@ -1,5 +1,9 @@
 package com.calchoras.service;
 
+import com.calchoras.dto.EmployeeDTO;
+import com.calchoras.dto.TimeEntryDTO;
+import com.calchoras.mapper.EmployeeMapper;
+import com.calchoras.mapper.TimeEntryMapper;
 import com.calchoras.model.DailyCalculationResult;
 import com.calchoras.model.Employee;
 import com.calchoras.model.PeriodCalculationResult;
@@ -20,13 +24,16 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public PeriodCalculationResult calculatePeriodBalance(Employee employee, List<TimeEntry> entries){
+    public PeriodCalculationResult calculatePeriodBalance(EmployeeDTO employeeDTO, List<TimeEntryDTO> entries){
         List<DailyCalculationResult> dailyResults = new ArrayList<>();
         Duration totalOvertimeAccumulated = Duration.ZERO;
         Duration totalNegativeHoursAccumulated = Duration.ZERO;
         int incompleteEntriesCount = 0;
 
-        for (TimeEntry entry : entries) {
+        Employee employee = EmployeeMapper.toEntity(employeeDTO);
+        List<TimeEntry> timeEntries = TimeEntryMapper.toEntity(entries);
+
+        for (TimeEntry entry : timeEntries) {
             DailyCalculationResult dailyResult = dailyCalculationService.calculate(entry, employee);
 
             dailyResults.add(dailyResult);
