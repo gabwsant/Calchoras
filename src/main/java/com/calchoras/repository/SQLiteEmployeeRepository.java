@@ -240,6 +240,41 @@ public class SQLiteEmployeeRepository implements IEmployeeRepository {
         }
     }
 
+    @Override
+    public boolean existsByNameAndCompanyId(String name, int companyId) {
+        String sql = "SELECT 1 FROM Employee WHERE name = ? AND company_id = ?";
+
+        try (Connection conn = SQLiteConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, name);
+            pstmt.setInt(2, companyId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Erro ao verificar duplicidade de nome na empresa: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean existsByNameAndCompanyIdAndIdNot(String name, int companyId, int idToIgnore) {
+        String sql = "SELECT 1 FROM Employee WHERE name = ? AND company_id = ? AND id != ?";
+
+        try (Connection conn = SQLiteConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, name);
+            pstmt.setInt(2, companyId);
+            pstmt.setInt(3, idToIgnore);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Erro ao verificar duplicidade de nome na empresa ignorando ID: " + e.getMessage(), e);
+        }
+    }
+
+    // ----------------------------------
+
     private Employee mapResultSetToEmployee(ResultSet rs) throws SQLException {
         return new Employee(
                 rs.getInt("id"),

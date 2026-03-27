@@ -104,4 +104,8 @@ public interface IEmployeeRepository {
      * @return true if at least one employee exists for the company
      */
     boolean existsByCompanyId(int companyId);
+
+    boolean existsByNameAndCompanyId(String name, int companyId);
+
+    boolean existsByNameAndCompanyIdAndIdNot(String name, int companyId, int idToIgnore);
 }

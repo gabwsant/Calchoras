@@ -1,7 +1,5 @@
 package com.calchoras.service;
 
-import com.calchoras.dto.CompanyDTO;
-import com.calchoras.mapper.CompanyMapper;
 import com.calchoras.model.Company;
 import com.calchoras.repository.interfaces.ICompanyRepository;
 import com.calchoras.service.interfaces.ICompanyService;
@@ -18,41 +16,31 @@ public class CompanyService implements ICompanyService {
     }
 
     @Override
-    public List<CompanyDTO> findAll() {
+    public List<Company> findAll() {
         List<Company> companies = companyRepository.findAll();
         return companies.stream()
-                .map(CompanyMapper::toDTO)
                 .toList();
     }
 
     @Override
-    public Optional<CompanyDTO> findById(int companyId) {
-        return companyRepository.findById(companyId)
-                .map(CompanyMapper::toDTO);
+    public Optional<Company> findById(int companyId) {
+        return companyRepository.findById(companyId);
     }
 
     @Override
-    public CompanyDTO save(CompanyDTO companyDTO) {
-        if (companyRepository.existsByName(companyDTO.name())) {
+    public Company save(Company company) {
+        if (companyRepository.existsByName(company.getName())) {
             throw new IllegalArgumentException("Empresa já existe.");
         }
-
-        Company company = CompanyMapper.toEntity(companyDTO);
-        Company savedCompany = companyRepository.save(company);
-
-        return CompanyMapper.toDTO(savedCompany);
+        return companyRepository.save(company);
     }
 
     @Override
-    public CompanyDTO update(CompanyDTO companyDTO) {
-        if (!companyRepository.existsById(companyDTO.id())) {
+    public Company update(Company company) {
+        if (!companyRepository.existsById(company.getId())) {
             throw new IllegalArgumentException("Empresa não encontrada para atualização.");
         }
-
-        Company company = CompanyMapper.toEntity(companyDTO);
-        Company savedCompany = companyRepository.update(company);
-
-        return CompanyMapper.toDTO(savedCompany);
+        return companyRepository.update(company);
     }
 
     @Override

@@ -24,16 +24,13 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public PeriodCalculationResult calculatePeriodBalance(EmployeeDTO employeeDTO, List<TimeEntryDTO> entries){
+    public PeriodCalculationResult calculatePeriodBalance(Employee employee, List<TimeEntry> entries){
         List<DailyCalculationResult> dailyResults = new ArrayList<>();
         Duration totalOvertimeAccumulated = Duration.ZERO;
         Duration totalNegativeHoursAccumulated = Duration.ZERO;
         int incompleteEntriesCount = 0;
 
-        Employee employee = EmployeeMapper.toEntity(employeeDTO);
-        List<TimeEntry> timeEntries = TimeEntryMapper.toEntity(entries);
-
-        for (TimeEntry entry : timeEntries) {
+        for (TimeEntry entry : entries) {
             DailyCalculationResult dailyResult = dailyCalculationService.calculate(entry, employee);
 
             dailyResults.add(dailyResult);

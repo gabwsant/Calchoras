@@ -3,6 +3,9 @@ package com.calchoras.mapper;
 import com.calchoras.dto.CompanyDTO;
 import com.calchoras.model.Company;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CompanyMapper {
 
     // model to view
@@ -14,6 +17,17 @@ public class CompanyMapper {
                 entity.getId(),
                 entity.getName()
         );
+    }
+
+    public static List<CompanyDTO> toDTO(List<Company> entityList) {
+        if (entityList == null) {
+            return null;
+        }
+        List<CompanyDTO> list = new ArrayList<>();
+        for (Company entity : entityList) {
+            list.add(toDTO(entity));
+        }
+        return list;
     }
 
     // view to model

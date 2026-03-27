@@ -3,6 +3,9 @@ package com.calchoras.mapper;
 import com.calchoras.dto.EmployeeDTO;
 import com.calchoras.model.Employee;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EmployeeMapper {
 
     // model to view
@@ -19,6 +22,17 @@ public class EmployeeMapper {
                 entity.getLunchBreakMinutes(),
                 entity.isActive()
         );
+    }
+
+    public static List<EmployeeDTO> toDTO(List<Employee> entities) {
+        if (entities == null) {
+            return null;
+        }
+        List<EmployeeDTO> list = new ArrayList<>();
+        for (Employee entity : entities) {
+            list.add(toDTO(entity));
+        }
+        return list;
     }
 
     // view to model

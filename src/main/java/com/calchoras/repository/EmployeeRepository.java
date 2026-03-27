@@ -159,4 +159,13 @@ public class EmployeeRepository implements IEmployeeRepository {
     public boolean existsByCompanyId(int companyId) {
         return employeesList.stream().anyMatch(e -> e.getCompanyId() == companyId);
     }
+
+    @Override
+    public boolean existsByNameAndCompanyId(String name, int companyId) {
+        return false;
+    }
+    @Override
+    public  boolean existsByNameAndCompanyIdAndIdNot(String name, int companyId, int idToIgnore) {
+        return false;
+    }
 }

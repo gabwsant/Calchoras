@@ -1,7 +1,5 @@
 package com.calchoras.service;
 
-import com.calchoras.dto.EmployeeDTO;
-import com.calchoras.mapper.EmployeeMapper;
 import com.calchoras.model.Employee;
 import com.calchoras.repository.interfaces.IEmployeeRepository;
 import com.calchoras.service.interfaces.ICompanyService;
@@ -9,6 +7,7 @@ import com.calchoras.service.interfaces.IEmployeeService;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class EmployeeService implements IEmployeeService {
@@ -22,84 +21,67 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Override
-    public List<EmployeeDTO> findAll() {
-        return employeeRepository.findAll()
-                .stream()
-                .map(EmployeeMapper::toDTO)
-                .toList();
+    public List<Employee> findAll() {
+        return employeeRepository.findAll();
     }
 
     @Override
-    public Optional<EmployeeDTO> findById(int employeeId) {
-        return employeeRepository.findById(employeeId)
-                .map(EmployeeMapper::toDTO);
+    public Optional<Employee> findById(int employeeId) {
+        return employeeRepository.findById(employeeId);
     }
 
     @Override
-    public List<EmployeeDTO> findByCompanyId(int companyId) {
+    public List<Employee> findByCompanyId(int companyId) {
         return employeeRepository.findByCompanyId(companyId)
                 .stream()
-                .map(EmployeeMapper::toDTO)
-                .sorted(
-                        Comparator.comparing(EmployeeDTO::active, Comparator.reverseOrder())
-                                .thenComparing(EmployeeDTO::name))
+                .sorted(Comparator.comparing(Employee::isActive, Comparator.reverseOrder())
+                        .thenComparing(Employee::getName))
                 .toList();
     }
 
     @Override
-    public List<EmployeeDTO> findActivesByCompanyId(int companyId) {
+    public List<Employee> findActivesByCompanyId(int companyId) {
         return employeeRepository.findActivesByCompanyId(companyId)
                 .stream()
-                .map(EmployeeMapper::toDTO)
-                .sorted(
-                        Comparator.comparing(EmployeeDTO::active, Comparator.reverseOrder())
-                                .thenComparing(EmployeeDTO::name))
+                .sorted(Comparator.comparing(Employee::isActive, Comparator.reverseOrder())
+                        .thenComparing(Employee::getName))
                 .toList();
     }
 
     @Override
-    public EmployeeDTO save(EmployeeDTO employeeDTO) {
-        if (
-            employeeRepository.existsByName(employeeDTO.name()) &&
-            employeeRepository.existsByCompanyId(employeeDTO.companyId())
-        ) {
-            throw new IllegalArgumentException("Funcionário já existe para esta empresa.");
-        }
+    public Employee save(Employee employee) {
+        Objects.requireNonNull(employee, "O funcionário não pode ser nulo.");
+        Objects.requireNonNull(employee.getName(), "O nome do funcionário é obrigatório.");
 
-        if (!companyService.existsById(employeeDTO.companyId())) {
+        if (!companyService.existsById(employee.getCompanyId())) {
             throw new IllegalArgumentException("Empresa não encontrada.");
         }
 
-        Employee employee = EmployeeMapper.toEntity(employeeDTO);
-        Employee savedEmployee = employeeRepository.save(employee);
+        if (employeeRepository.existsByNameAndCompanyId(employee.getName(), employee.getCompanyId())) {
+            throw new IllegalArgumentException("Já existe um funcionário com este nome para esta empresa.");
+        }
 
-        return EmployeeMapper.toDTO(savedEmployee);
+        return employeeRepository.save(employee);
     }
 
     @Override
-    public EmployeeDTO update(EmployeeDTO employeeDTO) {
+    public Employee update(Employee employee) {
+        Objects.requireNonNull(employee, "O funcionário não pode ser nulo.");
+        Objects.requireNonNull(employee.getName(), "O nome do funcionário é obrigatório.");
 
-        if (!existsById(employeeDTO.id())) {
-            throw new IllegalArgumentException("Funcionário não encontrado na base de dados!");
+        if (!existsById(employee.getId())) {
+            throw new IllegalArgumentException("Funcionário não encontrado na base de dados.");
         }
 
-        if (!companyService.existsById(employeeDTO.companyId())) {
-            throw new IllegalArgumentException("Empresa inválida ou não encontrada!");
+        if (!companyService.existsById(employee.getCompanyId())) {
+            throw new IllegalArgumentException("Empresa inválida ou não encontrada.");
         }
 
-        boolean existsDuplicate = employeeRepository.findByCompanyId(employeeDTO.companyId())
-                .stream()
-                .anyMatch(e -> e.getName().equalsIgnoreCase(employeeDTO.name()) &&
-                        e.getId() != employeeDTO.id());
-
-        if (existsDuplicate) {
+        if (employeeRepository.existsByNameAndCompanyIdAndIdNot(employee.getName(), employee.getCompanyId(), employee.getId())) {
             throw new IllegalArgumentException("Já existe outro funcionário com este nome nesta empresa.");
         }
 
-        Employee employee = EmployeeMapper.toEntity(employeeDTO);
-        Employee updatedEmployee = employeeRepository.update(employee);
-
-        return EmployeeMapper.toDTO(updatedEmployee);
+        return employeeRepository.update(employee);
     }
 
     @Override
@@ -108,10 +90,14 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Override
-    public boolean disableById(int employeeId) { return employeeRepository.disableById(employeeId); }
+    public boolean disableById(int employeeId) {
+        return employeeRepository.disableById(employeeId);
+    }
 
     @Override
-    public boolean enableById(int employeeId) { return employeeRepository.enableById(employeeId); }
+    public boolean enableById(int employeeId) {
+        return employeeRepository.enableById(employeeId);
+    }
 
     @Override
     public boolean existsById(int employeeId) {

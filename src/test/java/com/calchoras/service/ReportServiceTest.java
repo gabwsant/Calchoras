@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ReportServiceTest {
 
     private ReportService reportService;
-    private EmployeeDTO sampleEmployee;
+    private Employee sampleEmployee;
 
     private static class MockDailyCalculationService implements IDailyCalculationService {
         @Override
@@ -44,16 +44,16 @@ class ReportServiceTest {
 
         reportService = new ReportService(mockDailyCalculator);
 
-        sampleEmployee = new EmployeeDTO(1, 1, "Funcionário Mock", LocalTime.of(8,0), LocalTime.of(17,0), 60, true);
+        sampleEmployee = new Employee(1, 1, "Funcionário Mock", LocalTime.of(8,0), LocalTime.of(17,0), 60, true);
     }
 
     @Test
     @DisplayName("Deve agregar corretamente os totais de múltiplas batidas de ponto")
     void calculateMonthlyBalance_withMultipleEntries_shouldAggregateTotals() {
-       List<TimeEntryDTO> entries = List.of(
-                new TimeEntryDTO(1, 1, LocalDate.of(2025, 8, 1), LocalTime.of(8,0), LocalTime.of(12,0), LocalTime.of(13,0), LocalTime.of(17,10), false),
-                new TimeEntryDTO(1, 1, LocalDate.of(2025, 8, 2), LocalTime.of(8,0), LocalTime.of(12,0), LocalTime.of(13,0), LocalTime.of(16,45), false),
-                new TimeEntryDTO(1, 1, LocalDate.of(2025, 8, 3), LocalTime.of(8,0), LocalTime.of(12,0), LocalTime.of(13,0), LocalTime.of(17,0), false)
+       List<TimeEntry> entries = List.of(
+                new TimeEntry(1, 1, LocalDate.of(2025, 8, 1), LocalTime.of(8,0), LocalTime.of(12,0), LocalTime.of(13,0), LocalTime.of(17,10), false),
+                new TimeEntry(1, 1, LocalDate.of(2025, 8, 2), LocalTime.of(8,0), LocalTime.of(12,0), LocalTime.of(13,0), LocalTime.of(16,45), false),
+                new TimeEntry(1, 1, LocalDate.of(2025, 8, 3), LocalTime.of(8,0), LocalTime.of(12,0), LocalTime.of(13,0), LocalTime.of(17,0), false)
         );
 
         PeriodCalculationResult result = reportService.calculatePeriodBalance(sampleEmployee, entries);
@@ -70,7 +70,7 @@ class ReportServiceTest {
     @Test
     @DisplayName("Deve retornar totais zerados para uma lista de batidas vazia")
     void calculateMonthlyBalance_withEmptyEntryList_shouldReturnZeroDurations() {
-        List<TimeEntryDTO> emptyList = Collections.emptyList();
+        List<TimeEntry> emptyList = Collections.emptyList();
 
         PeriodCalculationResult result = reportService.calculatePeriodBalance(sampleEmployee, emptyList);
 

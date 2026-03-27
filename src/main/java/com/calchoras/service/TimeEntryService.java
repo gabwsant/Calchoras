@@ -22,75 +22,47 @@ public class TimeEntryService implements ITimeEntryService {
     }
 
     @Override
-    public Optional<TimeEntryDTO> findById(int id) {
-        return repository.findById(id)
-                .map(TimeEntryMapper::toDTO);
+    public Optional<TimeEntry> findById(int id) {
+        return repository.findById(id);
     }
 
     @Override
-    public List<TimeEntryDTO> findByEmployeeId(int employeeId) {
+    public List<TimeEntry> findByEmployeeId(int employeeId) {
         return repository.findByEmployeeId(employeeId)
                 .stream()
-                .map(TimeEntryMapper::toDTO)
                 .toList();
     }
 
     @Override
-    public Optional<TimeEntryDTO> findByEmployeeIdAndDate(int employeeId, LocalDate date) {
-        return repository.findByEmployeeIdAndDate(employeeId, date)
-                .map(TimeEntryMapper::toDTO);
+    public Optional<TimeEntry> findByEmployeeIdAndDate(int employeeId, LocalDate date) {
+        return repository.findByEmployeeIdAndDate(employeeId, date);
     }
 
     @Override
-    public List<TimeEntryDTO> findByEmployeeIdAndRange(int employeeId, LocalDate dateFrom, LocalDate dateTo) {
+    public List<TimeEntry> findByEmployeeIdAndRange(int employeeId, LocalDate dateFrom, LocalDate dateTo) {
         return repository.findByEmployeeIdAndRange(employeeId, dateFrom, dateTo)
                 .stream()
-                .map(TimeEntryMapper::toDTO)
                 .toList();
     }
 
     @Override
-    public TimeEntryDTO save(TimeEntryDTO entryDTO) {
-
-        if (!employeeService.existsById(entryDTO.employeeId())) {
+    public TimeEntry save(TimeEntry entry) {
+        if (!employeeService.existsById(entry.getEmployeeId())) {
             throw new IllegalArgumentException("Funcionário não encontrado.");
         }
-
-        if (repository.findByEmployeeIdAndDate(entryDTO.employeeId(), entryDTO.entryDate()).isPresent()) {
+        if (repository.findByEmployeeIdAndDate(entry.getEmployeeId(), entry.getEntryDate()).isPresent()) {
             throw new IllegalArgumentException("Já existe um lançamento para esse funcionário nessa data.");
         }
-
-        TimeEntry timeEntry = TimeEntryMapper.toEntity(entryDTO);
-        TimeEntry savedTimeEntry = repository.save(timeEntry);
-
-        return TimeEntryMapper.toDTO(savedTimeEntry);
+        return repository.save(entry);
     }
 
 
     @Override
-    public TimeEntryDTO update(TimeEntryDTO entryDTO) {
-        if (!repository.existsById(entryDTO.id())) {
-            throw new IllegalArgumentException("Registro de ponto com ID " + entryDTO.id() + " não encontrado.");
+    public TimeEntry update(TimeEntry entry) {
+        if (!repository.existsById(entry.getId())) {
+            throw new IllegalArgumentException("Registro de ponto com ID " + entry.getId() + " não encontrado.");
         }
-
-        TimeEntry entity = TimeEntryMapper.toEntity(entryDTO);
-        TimeEntry updatedEntity = repository.update(entity);
-
-        return TimeEntryMapper.toDTO(updatedEntity);
-    }
-
-    public TimeEntryDTO saveOrUpdate(TimeEntryDTO dto) {
-        Optional<TimeEntry> existing = repository.findByEmployeeIdAndDate(dto.employeeId(), dto.entryDate());
-
-        TimeEntry entity = TimeEntryMapper.toEntity(dto);
-
-        if (existing.isPresent()) {
-            entity.setId(existing.get().getId());
-            repository.update(entity);
-        } else {
-            repository.save(entity);
-        }
-        return TimeEntryMapper.toDTO(entity);
+        return repository.update(entry);
     }
 
     @Override

@@ -3,6 +3,11 @@ package com.calchoras.controller;
 import com.calchoras.dto.CompanyDTO;
 import com.calchoras.dto.EmployeeDTO;
 import com.calchoras.dto.TimeEntryDTO;
+import com.calchoras.mapper.CompanyMapper;
+import com.calchoras.mapper.EmployeeMapper;
+import com.calchoras.mapper.TimeEntryMapper;
+import com.calchoras.model.Company;
+import com.calchoras.model.Employee;
 import com.calchoras.model.PeriodCalculationResult;
 import com.calchoras.model.TimeEntry;
 import com.calchoras.service.ReportService;
@@ -127,21 +132,21 @@ public class MainFrameController {
         }
 
         try {
-            TimeEntryDTO timeEntryToDelete = buildTimeEntryDTOFromView();
+            TimeEntry timeEntryToDelete = buildTimeEntryFromView();
 
             boolean exists = timeEntryService.existsByEmployeeIdAndDate(
-                    timeEntryToDelete.employeeId(),
-                    timeEntryToDelete.entryDate()
+                    timeEntryToDelete.getEmployeeId(),
+                    timeEntryToDelete.getEntryDate()
             );
 
             if (!exists) {
-                view.showError("Não existe um ponto registrado para a data: " + timeEntryToDelete.entryDate());
+                view.showError("Não existe um ponto registrado para a data: " + timeEntryToDelete.getEntryDate());
                 return;
             }
 
             int confirm = JOptionPane.showConfirmDialog(
                     view,
-                    "Tem certeza que deseja remover a batida de " + timeEntryToDelete.entryDate() + "?",
+                    "Tem certeza que deseja remover a batida de " + timeEntryToDelete.getEntryDate() + "?",
                     "Confirmar Exclusão",
                     JOptionPane.YES_NO_OPTION
             );
@@ -149,13 +154,13 @@ public class MainFrameController {
             if (confirm != JOptionPane.YES_OPTION) return;
 
             boolean isDeleted = timeEntryService.deleteByEmployeeIdAndDate(
-                    timeEntryToDelete.employeeId(),
-                    timeEntryToDelete.entryDate()
+                    timeEntryToDelete.getEmployeeId(),
+                    timeEntryToDelete.getEntryDate()
             );
 
             if (isDeleted) {
                 view.clearTimeEntryFields();
-                view.getResultArea().append("\nBatida removida para " + timeEntryToDelete.entryDate());
+                view.getResultArea().append("\nBatida removida para " + timeEntryToDelete.getEntryDate());
                 handleIsDayOffCheckBoxChange();
                 view.getClockInField().requestFocus();
             } else {
@@ -184,8 +189,10 @@ public class MainFrameController {
 
     private void loadInitialData() {
         try {
-            List<CompanyDTO> companies = companyService.findAll();
-            view.updateCompanyList(companies);
+            List<Company> companies = companyService.findAll();
+            List<CompanyDTO> companyDTOs = CompanyMapper.toDTO(companies);
+
+            view.updateCompanyList(companyDTOs);
             view.clearTimeEntryFields();
             view.resetDateField();
         } catch (Exception e) {
@@ -244,12 +251,14 @@ public class MainFrameController {
         }
 
         try {
-            CompanyDTO companyToSave = new CompanyDTO(0, name);
-            CompanyDTO newCompany = companyService.save(companyToSave);
+            Company companyToSave = new Company(0, name);
+            Company savedCompany = companyService.save(companyToSave);
 
-            view.getCompanyComboBox().addItem(newCompany);
-            view.getCompanyComboBox().setSelectedItem(newCompany);
-            view.showSuccess("Empresa '" + newCompany.name() + "' cadastrada com sucesso!");
+            CompanyDTO newCompanyDTO = CompanyMapper.toDTO(savedCompany);
+
+            view.getCompanyComboBox().addItem(newCompanyDTO);
+            view.getCompanyComboBox().setSelectedItem(newCompanyDTO);
+            view.showSuccess("Empresa '" + newCompanyDTO.name() + "' cadastrada com sucesso!");
 
         } catch (IllegalArgumentException ex) {
             view.showError(ex.getMessage());
@@ -259,25 +268,26 @@ public class MainFrameController {
     }
 
     public void handleCompanySelectionChange(int companyId) {
-        List<EmployeeDTO> employees;
+        List<Employee> employees;
         if (view.getShowAllEmployees().isSelected()) {
             employees = employeeService.findByCompanyId(companyId);
         } else {
             employees = employeeService.findActivesByCompanyId(companyId);
         }
 
-        view.updateEmployeeList(employees);
+        List<EmployeeDTO> employeeDTOs = EmployeeMapper.toDTO(employees);
+        view.updateEmployeeList(employeeDTOs);
+
         view.clearEmployeeInfoFields();
         view.resetDateField();
     }
 
     private void handleUpdateCompanyAction(int id, String newName) {
         try {
-            CompanyDTO dto = new CompanyDTO(id, newName);
-            companyService.update(dto);
+            Company company = new Company(id, newName);
+            companyService.update(company);
 
             loadInitialData();
-
             view.showSuccess("Empresa atualizada com sucesso!");
         } catch (Exception ex) {
             view.showError("Erro ao atualizar empresa: " + ex.getMessage());
@@ -311,8 +321,8 @@ public class MainFrameController {
     private void openEmployeeDialog() {
         EmployeeDialog dialog = new EmployeeDialog(view);
 
-        List<CompanyDTO> companies = companyService.findAll();
-        dialog.updateCompanyList(companies);
+        List<Company> companies = companyService.findAll();
+        dialog.updateCompanyList(CompanyMapper.toDTO(companies));
         dialog.setSelectedCompany(view.getSelectedCompanyId());
         dialog.addAutoAdvanceToField(dialog.getShiftIn());
         dialog.addAutoAdvanceToField(dialog.getShiftOut());
@@ -353,17 +363,11 @@ public class MainFrameController {
             LocalTime shiftOut = LocalTime.parse(shiftOutStr);
             long lunchBreakMinutes = Long.parseLong(lunchBreakMinutesStr);
 
-            EmployeeDTO employeeDto = new EmployeeDTO(
-                    0,
-                    companyId,
-                    name,
-                    shiftIn,
-                    shiftOut,
-                    lunchBreakMinutes,
-                    true // new employee starts active
+            Employee employee = new Employee(
+                    0, companyId, name, shiftIn, shiftOut, lunchBreakMinutes, true
             );
 
-            employeeService.save(employeeDto);
+            employeeService.save(employee);
 
             view.clearEmployeeInfoFields();
             handleCompanySelectionChange(companyId);
@@ -387,13 +391,21 @@ public class MainFrameController {
         }
 
         try {
-            EmployeeDTO employeeToUpdate = buildEmployeeDTOFromView(selectedEmployee.getId());
+            Employee employeeToUpdate = new Employee(
+                    selectedEmployee.getId(),
+                    view.getSelectedCompanyId(),
+                    view.getNameField().getText(),
+                    LocalTime.parse(view.getShiftInField().getText()),
+                    LocalTime.parse(view.getShiftOutField().getText()),
+                    Long.parseLong(view.getLunchBreakMinutesField().getText()),
+                    view.isSelectedEmployeeActive()
+            );
 
             employeeService.update(employeeToUpdate);
 
             view.clearEmployeeInfoFields();
-            handleCompanySelectionChange(employeeToUpdate.companyId());
-            view.showSuccess("Funcionário salvo com sucesso!");
+            handleCompanySelectionChange(employeeToUpdate.getCompanyId());
+            view.showSuccess("Funcionário atualizado com sucesso!");
 
         } catch (java.time.format.DateTimeParseException | NumberFormatException e) {
             view.showError("Erro no formato de Hora (HH:mm) ou Minutos (numérico).");
@@ -470,8 +482,11 @@ public class MainFrameController {
     }
 
     private void handleEmployeeSelection(int employeeId) {
-        employeeService.findById(employeeId)
-                .ifPresent(view::displayEmployeeInfo);
+        employeeService.findById(employeeId).ifPresent(employee -> {
+            EmployeeDTO dto = EmployeeMapper.toDTO(employee);
+            view.displayEmployeeInfo(dto);
+        });
+
         loadTimeEntry(employeeId, LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER));
     }
 
@@ -494,22 +509,25 @@ public class MainFrameController {
     private void handleAddTimeEntryAction() {
         if (!view.hasSelectedEmployee()) {
             view.showError("Selecione um funcionário antes de adicionar um ponto.");
+            return;
         }
 
         try {
-            TimeEntryDTO timeEntryToInsertOrUpdate = buildTimeEntryDTOFromView();
+            TimeEntry timeEntry = buildTimeEntryFromView();
 
-            if (
-                    !timeEntryToInsertOrUpdate.dayOff() &&
-                            timeEntryToInsertOrUpdate.clockIn() == null &&
-                            timeEntryToInsertOrUpdate.clockOut() == null
-            ) {
+            if (!timeEntry.isDayOff() && timeEntry.getClockIn() == null && timeEntry.getClockOut() == null) {
                 throw new IllegalArgumentException("Selecione 'Dia de Folga' ou insira os horários de entrada e saída.");
             }
 
-            TimeEntryDTO timeEntry = timeEntryService.saveOrUpdate(timeEntryToInsertOrUpdate);
+            TimeEntry savedEntry;
 
-            view.getResultArea().append("\nBatida adicionada para " + timeEntry.entryDate());
+            if(timeEntryService.existsByEmployeeIdAndDate(view.getSelectedEmployeeId(), LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER))) {
+                savedEntry = timeEntryService.update(timeEntry);
+            } else {
+                savedEntry = timeEntryService.save(timeEntry);
+            }
+
+            view.getResultArea().append("\nBatida adicionada para " + savedEntry.getEntryDate());
             view.getClockInField().requestFocus();
             handleNextEntryAction();
 
@@ -572,14 +590,16 @@ public class MainFrameController {
 
     private void loadTimeEntry(int employeeId, LocalDate date) {
         view.clearTimeEntryFields();
-        timeEntryService.findByEmployeeIdAndDate(employeeId, date)
-                .ifPresent(view::displayTimeEntry);
+        timeEntryService.findByEmployeeIdAndDate(employeeId, date).ifPresent(entry -> {
+            TimeEntryDTO dto = TimeEntryMapper.toDTO(entry);
+            view.displayTimeEntry(dto);
+        });
         handleIsDayOffCheckBoxChange();
     }
 
-    private TimeEntryDTO buildTimeEntryDTOFromView() {
-        return new TimeEntryDTO(
-                0, // it's defined by the repo
+    private TimeEntry buildTimeEntryFromView() {
+        return new TimeEntry(
+                0,
                 view.getSelectedEmployeeId(),
                 view.getEntryDate(),
                 view.getClockIn(),
@@ -595,32 +615,32 @@ public class MainFrameController {
     // ===================================================================================
 
     private void handleCalculateAction() {
-
         if (!view.hasSelectedEmployee()) {
             view.showError("Selecione um funcionário antes de calcular.");
+            return;
         }
 
         try {
-            EmployeeListItem selectedEmployee = view.getEmployeeList().getSelectedValue();
-            EmployeeDTO employeeToCalculate = buildEmployeeDTOFromView(selectedEmployee.getId());
+            int employeeId = view.getEmployeeList().getSelectedValue().getId();
+
+            Employee employeeToCalculate = employeeService.findById(employeeId)
+                    .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado"));
 
             LocalDate initialDate = LocalDate.parse(view.getCompInitialDateField().getText(), DATE_FORMATTER);
             LocalDate finalDate = LocalDate.parse(view.getCompFinalDateField().getText(), DATE_FORMATTER);
 
-            List<TimeEntryDTO> timeEntries = timeEntryService.findByEmployeeIdAndRange(employeeToCalculate.id(), initialDate, finalDate);
+            List<TimeEntry> timeEntries = timeEntryService.findByEmployeeIdAndRange(employeeId, initialDate, finalDate);
 
             PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries);
 
             view.getResultArea().append(
                     "\nTotal de horas positivas: " + result.totalOvertimeAccumulated().toString()
-                    + "\nTotal de horas negativas: " + result.totalNegativeHoursAccumulated().toString()
-
+                            + "\nTotal de horas negativas: " + result.totalNegativeHoursAccumulated().toString()
             );
 
         } catch (Exception e) {
-
+            view.showError("Erro ao calcular: " + e.getMessage());
         }
-
     }
 
     // ===================================================================================

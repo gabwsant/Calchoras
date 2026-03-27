@@ -1,6 +1,6 @@
 package com.calchoras.service.interfaces;
 
-import com.calchoras.dto.EmployeeDTO;
+import com.calchoras.model.Employee;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +13,7 @@ public interface IEmployeeService {
     /**
      * Returns all employees.
      */
-    List<EmployeeDTO> findAll();
+    List<Employee> findAll();
 
     /**
      * Returns an employee by its ID.
@@ -21,7 +21,7 @@ public interface IEmployeeService {
      * @param employeeId the ID of the employee
      * @return an Optional containing the employee if found
      */
-    Optional<EmployeeDTO> findById(int employeeId);
+    Optional<Employee> findById(int employeeId);
 
     /**
      * Returns all employees belonging to a company.
@@ -29,7 +29,7 @@ public interface IEmployeeService {
      * @param companyId the company ID
      * @return a list of employees
      */
-    List<EmployeeDTO> findByCompanyId(int companyId);
+    List<Employee> findByCompanyId(int companyId);
 
     /**
      * Returns ACTIVES employees belonging to a company.
@@ -37,23 +37,23 @@ public interface IEmployeeService {
      * @param companyId the company ID
      * @return a list of active employees
      */
-    List<EmployeeDTO> findActivesByCompanyId(int companyId);
+    List<Employee> findActivesByCompanyId(int companyId);
 
     /**
      * Creates a new employee.
      *
-     * @param employeeDTO the employee to be saved
+     * @param employee the employee to be saved
      * @return the created employee
      */
-    EmployeeDTO save(EmployeeDTO employeeDTO);
+    Employee save(Employee employee);
 
     /**
      * Updates an existing employee.
      *
-     * @param employeeDTO the employee to be updated
+     * @param employee the employee to be updated
      * @return the updated employee
      */
-    EmployeeDTO update(EmployeeDTO employeeDTO);
+    Employee update(Employee employee);
 
     /**
      * Deletes an employee by ID.
