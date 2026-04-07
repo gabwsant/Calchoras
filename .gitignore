@@ -33,3 +33,6 @@ build/
 
 ### Dados ###
 calchoras.db
+
+### Logs ###
+*.log
