@@ -28,12 +28,13 @@ public class Main {
 			ITimeEntryService timeEntryService = new TimeEntryService(timeEntryRepository, employeeService);
 			IDailyCalculationService dailyCalculationService = new DailyCalculationService();
 			IReportService reportService = new ReportService(dailyCalculationService);
+			IReportExporterService reportExporterService = new ReportExporterService();
 
 			// View
 			MainFrame view = new MainFrame();
 
 			// Controller
-			new MainFrameController(view, companyService, employeeService, timeEntryService, dailyCalculationService, reportService);
+			new MainFrameController(view, companyService, employeeService, timeEntryService, reportService, reportExporterService);
 		});
 	}
 }

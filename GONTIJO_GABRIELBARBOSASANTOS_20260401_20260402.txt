@@ -1,0 +1,18 @@
+=================================================
+               RELATÓRIO DE HORAS                
+=================================================
+Empresa:     Gontijo
+Funcionário: Gabriel Barbosa Santos
+Período:     01/04/2026 a 02/04/2026
+Gerado em:   08/04/2026 14:29:00
+=================================================
+
+--- Resumo do Período ---
+Horas Extras Acumuladas: 00:07
+Horas Negativas Acumuladas: 00:00
+Saldo Final: 00:07
+Registros Incompletos: 0
+
+--- Detalhamento Diário ---
+Data: 01/04/2026 | Batidas: [ 08:00 - 12:00 - 13:00 - 17:45 ] | Extras: 00:00 | Negativas: 00:00
+Data: 02/04/2026 | Batidas: [ 08:00 - 12:10 - 13:03 - 17:45 ] | Extras: 00:07 | Negativas: 00:00

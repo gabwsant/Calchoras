@@ -4,9 +4,12 @@ import com.calchoras.model.DailyCalculationResult;
 import com.calchoras.model.Employee;
 import com.calchoras.model.TimeEntry;
 import com.calchoras.service.interfaces.IDailyCalculationService;
+import org.springframework.cglib.core.Local;
 
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DailyCalculationService implements IDailyCalculationService {
 
@@ -20,9 +23,16 @@ public class DailyCalculationService implements IDailyCalculationService {
         LocalTime lunchOut = timeEntry.getLunchOut();
         LocalTime clockOut = timeEntry.getClockOut();
 
+        List<LocalTime> punches = new ArrayList<>();
+        punches.add(clockIn);
+        punches.add(lunchIn);
+        punches.add(lunchOut);
+        punches.add(clockOut);
+
         if (timeEntry.isDayOff()) {
             return new DailyCalculationResult(
                     timeEntry.getEntryDate(),
+                    punches,
                     Duration.ZERO, // workedHours
                     expectedHours, // expectedHours
                     Duration.ZERO, // overtimeHours
@@ -35,6 +45,7 @@ public class DailyCalculationService implements IDailyCalculationService {
 
             return new DailyCalculationResult(
                     timeEntry.getEntryDate(),
+                    punches,
                     Duration.ZERO,      // workedHours: 0
                     expectedHours,      // expectedHours
                     Duration.ZERO,      // overtimeHours: 0
@@ -60,6 +71,7 @@ public class DailyCalculationService implements IDailyCalculationService {
 
         return new DailyCalculationResult(
                 timeEntry.getEntryDate(),
+                punches,
                 workedHours,
                 expectedHours,
                 overtimeHours,

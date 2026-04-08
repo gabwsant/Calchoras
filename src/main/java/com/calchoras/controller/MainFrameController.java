@@ -10,20 +10,17 @@ import com.calchoras.model.Company;
 import com.calchoras.model.Employee;
 import com.calchoras.model.PeriodCalculationResult;
 import com.calchoras.model.TimeEntry;
-import com.calchoras.service.ReportService;
-import com.calchoras.service.TimeEntryService;
 import com.calchoras.service.interfaces.*;
 import com.calchoras.util.validators.TimeFieldValidator;
 import com.calchoras.view.*;
-import org.springframework.format.datetime.standard.DurationFormatter;
 
 import javax.swing.*;
 import java.awt.event.*;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 public class MainFrameController {
@@ -35,8 +32,8 @@ public class MainFrameController {
     private final ICompanyService companyService;
     private final IEmployeeService employeeService;
     private final ITimeEntryService timeEntryService;
-    private final IDailyCalculationService dailyCalculationService;
     private final IReportService reportService;
+    private final IReportExporterService reportExporter;
 
 
     public MainFrameController(
@@ -44,15 +41,15 @@ public class MainFrameController {
             ICompanyService companyService,
             IEmployeeService employeeService,
             ITimeEntryService timeEntryService,
-            IDailyCalculationService dailyCalculationService,
-            IReportService reportService
+            IReportService reportService,
+            IReportExporterService reportExporter
     ) {
         this.view = view;
         this.companyService = companyService;
         this.employeeService = employeeService;
         this.timeEntryService = timeEntryService;
-        this.dailyCalculationService = dailyCalculationService;
         this.reportService = reportService;
+        this.reportExporter = reportExporter;
 
         initValidators();
         initAutoAdvance();
@@ -124,6 +121,9 @@ public class MainFrameController {
 
         // Computation
         view.getCalculateButton().addActionListener(e -> handleCalculateAction());
+
+        // Exporting
+        view.getPrintReportButton().addActionListener(e -> handlePrintReportAction());
 
         // Mouse Listeners
         addHandleMouseRightClick();
@@ -493,18 +493,6 @@ public class MainFrameController {
         loadTimeEntry(employeeId, LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER));
     }
 
-    private EmployeeDTO buildEmployeeDTOFromView(int employeeId) {
-        return new EmployeeDTO(
-                employeeId,
-                view.getSelectedCompanyId(),
-                view.getNameField().getText(),
-                LocalTime.parse(view.getShiftInField().getText()),
-                LocalTime.parse(view.getShiftOutField().getText()),
-                Integer.parseInt(view.getLunchBreakMinutesField().getText()),
-                view.isSelectedEmployeeActive()
-        );
-    }
-
     // ===================================================================================
     // TIME ENTRY ACTIONS
     // ===================================================================================
@@ -667,6 +655,42 @@ public class MainFrameController {
 
         } catch (Exception e) {
             view.showError("Erro ao calcular: " + e.getMessage());
+        }
+    }
+
+    // ===================================================================================
+    // Exporting
+    // ===================================================================================
+    public void handlePrintReportAction() {
+        try {
+            int employeeId = view.getEmployeeList().getSelectedValue().getId();
+
+            Employee employeeToCalculate = employeeService.findById(employeeId)
+                    .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado"));
+
+            LocalDate initialDate = LocalDate.parse(view.getCompInitialDateField().getText(), DATE_FORMATTER);
+            LocalDate finalDate = LocalDate.parse(view.getCompFinalDateField().getText(), DATE_FORMATTER);
+
+            List<TimeEntry> timeEntries = timeEntryService.findByEmployeeIdAndRange(employeeId, initialDate, finalDate);
+
+            PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries);
+
+            Company employeeCompany = companyService.findById(employeeToCalculate.getCompanyId())
+                    .orElseThrow(() -> new IllegalArgumentException("Empresa do funcionário não encontrada"));
+
+            String filePath =
+                    employeeCompany.getName().replaceAll("\\s","").toUpperCase(Locale.ROOT) + "_" +
+                    employeeToCalculate.getName().replaceAll("\\s","").toUpperCase(Locale.ROOT) + "_" +
+                    initialDate.toString().replaceAll("-", "") + "_" +
+                    finalDate.toString().replaceAll("-", "") +
+                    ".txt";
+
+            reportExporter.exportToTxt(result, employeeToCalculate, employeeCompany.getName(), filePath);
+
+            view.showSuccess("Relatório gerado com sucesso: " + filePath);
+
+        } catch (Exception e) {
+            view.showError("Erro ao gerar arquivo: " + e.getMessage());
         }
     }
 
