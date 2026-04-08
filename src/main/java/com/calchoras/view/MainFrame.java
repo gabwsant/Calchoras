@@ -97,7 +97,7 @@ public class MainFrame extends JFrame {
     private void initFrame() {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(800, 600));
-        setPreferredSize(new Dimension(800, 600));
+        pack();
         setLocationRelativeTo(null);
     }
 
