@@ -15,13 +15,16 @@ import com.calchoras.service.TimeEntryService;
 import com.calchoras.service.interfaces.*;
 import com.calchoras.util.validators.TimeFieldValidator;
 import com.calchoras.view.*;
+import org.springframework.format.datetime.standard.DurationFormatter;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 public class MainFrameController {
 
@@ -140,13 +143,13 @@ public class MainFrameController {
             );
 
             if (!exists) {
-                view.showError("Não existe um ponto registrado para a data: " + timeEntryToDelete.getEntryDate());
+                view.showError("Não existe um ponto registrado para a data: " + timeEntryToDelete.getEntryDate().format(DATE_FORMATTER));
                 return;
             }
 
             int confirm = JOptionPane.showConfirmDialog(
                     view,
-                    "Tem certeza que deseja remover a batida de " + timeEntryToDelete.getEntryDate() + "?",
+                    "Tem certeza que deseja remover a batida de " + timeEntryToDelete.getEntryDate().format(DATE_FORMATTER) + "?",
                     "Confirmar Exclusão",
                     JOptionPane.YES_NO_OPTION
             );
@@ -160,7 +163,7 @@ public class MainFrameController {
 
             if (isDeleted) {
                 view.clearTimeEntryFields();
-                view.getResultArea().append("\nBatida removida para " + timeEntryToDelete.getEntryDate());
+                view.getResultArea().append("\nBatida removida para " + timeEntryToDelete.getEntryDate().format(DATE_FORMATTER));
                 handleIsDayOffCheckBoxChange();
                 view.getClockInField().requestFocus();
             } else {
@@ -513,26 +516,45 @@ public class MainFrameController {
         }
 
         try {
-            TimeEntry timeEntry = buildTimeEntryFromView();
+            TimeEntry newEntry = buildTimeEntryFromView();
 
-            if (!timeEntry.isDayOff() && timeEntry.getClockIn() == null && timeEntry.getClockOut() == null) {
-                throw new IllegalArgumentException("Selecione 'Dia de Folga' ou insira os horários de entrada e saída.");
+            if (!newEntry.isDayOff()
+                    && newEntry.getClockIn() == null
+                    && newEntry.getClockOut() == null) {
+                throw new IllegalArgumentException(
+                        "Selecione 'Dia de Folga' ou insira os horários de entrada e saída."
+                );
             }
 
-            TimeEntry savedEntry;
+            LocalDate entryDate = LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER);
 
-            if(timeEntryService.existsByEmployeeIdAndDate(view.getSelectedEmployeeId(), LocalDate.parse(view.getDateField().getText(), DATE_FORMATTER))) {
-                savedEntry = timeEntryService.update(timeEntry);
+            Optional<TimeEntry> existingEntryOpt =
+                    timeEntryService.findByEmployeeIdAndDate(
+                            view.getSelectedEmployeeId(), entryDate
+                    );
+
+            TimeEntry persistedEntry;
+
+            if (existingEntryOpt.isPresent()) {
+                TimeEntry existingEntry = existingEntryOpt.get();
+                newEntry.setId(existingEntry.getId());
+
+                persistedEntry = timeEntryService.update(newEntry);
             } else {
-                savedEntry = timeEntryService.save(timeEntry);
+                persistedEntry = timeEntryService.save(newEntry);
             }
 
-            view.getResultArea().append("\nBatida adicionada para " + savedEntry.getEntryDate());
+            view.getResultArea().append("\nBatida adicionada para " + persistedEntry.getEntryDate().format(DATE_FORMATTER));
             view.getClockInField().requestFocus();
             handleNextEntryAction();
 
         } catch (java.time.format.DateTimeParseException e) {
-            JOptionPane.showMessageDialog(view, "Erro de formato de Data (DD/MM/AAAA) ou Hora (HH:MM).", "Erro de Formato", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    view,
+                    "Erro de formato de Data (DD/MM/AAAA) ou Hora (HH:MM).",
+                    "Erro de Formato",
+                    JOptionPane.ERROR_MESSAGE
+            );
         } catch (IllegalArgumentException e) {
             view.showError(e.getMessage());
         } catch (Exception e) {
@@ -633,9 +655,14 @@ public class MainFrameController {
 
             PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries);
 
+            long overtime = result.totalOvertimeAccumulated().getSeconds();
+            long negative = result.totalNegativeHoursAccumulated().getSeconds();
+            long balance = result.finalBalance().getSeconds();
+
             view.getResultArea().append(
-                    "\nTotal de horas positivas: " + result.totalOvertimeAccumulated().toString()
-                            + "\nTotal de horas negativas: " + result.totalNegativeHoursAccumulated().toString()
+                    "\nTotal de horas positivas: " + String.format("%d:%02d", overtime / 3600, (overtime % 3600) / 60)
+                    + "\nTotal de horas negativas: " + String.format("%d:%02d", negative / 3600, (negative % 3600) / 60)
+                    + "\nBalanço final: " + String.format("%d:%02d", balance / 3600, Math.abs((balance % 3600) / 60))
             );
 
         } catch (Exception e) {

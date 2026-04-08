@@ -46,21 +46,11 @@ public class ReportService implements IReportService {
 
         Duration finalBalance = totalOvertimeAccumulated.minus(totalNegativeHoursAccumulated);
 
-        Duration finalOvertime = Duration.ZERO;
-        Duration finalNegative = Duration.ZERO;
-
-        if (finalBalance.isNegative()) {
-            finalNegative = finalBalance.abs();
-        } else {
-            finalOvertime = finalBalance;
-        }
-
         return new PeriodCalculationResult(
                 dailyResults,
                 totalOvertimeAccumulated,
                 totalNegativeHoursAccumulated,
-                finalOvertime,
-                finalNegative,
+                finalBalance,
                 incompleteEntriesCount
         );
     }
