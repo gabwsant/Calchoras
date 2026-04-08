@@ -7,7 +7,6 @@ public record PeriodCalculationResult(
         List<DailyCalculationResult> dailyResults,
         Duration totalOvertimeAccumulated,
         Duration totalNegativeHoursAccumulated,
-        Duration finalOvertime,
-        Duration finalNegative,
+        Duration finalBalance,
         int incompleteEntriesCount
 ) {}
