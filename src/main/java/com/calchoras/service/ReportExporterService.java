@@ -1,7 +1,7 @@
 package com.calchoras.service;
 
 import com.calchoras.model.DailyCalculationResult;
-import com.calchoras.model.Employee; // Importe seu modelo
+import com.calchoras.model.Employee;
 import com.calchoras.model.PeriodCalculationResult;
 import com.calchoras.service.interfaces.IReportExporterService;
 
@@ -24,49 +24,35 @@ public class ReportExporterService implements IReportExporterService {
     public void exportToTxt(PeriodCalculationResult result, Employee employee, String companyName, String filePath) throws IOException {
 
         String dataGeracao = LocalDateTime.now().format(DATETIME_FORMATTER);
-
         String periodo = descobrirPeriodo(result.dailyResults());
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
 
-            writer.write("=================================================");
-            writer.newLine();
-            writer.write("               RELATÓRIO DE HORAS                ");
-            writer.newLine();
-            writer.write("=================================================");
-            writer.newLine();
-            writer.write("Empresa:     " + companyName);
-            writer.newLine();
-            writer.write("Funcionário: " + employee.getName());
-            writer.newLine();
-            writer.write("Período:     " + periodo);
-            writer.newLine();
-            writer.write("Gerado em:   " + dataGeracao);
-            writer.newLine();
-            writer.write("=================================================");
-            writer.newLine();
+            writer.write("================================================="); writer.newLine();
+            writer.write("               RELATÓRIO DE HORAS                "); writer.newLine();
+            writer.write("================================================="); writer.newLine();
+            writer.write("Empresa:     " + companyName); writer.newLine();
+            writer.write("Funcionário: " + employee.getName()); writer.newLine();
+            writer.write("Período:     " + periodo); writer.newLine();
+            writer.write("Gerado em:   " + dataGeracao); writer.newLine();
+            writer.write("================================================="); writer.newLine();
             writer.newLine();
 
-            writer.write("--- Resumo do Período ---");
-            writer.newLine();
-            writer.write("Horas Extras Acumuladas: " + formatarDuracao(result.totalOvertimeAccumulated()));
-            writer.newLine();
-            writer.write("Horas Negativas Acumuladas: " + formatarDuracao(result.totalNegativeHoursAccumulated()));
-            writer.newLine();
-            writer.write("Saldo Final: " + formatarDuracao(result.finalBalance()));
-            writer.newLine();
-            writer.write("Registros Incompletos: " + result.incompleteEntriesCount());
-            writer.newLine();
+            writer.write("--- Resumo do Período ---"); writer.newLine();
+            writer.write("Horas Extras Acumuladas: " + formatarDuracao(result.totalOvertimeAccumulated())); writer.newLine();
+            writer.write("Horas Negativas Acumuladas: " + formatarDuracao(result.totalNegativeHoursAccumulated())); writer.newLine();
+            writer.write("Saldo Final: " + formatarDuracao(result.finalBalance())); writer.newLine();
+            writer.write("Registros Incompletos: " + result.incompleteEntriesCount()); writer.newLine();
             writer.newLine();
 
-            writer.write("--- Detalhamento Diário ---");
-            writer.newLine();
+            writer.write("--- Detalhamento Diário ---"); writer.newLine();
 
             for (DailyCalculationResult daily : result.dailyResults()) {
                 String dataFormatada = daily.date().format(DATE_FORMATTER);
 
+                // Correção: Trata valores nulos para evitar NullPointerException
                 String horariosDigitados = daily.punches().stream()
-                        .map(time -> time.format(TIME_FORMATTER))
+                        .map(time -> time == null ? "--:--" : time.format(TIME_FORMATTER))
                         .collect(Collectors.joining(" - "));
 
                 String extras = formatarDuracao(daily.overtimeHours());

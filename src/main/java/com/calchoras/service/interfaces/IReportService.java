@@ -3,6 +3,8 @@ package com.calchoras.service.interfaces;
 import com.calchoras.model.Employee;
 import com.calchoras.model.PeriodCalculationResult;
 import com.calchoras.model.TimeEntry;
+
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -17,5 +19,5 @@ public interface IReportService {
      * @param entries  The list of time entries for the period.
      * @return A PeriodCalculationResult instance containing daily totals and details.
      */
-    PeriodCalculationResult calculatePeriodBalance(Employee employee, List<TimeEntry> entries);
+    PeriodCalculationResult calculatePeriodBalance(Employee employee, List<TimeEntry> entries, LocalDate initialDate, LocalDate finalDate);
 }

@@ -1,0 +1,8 @@
+=== Requisitos, observações e possibilidades ===
+
+1. A CLT (Artigo 58) permite uma tolerância total de 10 minutos diários no registro de ponto, com limite de 5 minutos por marcação (entrada/saída).
+ opção para marcar
+
+2. O que fazer se todos os pontos estão fora do horário de trabalho?.
+
+3. Almoço jornada menor ou igual a 6hrs

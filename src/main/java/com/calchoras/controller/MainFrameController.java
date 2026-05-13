@@ -15,7 +15,9 @@ import com.calchoras.util.validators.TimeFieldValidator;
 import com.calchoras.view.*;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.event.*;
+import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -641,7 +643,7 @@ public class MainFrameController {
 
             List<TimeEntry> timeEntries = timeEntryService.findByEmployeeIdAndRange(employeeId, initialDate, finalDate);
 
-            PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries);
+            PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries, initialDate, finalDate);
 
             long overtime = result.totalOvertimeAccumulated().getSeconds();
             long negative = result.totalNegativeHoursAccumulated().getSeconds();
@@ -673,24 +675,44 @@ public class MainFrameController {
 
             List<TimeEntry> timeEntries = timeEntryService.findByEmployeeIdAndRange(employeeId, initialDate, finalDate);
 
-            PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries);
+            PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries, initialDate, finalDate);
 
             Company employeeCompany = companyService.findById(employeeToCalculate.getCompanyId())
                     .orElseThrow(() -> new IllegalArgumentException("Empresa do funcionário não encontrada"));
 
-            String filePath =
-                    employeeCompany.getName().replaceAll("\\s","").toUpperCase(Locale.ROOT) + "_" +
-                    employeeToCalculate.getName().replaceAll("\\s","").toUpperCase(Locale.ROOT) + "_" +
-                    initialDate.toString().replaceAll("-", "") + "_" +
-                    finalDate.toString().replaceAll("-", "") +
-                    ".txt";
+            String suggestedFileName =
+                    employeeCompany.getName().replaceAll("\\s", "").toUpperCase(Locale.ROOT) + "_" +
+                            employeeToCalculate.getName().replaceAll("\\s", "").toUpperCase(Locale.ROOT) + "_" +
+                            initialDate.toString().replaceAll("-", "") + "_" +
+                            finalDate.toString().replaceAll("-", "") +
+                            ".txt";
 
-            reportExporter.exportToTxt(result, employeeToCalculate, employeeCompany.getName(), filePath);
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Salvar Relatório de Horas");
+            fileChooser.setSelectedFile(new File(suggestedFileName));
+            fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos de Texto (*.txt)", "txt"));
 
-            view.showSuccess("Relatório gerado com sucesso: " + filePath);
+            int userSelection = fileChooser.showSaveDialog(null);
+
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToSave = fileChooser.getSelectedFile();
+                String finalFilePath = fileToSave.getAbsolutePath();
+
+                if (!finalFilePath.toLowerCase().endsWith(".txt")) {
+                    finalFilePath += ".txt";
+                }
+
+                reportExporter.exportToTxt(result, employeeToCalculate, employeeCompany.getName(), finalFilePath);
+
+                view.showSuccess("Relatório gerado com sucesso em:\n" + finalFilePath);
+            }
+
+        } catch (IllegalStateException e) {
+            view.showError("Atenção:\n" + e.getMessage());
 
         } catch (Exception e) {
-            view.showError("Erro ao gerar arquivo: " + e.getMessage());
+            view.showError("Erro inesperado ao gerar arquivo:\n" + e.getMessage());
+            e.printStackTrace(); // Opcional, bom deixar para debugar no console
         }
     }
 
