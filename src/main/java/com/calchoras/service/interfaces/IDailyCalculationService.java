@@ -11,9 +11,11 @@ public interface IDailyCalculationService {
 
     /**
      * Calculates the daily hour balance of an employee.
-     * @param timeEntry TimeEntry instance containing the time entries for a day
-     * @param employee The employee for whom the calculation will be performed
+     * @param timeEntry TimeEntry instance containing the time entries for a day.
+     * @param employee The employee for whom the calculation will be performed.
+     * @param allowedLateness The minutes the employee is allowed to be late and don't make negative hours.
+     * @param perPunchAllowed The minutes the employee is allowed to be late per punch.
      * @return A DailyCalculationResult instance containing the totals and details for the day
      */
-    DailyCalculationResult calculate(TimeEntry timeEntry, Employee employee);
+    DailyCalculationResult calculate(TimeEntry timeEntry, Employee employee, int allowedLateness, int perPunchAllowed);
 }

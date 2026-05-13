@@ -63,6 +63,8 @@ public class MainFrame extends JFrame {
     // Computation fields
     private JFormattedTextField compInitialDateField;
     private JFormattedTextField compFinalDateField;
+    private JTextField dailyAllowedLatenessField;
+    private JTextField dailyPerPunchAllowedField;
 
     // Main actions
     private JButton resetCalculationButton;
@@ -145,6 +147,10 @@ public class MainFrame extends JFrame {
         compInitialDateField.setColumns(10);
         compFinalDateField = new JFormattedTextField(dateMask);
         compFinalDateField.setColumns(10);
+        dailyAllowedLatenessField = new JTextField();
+        dailyAllowedLatenessField.setColumns(10);
+        dailyPerPunchAllowedField = new JTextField();
+        dailyPerPunchAllowedField.setColumns(10);
 
         resetCalculationButton = new JButton("Reiniciar");
         calculateButton = new JButton("Calcular");
@@ -245,8 +251,8 @@ public class MainFrame extends JFrame {
         centerFormPanel.add(timeEntryPanel);
 
         // --- COMPUTATIONS ---
-        JPanel computationPanel = new JPanel(new MigLayout("wrap 4, fillx, insets 2", "[right][grow, fill][right][grow, fill]", "[]5[]"));
-        computationPanel.setBorder(BorderFactory.createTitledBorder("Cálculo"));
+        JPanel computationPanel = new JPanel(new MigLayout("wrap 4, fillx, insets 10", "[right][grow, fill][right][grow, fill]", "[]10[]"));
+        computationPanel.setBorder(BorderFactory.createTitledBorder("Calcular Período"));
 
         computationPanel.add(new JLabel("Data Inicial:"));
         computationPanel.add(compInitialDateField);
@@ -254,8 +260,14 @@ public class MainFrame extends JFrame {
         computationPanel.add(new JLabel("Data Final:"));
         computationPanel.add(compFinalDateField);
 
-        computationPanel.add(calculateButton, "span 4, split 2, center, width 200!");
-        computationPanel.add(printReportButton, "width 200!");
+        computationPanel.add(new JLabel("Tolerância diária (min):"));
+        computationPanel.add(dailyAllowedLatenessField, "span 3, left, width 80!");
+
+        computationPanel.add(new JLabel("Tolerância por batida (min):"));
+        computationPanel.add(dailyPerPunchAllowedField, "span 3, left, width 80!");
+
+        computationPanel.add(calculateButton, "span 4, split 2, center, width 200!, gaptop 10");
+        computationPanel.add(printReportButton, "width 200!, gaptop 10");
 
         centerFormPanel.add(computationPanel);
 
@@ -374,6 +386,12 @@ public class MainFrame extends JFrame {
         );
     }
 
+    public void resetAllowedLatenessField() {
+        dailyAllowedLatenessField.setText("0");
+    }
+
+    public void resetAllowedPerPunchField() { dailyPerPunchAllowedField.setText("0"); }
+
     public void plusEntryDate(int plusDays) {
         dateField.setValue(getEntryDate().plusDays(plusDays).format(DATE_FORMATTER));
     }
@@ -485,6 +503,8 @@ public class MainFrame extends JFrame {
     public void enableComputationFields(boolean enable) {
         compInitialDateField.setEnabled(enable);
         compFinalDateField.setEnabled(enable);
+        dailyAllowedLatenessField.setEnabled(enable);
+        dailyPerPunchAllowedField.setEnabled(enable);
         calculateButton.setEnabled(enable);
         printReportButton.setEnabled(enable);
     }

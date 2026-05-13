@@ -13,7 +13,7 @@ import java.util.List;
 public class DailyCalculationService implements IDailyCalculationService {
 
     @Override
-    public DailyCalculationResult calculate(TimeEntry timeEntry, Employee employee) throws IllegalStateException{
+    public DailyCalculationResult calculate(TimeEntry timeEntry, Employee employee, int dailyAllowed, int perPunchAllowed) throws IllegalStateException{
 
         Duration expectedHours = calculateExpectedHours(employee, timeEntry.isDayOff());
 
@@ -56,10 +56,32 @@ public class DailyCalculationService implements IDailyCalculationService {
         Duration overtimeHours = Duration.ZERO;
         Duration negativeHours = Duration.ZERO;
 
-        if (balance.isNegative()) {
-            negativeHours = balance.abs();
+        long clockInVariance = calculateShortestVariance(employee.getShiftIn(), clockIn);
+        long clockOutVariance = calculateShortestVariance(employee.getShiftOut(), clockOut);
+
+        long actualLunchMinutes = Duration.between(lunchIn, lunchOut).toMinutes();
+        if (lunchOut.isBefore(lunchIn)) {
+            actualLunchMinutes = Duration.between(lunchIn, lunchOut).plusDays(1).toMinutes();
+        }
+        long lunchVariance = Math.abs(actualLunchMinutes - employee.getLunchBreakMinutes());
+
+        boolean exceededPunchTolerance = clockInVariance > perPunchAllowed ||
+                clockOutVariance > perPunchAllowed ||
+                lunchVariance > perPunchAllowed;
+
+        // 3. Checks if it exceeded the TOTAL DAILY tolerance
+        boolean exceededDailyTolerance = Math.abs(balance.toMinutes()) > dailyAllowed;
+
+        // 4. Applies the rule
+        if (exceededPunchTolerance || exceededDailyTolerance) {
+            // Tolerance breached! Accrues the real balance.
+            if (balance.isNegative()) {
+                negativeHours = balance.abs();
+            } else {
+                overtimeHours = balance;
+            }
         } else {
-            overtimeHours = balance;
+            // Within tolerance! The balance is "forgiven" and the variables remain Duration.ZERO
         }
 
         return new DailyCalculationResult(
@@ -110,5 +132,16 @@ public class DailyCalculationService implements IDailyCalculationService {
         }
 
         return totalWorked;
+    }
+
+    /**
+     * Calculates the shortest absolute variance in minutes between two LocalTimes,
+     * properly handling cases that cross midnight.
+     */
+    private long calculateShortestVariance(LocalTime expected, LocalTime actual) {
+        long absoluteDifference = Math.abs(Duration.between(expected, actual).toMinutes());
+        // 1440 is the total number of minutes in 24 hours.
+        // We take the minimum between the direct difference and the wrapped difference.
+        return Math.min(absoluteDifference, 1440 - absoluteDifference);
     }
 }

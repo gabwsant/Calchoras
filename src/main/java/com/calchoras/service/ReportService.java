@@ -23,8 +23,14 @@ public class ReportService implements IReportService {
     }
 
     @Override
-    public PeriodCalculationResult calculatePeriodBalance(Employee employee, List<TimeEntry> entries, LocalDate initialDate, LocalDate finalDate) {
-
+    public PeriodCalculationResult calculatePeriodBalance(
+            Employee employee,
+            List<TimeEntry> entries,
+            LocalDate initialDate,
+            LocalDate finalDate,
+            int dailyAllowedLateness,
+            int dailyAllowedPerPunch
+    ) {
         Map<LocalDate, TimeEntry> entriesMap = entries.stream()
                 .collect(Collectors.toMap(TimeEntry::getEntryDate, entry -> entry));
 
@@ -45,7 +51,7 @@ public class ReportService implements IReportService {
                 entry.setDayOff(false);
             }
 
-            DailyCalculationResult dailyResult = dailyCalculationService.calculate(entry, employee);
+            DailyCalculationResult dailyResult = dailyCalculationService.calculate(entry, employee, dailyAllowedLateness, dailyAllowedPerPunch);
 
             dailyResults.add(dailyResult);
 

@@ -200,6 +200,8 @@ public class MainFrameController {
             view.updateCompanyList(companyDTOs);
             view.clearTimeEntryFields();
             view.resetDateField();
+            view.resetAllowedLatenessField();
+            view.resetAllowedPerPunchField();
         } catch (Exception e) {
             view.showError("Erro ao carregar dados iniciais de empresas: " + e.getMessage());
         }
@@ -632,18 +634,64 @@ public class MainFrameController {
             return;
         }
 
+        LocalDate initialDate;
+        LocalDate finalDate;
+
+        try {
+            initialDate = LocalDate.parse(view.getCompInitialDateField().getText(), DATE_FORMATTER);
+            finalDate = LocalDate.parse(view.getCompFinalDateField().getText(), DATE_FORMATTER);
+        } catch (Exception e) {
+            view.showError("Período de datas inválido. Verifique o preenchimento.");
+            return;
+        }
+
+        int dailyAllowedLateness = 0;
+        int dailyAllowedPerPunch = 0;
+
+        try {
+            String latenessText = view.getDailyAllowedLatenessField().getText().trim();
+            String perPunchText = view.getDailyPerPunchAllowedField().getText().trim();
+
+            if (!latenessText.isEmpty()) {
+                dailyAllowedLateness = Integer.parseInt(latenessText);
+
+                if (dailyAllowedLateness < 0) {
+                    view.showError("A tolerância de minutos não pode ser negativa.");
+                    return;
+                }
+            } else {
+                view.showSuccess("Tolerância não informada. Assumindo o valor 0.");
+            }
+
+            if (!perPunchText.isEmpty()) {
+                dailyAllowedPerPunch = Integer.parseInt(perPunchText);
+
+                if (dailyAllowedPerPunch < 0) {
+                    view.showError("A tolerância por batida não pode ser negativa.");
+                    return;
+                }
+            } else {
+                view.showSuccess("Tolerância por batida não informada. Assumindo o valor 0.");
+            }
+        } catch (NumberFormatException e) {
+            view.showError("Valor inválido no campo de tolerância. Digite apenas números inteiros.");
+            return;
+        }
+
         try {
             int employeeId = view.getEmployeeList().getSelectedValue().getId();
 
             Employee employeeToCalculate = employeeService.findById(employeeId)
                     .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado"));
 
-            LocalDate initialDate = LocalDate.parse(view.getCompInitialDateField().getText(), DATE_FORMATTER);
-            LocalDate finalDate = LocalDate.parse(view.getCompFinalDateField().getText(), DATE_FORMATTER);
+            if (initialDate.isAfter(finalDate)) {
+                view.showError("Data inicial não pode ser maior que a data final.");
+                return;
+            }
 
             List<TimeEntry> timeEntries = timeEntryService.findByEmployeeIdAndRange(employeeId, initialDate, finalDate);
 
-            PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries, initialDate, finalDate);
+            PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries, initialDate, finalDate, dailyAllowedLateness, dailyAllowedPerPunch);
 
             long overtime = result.totalOvertimeAccumulated().getSeconds();
             long negative = result.totalNegativeHoursAccumulated().getSeconds();
@@ -664,18 +712,69 @@ public class MainFrameController {
     // Exporting
     // ===================================================================================
     public void handlePrintReportAction() {
+        if (!view.hasSelectedEmployee()) {
+            view.showError("Selecione um funcionário antes de calcular.");
+            return;
+        }
+
+        LocalDate initialDate;
+        LocalDate finalDate;
+
+        try {
+            initialDate = LocalDate.parse(view.getCompInitialDateField().getText(), DATE_FORMATTER);
+            finalDate = LocalDate.parse(view.getCompFinalDateField().getText(), DATE_FORMATTER);
+        } catch (Exception e) {
+            view.showError("Período de datas inválido. Verifique o preenchimento.");
+            return;
+        }
+
+        int dailyAllowedLateness = 0;
+        int dailyAllowedPerPunch = 0;
+
+        try {
+            String latenessText = view.getDailyAllowedLatenessField().getText().trim();
+            String perPunchText = view.getDailyPerPunchAllowedField().getText().trim();
+
+            if (!latenessText.isEmpty()) {
+                dailyAllowedLateness = Integer.parseInt(latenessText);
+
+                if (dailyAllowedLateness < 0) {
+                    view.showError("A tolerância de minutos não pode ser negativa.");
+                    return;
+                }
+            } else {
+                view.showSuccess("Tolerância não informada. Assumindo o valor 0.");
+            }
+
+            if (!perPunchText.isEmpty()) {
+                dailyAllowedPerPunch = Integer.parseInt(perPunchText);
+
+                if (dailyAllowedPerPunch < 0) {
+                    view.showError("A tolerância por batida não pode ser negativa.");
+                    return;
+                }
+            } else {
+                view.showSuccess("Tolerância por batida não informada. Assumindo o valor 0.");
+            }
+        } catch (NumberFormatException e) {
+            view.showError("Valor inválido no campo de tolerância. Digite apenas números inteiros.");
+            return;
+        }
+
         try {
             int employeeId = view.getEmployeeList().getSelectedValue().getId();
 
             Employee employeeToCalculate = employeeService.findById(employeeId)
                     .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado"));
 
-            LocalDate initialDate = LocalDate.parse(view.getCompInitialDateField().getText(), DATE_FORMATTER);
-            LocalDate finalDate = LocalDate.parse(view.getCompFinalDateField().getText(), DATE_FORMATTER);
+            if (initialDate.isAfter(finalDate)) {
+                view.showError("Data inicial não pode ser maior que a data final.");
+                return;
+            }
 
             List<TimeEntry> timeEntries = timeEntryService.findByEmployeeIdAndRange(employeeId, initialDate, finalDate);
 
-            PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries, initialDate, finalDate);
+            PeriodCalculationResult result = reportService.calculatePeriodBalance(employeeToCalculate, timeEntries, initialDate, finalDate, dailyAllowedLateness, dailyAllowedPerPunch);
 
             Company employeeCompany = companyService.findById(employeeToCalculate.getCompanyId())
                     .orElseThrow(() -> new IllegalArgumentException("Empresa do funcionário não encontrada"));
